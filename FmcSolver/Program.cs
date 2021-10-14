@@ -11,59 +11,13 @@ namespace FmcSolver
 	{
 		static void Main(string[] args)
 		{
-			List<SymmetryElement>[] subGroups = new List<SymmetryElement>[SymmetryGroup.Elements.Length];
-			for (int i = 0; i < subGroups.Length; i++)
-			{
-				subGroups[i] = SymmetryGroup.Elements[i].GenerateMultGroup();
-			}
-			HashSet<SymmetryElement> group = new HashSet<SymmetryElement>();
-			List<SymmetryElement> buffer = new List<SymmetryElement>();
 
-			for (int i = 0; i < SymmetryGroup.ORDER; i++)
-			{
-				for (int j = i + 1; j < SymmetryGroup.ORDER; j++)
-				{
-					for (int k = j + 1; k < SymmetryGroup.ORDER; k++)
-					{
-						for (int l = k + 1; l < SymmetryGroup.ORDER; l++)
-						{
-							group.Clear();
-							group.Add(SymmetryGroup.Elements[i]);
-							group.Add(SymmetryGroup.Elements[j]);
-							group.Add(SymmetryGroup.Elements[k]);
-							group.Add(SymmetryGroup.Elements[l]);
+			Cube c = new Cube();
+			c.ApplyScramble(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			c.PrintSideView();
 
-							int count;
-
-							do
-							{
-								count = group.Count;
-								buffer.Clear();
-								foreach (SymmetryElement e1 in group)
-								{
-									foreach (SymmetryElement e2 in group)
-									{
-										SymmetryElement prod = e1 * e2;
-
-										if (!group.Contains(prod))
-											buffer.Add(prod);
-									}
-								}
-
-								foreach (SymmetryElement e in buffer)
-									group.Add(e);
-
-							} while (count < group.Count);
-
-							//Console.WriteLine(group.Count + "\t" + SymmetryGroup.Elements[i] + " * " + SymmetryGroup.Elements[j]);
-							if(count < 48) Console.WriteLine(group.Count);
-						}
-					}
-				}
-			}
-
-			Console.WriteLine("Done");
 			Console.ReadLine();
+
 			PLLAlgos.Init();
 
 			Console.ReadLine();
@@ -71,7 +25,7 @@ namespace FmcSolver
 
 			//Console.WriteLine(FindMinmalCycle());
 
-			Cube c = new Cube();
+			c = new Cube();
 			MoveSequenz s = new MoveSequenz(20);
 			Console.WriteLine(s);
 			c.ApplyScramble(s);

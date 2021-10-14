@@ -3,7 +3,7 @@ using CubeAD;
 
 namespace CubeTester
 {
-	class MoveTester
+	class CubeTester
 	{
 		[Test]
 		public void RotateSingleSide()
@@ -73,5 +73,53 @@ namespace CubeTester
 			}
 
 		}
+
+		[Test]
+		public void GetEdges()
+		{
+			Cube c = new Cube();
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = 0; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+
+					Assert.AreEqual((CubeColor)x, c.GetEdgeColor(x, y));
+				}
+			}
+
+			//Super flip
+			c.ApplyScramble(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = 0; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+
+					Assert.AreEqual((CubeColor)y, c.GetEdgeColor(x, y));
+				}
+			}
+		}
+		[Test]
+		public void GetCorners()
+		{
+			Cube c = new Cube();
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = 0; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+
+					for (int z = 0; z < 6; z++)
+					{
+						if (x / 2 == z / 2 || y / 2 == z / 2) continue;
+
+						Assert.AreEqual((CubeColor)x, c.GetCornerColor(x, y, z));
+					}
+				}
+			}
+		}
+
 	}
 }

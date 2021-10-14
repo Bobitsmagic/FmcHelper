@@ -6,8 +6,14 @@ namespace CubeAD
 	public class Cube
 	{
 		const int SIDE_COUNT = 6;
+		const int LEFT = 0;
+		const int RIGHT = 1;
+		const int BOTTOM = 2;
+		const int TOP = 3;
+		const int FRONT = 4;
+		const int BACK = 5;
 
-		private static Side[] SolvedColors =
+		private static readonly Side[] SolvedColors =
 {
 			new Side((CubeColor)0),
 			new Side((CubeColor)1),
@@ -17,60 +23,90 @@ namespace CubeAD
 			new Side((CubeColor)5)
 		};
 
-		private static (int Side, int Stripe)[] BottomIndices =
+		//Adj stripes of adj sides (Clockwise order)
+		private static readonly (int Side, int Stripe)[][] AdjStripes = new (int Side, int Stripe)[][]
 		{
-			(4, 0),
-			(1, 1),
-			(5, 2),
-			(0, 3)
-		};
-		private static (int Side, int Stripe)[] TopIndices =
-		{
-			(5, 0),
-			(0, 1),
-			(4, 2),
-			(1, 3)
-		};
-		private static (int Side, int Stripe)[] BackIndices =
-		{
-			(0, 0),
-			(3, 0),
-			(1, 0),
-			(2, 0)
-		};
-		private static (int Side, int Stripe)[] FrontIndices =
-		{
-			(0, 2),
-			(3, 2),
-			(1, 2),
-			(2, 2)
-		};
+			//Left
+			new (int Side, int Stripe)[]
+			{
+				(BOTTOM,	1),
+				(BACK,		3),
+				(TOP,		3),
+				(FRONT,		3)
+			},
 
-		private static int[] OrangeEdgeIndices =
-		{
+			//Right
+			new (int Side, int Stripe)[]
+			{
+				(BOTTOM,	3),
+				(FRONT,		1),
+				(TOP,		1),
+				(BACK,		1)
+			},
 
-		}
+			//Bottom
+			new (int Side, int Stripe)[]
+			{
+				(LEFT,		3),
+				(FRONT,		2),
+				(RIGHT,		1),
+				(BACK,		0)
+			},
 
+			//Top
+			new (int Side, int Stripe)[]
+			{
+				(LEFT,		1),
+				(BACK,		2),
+				(RIGHT,		3),
+				(FRONT,		0)
+			},
+
+			//Front
+			new (int Side, int Stripe)[]
+			{
+				(LEFT,		2),
+				(TOP,		2),
+				(RIGHT,		2),
+				(BOTTOM,	2)
+			},
+
+			//Back
+			new (int Side, int Stripe)[]
+			{
+				(LEFT,		0),
+				(BOTTOM,	0),
+				(RIGHT,		0),
+				(TOP,		0)
+			}
+		};
+		
+		//Squares that form a block (Clockwise after squares of main side)
 		private static (int side1, int square1, int side2, int square2)[] OrangeBlocks =
 		{
-			(3, 3, 4, 2),
-			(3, 2, 5, 3),
-			(5, 2, 2, 1),
-			(4, 3, 2, 0)
+			(TOP,		3, BACK,	2),
+			(TOP,		2, FRONT,	3),
+			(BOTTOM,	1, FRONT,	2),
+			(BOTTOM,	0, BACK,	3)
 		};
 
 		private static (int side1, int square1, int side2, int square2)[] RedBlocks =
 		{
-			(2, 3, 4, 0),
-			(2, 2, 5, 1),
-			(3, 1, 5, 0),
-			(3, 0, 4, 1)
+			(BOTTOM,    3, BACK,    0),
+			(BOTTOM,    2, FRONT,   1),
+			(TOP,       1, FRONT,   0),
+			(TOP,       0, BACK,    1)
 		};
 
 		Side[] Sides = new Side[SIDE_COUNT];
 		byte Blocked;
 
 		public Cube()
+		{
+			Reset();
+		}
+
+		public void Reset()
 		{
 			for (int i = 0; i < SIDE_COUNT; i++)
 			{
@@ -79,7 +115,6 @@ namespace CubeAD
 
 			Blocked = 0;
 		}
-
 		public Cube(Cube old, CubeMove m)
 		{
 			Blocked = old.Blocked;
@@ -113,7 +148,7 @@ namespace CubeAD
 			for (int i = 0; i < s.Moves.Count; i++)
 				MakeMove(s.Moves[i]);
 
-			ResetBlocked();
+			ResetBlocked(); //does not necessarily need to be reset
 		}
 
 		public void ResetBlocked()
@@ -125,6 +160,7 @@ namespace CubeAD
 		public void MakeMove(CubeMove m)
 		{
 			int side = (int)m / 3;
+
 			Sides[side].Rotate(((int)m % 3) + 1);
 
 			Blocked |= (byte)(1 << side);
@@ -140,229 +176,53 @@ namespace CubeAD
 				}
 			}
 
-			uint buffer = 0;
-			switch ((int)m)
+			uint buffer;
+			int moveType = (int)m % 3;
+			(int Side, int Stripe)[] stripes = AdjStripes[side];
+
+			switch (moveType)
 			{
-				#region Left
 				case 0:
-					buffer = Sides[2].GetStripe(1);
-					Sides[2].SetStripe(1, Sides[5].GetStripe(3));
-					Sides[5].SetStripe(3, Sides[3].GetStripe(3));
-					Sides[3].SetStripe(3, Sides[4].GetStripe(3));
-					Sides[4].SetStripe(3, buffer);
+					buffer = Sides[stripes[0].Side].GetStripe(stripes[0].Stripe);
+
+					Sides[stripes[0].Side].SetStripe(stripes[0].Stripe,
+						Sides[stripes[3].Side].GetStripe(stripes[3].Stripe));
+
+					Sides[stripes[3].Side].SetStripe(stripes[3].Stripe,
+						Sides[stripes[2].Side].GetStripe(stripes[2].Stripe));
+
+					Sides[stripes[2].Side].SetStripe(stripes[2].Stripe,
+						Sides[stripes[1].Side].GetStripe(stripes[1].Stripe));
+
+					Sides[stripes[1].Side].SetStripe(stripes[1].Stripe, buffer);
 					break;
+
 				case 1:
-					buffer = Sides[2].GetStripe(1);
-					Sides[2].SetStripe(1, Sides[3].GetStripe(3));
-					Sides[3].SetStripe(3, buffer);
+					buffer = Sides[stripes[0].Side].GetStripe(stripes[0].Stripe);
+					Sides[stripes[0].Side].SetStripe(stripes[0].Stripe,
+						Sides[stripes[2].Side].GetStripe(stripes[2].Stripe));
+					Sides[stripes[2].Side].SetStripe(stripes[2].Stripe, buffer);
 
-					buffer = Sides[4].GetStripe(3);
-					Sides[4].SetStripe(3, Sides[5].GetStripe(3));
-					Sides[5].SetStripe(3, buffer);
+					buffer = Sides[stripes[1].Side].GetStripe(stripes[1].Stripe);
+					Sides[stripes[1].Side].SetStripe(stripes[1].Stripe,
+						Sides[stripes[3].Side].GetStripe(stripes[3].Stripe));
+					Sides[stripes[3].Side].SetStripe(stripes[3].Stripe, buffer);
 					break;
+
 				case 2:
-					buffer = Sides[2].GetStripe(1);
-					Sides[2].SetStripe(1, Sides[4].GetStripe(3));
-					Sides[4].SetStripe(3, Sides[3].GetStripe(3));
-					Sides[3].SetStripe(3, Sides[5].GetStripe(3));
-					Sides[5].SetStripe(3, buffer);
+					buffer = Sides[stripes[0].Side].GetStripe(stripes[0].Stripe);
+
+					Sides[stripes[0].Side].SetStripe(stripes[0].Stripe,
+						Sides[stripes[1].Side].GetStripe(stripes[1].Stripe));
+
+					Sides[stripes[1].Side].SetStripe(stripes[1].Stripe,
+						Sides[stripes[2].Side].GetStripe(stripes[2].Stripe));
+
+					Sides[stripes[2].Side].SetStripe(stripes[2].Stripe,
+						Sides[stripes[3].Side].GetStripe(stripes[3].Stripe));
+
+					Sides[stripes[3].Side].SetStripe(stripes[3].Stripe, buffer);
 					break;
-				#endregion
-
-				#region Right
-				case 3:
-					buffer = Sides[2].GetStripe(3);
-					Sides[2].SetStripe(3, Sides[4].GetStripe(1));
-					Sides[4].SetStripe(1, Sides[3].GetStripe(1));
-					Sides[3].SetStripe(1, Sides[5].GetStripe(1));
-					Sides[5].SetStripe(1, buffer);
-					break;
-				case 4:
-					buffer = Sides[2].GetStripe(3);
-					Sides[2].SetStripe(3, Sides[3].GetStripe(1));
-					Sides[3].SetStripe(1, buffer);
-
-					buffer = Sides[4].GetStripe(1);
-					Sides[4].SetStripe(1, Sides[5].GetStripe(1));
-					Sides[5].SetStripe(1, buffer);
-					break;
-				case 5:
-					buffer = Sides[2].GetStripe(3);
-					Sides[2].SetStripe(3, Sides[5].GetStripe(1));
-					Sides[5].SetStripe(1, Sides[3].GetStripe(1));
-					Sides[3].SetStripe(1, Sides[4].GetStripe(1));
-					Sides[4].SetStripe(1, buffer);
-					break;
-				#endregion
-
-				#region Bottom
-				case 6:
-					buffer = Sides[BottomIndices[0].Side].GetStripe(BottomIndices[0].Stripe);
-
-					Sides[BottomIndices[0].Side].SetStripe(BottomIndices[0].Stripe,
-						Sides[BottomIndices[1].Side].GetStripe(BottomIndices[1].Stripe));
-
-					Sides[BottomIndices[1].Side].SetStripe(BottomIndices[1].Stripe,
-						Sides[BottomIndices[2].Side].GetStripe(BottomIndices[2].Stripe));
-
-					Sides[BottomIndices[2].Side].SetStripe(BottomIndices[2].Stripe,
-						Sides[BottomIndices[3].Side].GetStripe(BottomIndices[3].Stripe));
-
-					Sides[BottomIndices[3].Side].SetStripe(BottomIndices[3].Stripe, buffer);
-
-					break;
-				case 7:
-					buffer = Sides[BottomIndices[0].Side].GetStripe(BottomIndices[0].Stripe);
-					Sides[BottomIndices[0].Side].SetStripe(BottomIndices[0].Stripe,
-						Sides[BottomIndices[2].Side].GetStripe(BottomIndices[2].Stripe));
-					Sides[BottomIndices[2].Side].SetStripe(BottomIndices[2].Stripe, buffer);
-
-					buffer = Sides[BottomIndices[1].Side].GetStripe(BottomIndices[1].Stripe);
-					Sides[BottomIndices[1].Side].SetStripe(BottomIndices[1].Stripe,
-						Sides[BottomIndices[3].Side].GetStripe(BottomIndices[3].Stripe));
-					Sides[BottomIndices[3].Side].SetStripe(BottomIndices[3].Stripe, buffer);
-					break;
-				case 8:
-					buffer = Sides[BottomIndices[0].Side].GetStripe(BottomIndices[0].Stripe);
-
-					Sides[BottomIndices[0].Side].SetStripe(BottomIndices[0].Stripe,
-						Sides[BottomIndices[3].Side].GetStripe(BottomIndices[3].Stripe));
-
-					Sides[BottomIndices[3].Side].SetStripe(BottomIndices[3].Stripe,
-						Sides[BottomIndices[2].Side].GetStripe(BottomIndices[2].Stripe));
-
-					Sides[BottomIndices[2].Side].SetStripe(BottomIndices[2].Stripe,
-						Sides[BottomIndices[1].Side].GetStripe(BottomIndices[1].Stripe));
-
-					Sides[BottomIndices[1].Side].SetStripe(BottomIndices[1].Stripe, buffer);
-					break;
-				#endregion
-
-				#region Top
-				case 9:
-					buffer = Sides[TopIndices[0].Side].GetStripe(TopIndices[0].Stripe);
-
-					Sides[TopIndices[0].Side].SetStripe(TopIndices[0].Stripe,
-						Sides[TopIndices[3].Side].GetStripe(TopIndices[3].Stripe));
-
-					Sides[TopIndices[3].Side].SetStripe(TopIndices[3].Stripe,
-						Sides[TopIndices[2].Side].GetStripe(TopIndices[2].Stripe));
-
-					Sides[TopIndices[2].Side].SetStripe(TopIndices[2].Stripe,
-						Sides[TopIndices[1].Side].GetStripe(TopIndices[1].Stripe));
-
-					Sides[TopIndices[1].Side].SetStripe(TopIndices[1].Stripe, buffer);
-					break;
-				case 10:
-					buffer = Sides[TopIndices[0].Side].GetStripe(TopIndices[0].Stripe);
-					Sides[TopIndices[0].Side].SetStripe(TopIndices[0].Stripe,
-						Sides[TopIndices[2].Side].GetStripe(TopIndices[2].Stripe));
-					Sides[TopIndices[2].Side].SetStripe(TopIndices[2].Stripe, buffer);
-
-					buffer = Sides[TopIndices[1].Side].GetStripe(TopIndices[1].Stripe);
-					Sides[TopIndices[1].Side].SetStripe(TopIndices[1].Stripe,
-						Sides[TopIndices[3].Side].GetStripe(TopIndices[3].Stripe));
-					Sides[TopIndices[3].Side].SetStripe(TopIndices[3].Stripe, buffer);
-					break;
-				case 11:
-					buffer = Sides[TopIndices[0].Side].GetStripe(TopIndices[0].Stripe);
-
-					Sides[TopIndices[0].Side].SetStripe(TopIndices[0].Stripe,
-						Sides[TopIndices[1].Side].GetStripe(TopIndices[1].Stripe));
-
-					Sides[TopIndices[1].Side].SetStripe(TopIndices[1].Stripe,
-						Sides[TopIndices[2].Side].GetStripe(TopIndices[2].Stripe));
-
-					Sides[TopIndices[2].Side].SetStripe(TopIndices[2].Stripe,
-						Sides[TopIndices[3].Side].GetStripe(TopIndices[3].Stripe));
-
-					Sides[TopIndices[3].Side].SetStripe(TopIndices[3].Stripe, buffer);
-					break;
-				#endregion
-
-				#region Back
-				case 12:
-					buffer = Sides[BackIndices[0].Side].GetStripe(BackIndices[0].Stripe);
-
-					Sides[BackIndices[0].Side].SetStripe(BackIndices[0].Stripe,
-						Sides[BackIndices[1].Side].GetStripe(BackIndices[1].Stripe));
-
-					Sides[BackIndices[1].Side].SetStripe(BackIndices[1].Stripe,
-						Sides[BackIndices[2].Side].GetStripe(BackIndices[2].Stripe));
-
-					Sides[BackIndices[2].Side].SetStripe(BackIndices[2].Stripe,
-						Sides[BackIndices[3].Side].GetStripe(BackIndices[3].Stripe));
-
-					Sides[BackIndices[3].Side].SetStripe(BackIndices[3].Stripe, buffer);
-					break;
-				case 13:
-					buffer = Sides[BackIndices[0].Side].GetStripe(BackIndices[0].Stripe);
-					Sides[BackIndices[0].Side].SetStripe(BackIndices[0].Stripe,
-						Sides[BackIndices[2].Side].GetStripe(BackIndices[2].Stripe));
-					Sides[BackIndices[2].Side].SetStripe(BackIndices[2].Stripe, buffer);
-
-					buffer = Sides[BackIndices[1].Side].GetStripe(BackIndices[1].Stripe);
-					Sides[BackIndices[1].Side].SetStripe(BackIndices[1].Stripe,
-						Sides[BackIndices[3].Side].GetStripe(BackIndices[3].Stripe));
-					Sides[BackIndices[3].Side].SetStripe(BackIndices[3].Stripe, buffer);
-					break;
-				case 14:
-					buffer = Sides[BackIndices[0].Side].GetStripe(BackIndices[0].Stripe);
-
-					Sides[BackIndices[0].Side].SetStripe(BackIndices[0].Stripe,
-						Sides[BackIndices[3].Side].GetStripe(BackIndices[3].Stripe));
-
-					Sides[BackIndices[3].Side].SetStripe(BackIndices[3].Stripe,
-						Sides[BackIndices[2].Side].GetStripe(BackIndices[2].Stripe));
-
-					Sides[BackIndices[2].Side].SetStripe(BackIndices[2].Stripe,
-						Sides[BackIndices[1].Side].GetStripe(BackIndices[1].Stripe));
-
-					Sides[BackIndices[1].Side].SetStripe(BackIndices[1].Stripe, buffer);
-					break;
-				#endregion
-
-				#region Front
-				case 15:
-					buffer = Sides[FrontIndices[0].Side].GetStripe(FrontIndices[0].Stripe);
-
-					Sides[FrontIndices[0].Side].SetStripe(FrontIndices[0].Stripe,
-						Sides[FrontIndices[3].Side].GetStripe(FrontIndices[3].Stripe));
-
-					Sides[FrontIndices[3].Side].SetStripe(FrontIndices[3].Stripe,
-						Sides[FrontIndices[2].Side].GetStripe(FrontIndices[2].Stripe));
-
-					Sides[FrontIndices[2].Side].SetStripe(FrontIndices[2].Stripe,
-						Sides[FrontIndices[1].Side].GetStripe(FrontIndices[1].Stripe));
-
-					Sides[FrontIndices[1].Side].SetStripe(FrontIndices[1].Stripe, buffer);
-					break;
-				case 16:
-					buffer = Sides[FrontIndices[0].Side].GetStripe(FrontIndices[0].Stripe);
-					Sides[FrontIndices[0].Side].SetStripe(FrontIndices[0].Stripe,
-						Sides[FrontIndices[2].Side].GetStripe(FrontIndices[2].Stripe));
-					Sides[FrontIndices[2].Side].SetStripe(FrontIndices[2].Stripe, buffer);
-
-					buffer = Sides[FrontIndices[1].Side].GetStripe(FrontIndices[1].Stripe);
-					Sides[FrontIndices[1].Side].SetStripe(FrontIndices[1].Stripe,
-						Sides[FrontIndices[3].Side].GetStripe(FrontIndices[3].Stripe));
-					Sides[FrontIndices[3].Side].SetStripe(FrontIndices[3].Stripe, buffer);
-					break;
-				case 17:
-					buffer = Sides[FrontIndices[0].Side].GetStripe(FrontIndices[0].Stripe);
-
-					Sides[FrontIndices[0].Side].SetStripe(FrontIndices[0].Stripe,
-						Sides[FrontIndices[1].Side].GetStripe(FrontIndices[1].Stripe));
-
-					Sides[FrontIndices[1].Side].SetStripe(FrontIndices[1].Stripe,
-						Sides[FrontIndices[2].Side].GetStripe(FrontIndices[2].Stripe));
-
-					Sides[FrontIndices[2].Side].SetStripe(FrontIndices[2].Stripe,
-						Sides[FrontIndices[3].Side].GetStripe(FrontIndices[3].Stripe));
-
-					Sides[FrontIndices[3].Side].SetStripe(FrontIndices[3].Stripe, buffer);
-					break;
-					#endregion
 			}
 		}
 
@@ -377,20 +237,57 @@ namespace CubeAD
 			}
 		}
 
+		public static int[,] AdjEdges = new int[,]
+		{
+			//Left
+			{ -1, -1, 7, 3, 5, 1 },
+			//Right
+			{ -1, -1, 3, 7, 5, 1 },
+
+			//Bottom
+			{ 3, 7, -1, -1, 5, 1 },
+			//Top
+			{ 7, 3, -1, -1, 5, 1 },
+
+			//Front
+			{ 7, 3, 5, 1, -1, -1 },
+			//Back
+			{ 7, 3, 1, 5, -1, -1 },
+		};
 		public CubeColor GetEdgeColor(int side1, int side2)
 		{
-			switch (side1)
-			{
-				case 0:
-					
-					break;
-			}
+			return (CubeColor)Sides[side1][AdjEdges[side1, side2]];
 		}
 
-		public bool HasSymmetry(SymmetryElement se)
+		public static int[,] AdjCorners =
 		{
-			
+			//Left						removed cuz redundancy
+			{ -1, -1, -1, -1, 6, 0, 4, 2, -2, -2, -2, -2 },
+			//Right
+			{ -1, -1, -1, -1, 4, 2, 6, 0, -2, -2, -2, -2 },
+
+			//Bottom
+			{ 4, 2, 6, 0, -1, -1, -1, -1, -2, -2, -2, -2 },
+			//Top
+			{ 6, 0, 4, 2, -1, -1, -1, -1, -2, -2, -2, -2 },
+
+			//Front
+			{ 6, 0, 4, 2, -2, -2, -2, -2, -1, -1, -1, -1},
+			//Back
+			{ 0, 6, 2, 4, -2, -2, -2, -2, -1, -1, -1, -1},
+		};
+		public CubeColor GetCornerColor(int side1, int side2, int side3)
+		{
+			int lower = Math.Min(side2, side3);
+			int higher = Math.Min(side2, side3);
+
+			return (CubeColor)Sides[side1][AdjCorners[side1, lower * 2 + (higher & 1)]];
 		}
+
+		//public bool HasSymmetry(SymmetryElement se)
+		//{
+
+		//}
 
 		public string GetSimpleSideView()
 		{
@@ -413,7 +310,7 @@ namespace CubeAD
 					if (x == 1 && y == 1)
 						s += CubeColor.Blue.ToString()[0];
 					else
-						s += Sides[4][x, y].ToString()[0];
+						s += Sides[BACK][x, y].ToString()[0];
 
 					s += x == 2 ? "|" : " ";
 				}
@@ -452,7 +349,7 @@ namespace CubeAD
 					if (x == 1 && y == 1)
 						s += CubeColor.Green.ToString()[0];
 					else
-						s += Sides[5][x, y].ToString()[0];
+						s += Sides[FRONT][x, y].ToString()[0];
 
 					s += x == 2 ? "|" : " ";
 				}
@@ -494,7 +391,7 @@ namespace CubeAD
 			int bottomCounter = 0;
 			for (int i = 0; i < 4; i++)
 			{
-				if (Sides[0].FitsPattern(SolvedColors[0], Side.SQUARE_MASK[i]))
+				if (Sides[LEFT].FitsPattern(SolvedColors[LEFT], Side.SQUARE_MASK[i]))
 				{
 					(int side1, int square1, int side2, int square2) = OrangeBlocks[i];
 					if (Sides[side1].FitsPattern(SolvedColors[side1], Side.SQUARE_MASK[square1]) &&
@@ -507,7 +404,7 @@ namespace CubeAD
 					}
 				}
 
-				if (Sides[1].FitsPattern(SolvedColors[1], Side.SQUARE_MASK[i]))
+				if (Sides[RIGHT].FitsPattern(SolvedColors[RIGHT], Side.SQUARE_MASK[i]))
 				{
 					(int side1, int square1, int side2, int square2) = RedBlocks[i];
 					if (Sides[side1].FitsPattern(SolvedColors[side1], Side.SQUARE_MASK[square1]) &&
@@ -553,37 +450,37 @@ namespace CubeAD
 
 		public static (int Side1, int Side2, int pair1, int Pair2)[] F2LPairs =
 		{
-			//0
-			(0, 4, 0, 7),
-			(0, 4, 1, 6),
-			(0, 3, 2, 7),
-			(0, 3, 3, 6),
-			(0, 5, 4, 7),
-			(0, 5, 5, 6),
-			(0, 2, 6, 3),
-			(0, 2, 7, 2),
+			//LEFT
+			(LEFT, BACK,	0, 7),
+			(LEFT, BACK,	1, 6),
+			(LEFT, TOP,		2, 7),
+			(LEFT, TOP,		3, 6),
+			(LEFT, FRONT,	4, 7),
+			(LEFT, FRONT,	5, 6),
+			(LEFT, BOTTOM,	6, 3),
+			(LEFT, BOTTOM,	7, 2),
 
 			//1
-			(1, 4, 0, 3),
-			(1, 4, 1, 2),
-			(1, 2, 2, 7),
-			(1, 2, 3, 6),
-			(1, 5, 4, 3),
-			(1, 5, 5, 2),
-			(1, 3, 6, 3),
-			(1, 3, 7, 2),
+			(RIGHT, BACK,	0, 3),
+			(RIGHT, BACK,	1, 2),
+			(RIGHT, BOTTOM, 2, 7),
+			(RIGHT, BOTTOM, 3, 6),
+			(RIGHT, FRONT,	4, 3),
+			(RIGHT, FRONT,	5, 2),
+			(RIGHT, TOP,	6, 3),
+			(RIGHT, TOP,	7, 2),
 
 			//2
-			(2, 4, 0, 1),
-			(2, 4, 1, 0),
-			(2, 5, 4, 5),
-			(2, 5, 5, 4),
+			(BOTTOM, BACK,	0, 1),
+			(BOTTOM, BACK,	1, 0),
+			(BOTTOM, FRONT, 4, 5),
+			(BOTTOM, FRONT, 5, 4),
 
 			//3
-			(3, 4, 0, 5),
-			(3, 4, 1, 4),
-			(3, 5, 4, 1),
-			(3, 5, 5, 0)
+			(TOP, BACK, 0, 5),
+			(TOP, BACK, 1, 4),
+			(TOP, FRONT, 4, 1),
+			(TOP, FRONT, 5, 0)
 		};
 		public int CountF2LPairs()
 		{
@@ -614,60 +511,55 @@ namespace CubeAD
 			return counter;
 		}
 
-		static int[] TopOrientationSides = {
-			4, 1, 5, 0
-		};
-		static int[] BottomOrientationSides = {
-			4, 0, 5, 1
-		};
-		static int[] BottomOrientationFaces =
-		{
-			1, 5, 5, 3
-		};
+		//[TODO] Fix green/blue pieces 
 		public int CountOrientedEgdes()
 		{
 			int counter = 0;
 
+			//Check white/yellow edges containing on bottom/top
 			for (int i = 1; i < 8; i += 2)
 			{
-				if (Sides[2][i] / 2 == 1)
+				if (Sides[BOTTOM][i] / 2 == 1)
 					counter++;
-				if (Sides[3][i] / 2 == 1)
+				if (Sides[TOP][i] / 2 == 1)
 					counter++;
 			}
 
-			if (Sides[4][3] / 2 == 1)
+
+			//Check white/yellow containing edges on front/back
+			if (Sides[FRONT][3] / 2 == 1)
 				counter++;
-			if (Sides[4][7] / 2 == 1)
+			if (Sides[FRONT][7] / 2 == 1)
 				counter++;
 
-			if (Sides[5][3] / 2 == 1)
+			if (Sides[BACK][3] / 2 == 1)
 				counter++;
-			if (Sides[5][7] / 2 == 1)
+			if (Sides[BACK][7] / 2 == 1)
 				counter++;
 
-			for (int i = 1; i < 8; i += 2)
+			//Check green/blue containing edges on top/bottom
+
+			//all none bot/top sides
+			for(int x = 0; x < 6; x++)
 			{
-				if (Sides[2][i] / 2 == 2)
-				{
-					if (Sides[BottomOrientationSides[i / 2]][BottomOrientationFaces[i / 2]] / 2 != 1)
-						counter++;
-				}
-				if (Sides[3][i] / 2 == 2)
-				{
-					if (Sides[TopOrientationSides[i / 2]][(i + 4) % 8] / 2 != 1)
-						counter++;
-				}
+				if (x / 2 == 1) continue;
+				//main color (blue/green) on bot/top and secondary color (orange/red) on another side 
+				if ((int)GetEdgeColor(BOTTOM, x) / 2 == 2 &&
+					(int)GetEdgeColor(x, BOTTOM) / 2 == 0) counter++;
+
+				if ((int)GetEdgeColor(TOP, x) / 2 == 2 &&
+					(int)GetEdgeColor(x, TOP) / 2 == 0) counter++;
 			}
+			
 
-			if (Sides[4][3] / 2 == 2 && Sides[1][1] / 2 != 1)
+			if (Sides[BACK][3] / 2 == 2 && Sides[RIGHT][1] / 2 != 1)
 				counter++;
-			if (Sides[5][3] / 2 == 2 && Sides[1][5] / 2 != 1)
+			if (Sides[FRONT][3] / 2 == 2 && Sides[RIGHT][5] / 2 != 1)
 				counter++;
 
-			if (Sides[4][7] / 2 == 2 && Sides[0][1] / 2 != 1)
+			if (Sides[BACK][7] / 2 == 2 && Sides[LEFT][1] / 2 != 1)
 				counter++;
-			if (Sides[5][7] / 2 == 2 && Sides[0][5] / 2 != 1)
+			if (Sides[FRONT][7] / 2 == 2 && Sides[LEFT][5] / 2 != 1)
 				counter++;
 
 			return counter;

@@ -258,6 +258,10 @@ namespace CubeAD
 		{
 			return (CubeColor)Sides[side1][AdjEdges[side1, side2]];
 		}
+		public CubeColor GetEdgeColor(CubeColor side1, CubeColor side2)
+		{
+			return (CubeColor)Sides[(int)side1][AdjEdges[(int)side1, (int)side2]];
+		}
 
 		public static int[,] AdjCorners =
 		{
@@ -279,15 +283,51 @@ namespace CubeAD
 		public CubeColor GetCornerColor(int side1, int side2, int side3)
 		{
 			int lower = Math.Min(side2, side3);
-			int higher = Math.Min(side2, side3);
+			int higher = Math.Max(side2, side3);
 
 			return (CubeColor)Sides[side1][AdjCorners[side1, lower * 2 + (higher & 1)]];
 		}
+		
+		public bool HasSymmetry(SymmetryElement se)
+		{
+			//Check edges
+			for (int x = 0; x < 6; x++)
+			{
+				int nextX = se.Transform(x);
+				for (int y = 0; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
 
-		//public bool HasSymmetry(SymmetryElement se)
-		//{
+					int nextY = se.Transform(y);
 
-		//}
+					if (se.TransformColor(GetEdgeColor(x, y)) != GetEdgeColor(nextX, nextY))
+						return false;
+				}
+			}
+
+			//Check corners
+			for (int x = 0; x < 6; x++)
+			{
+				int nextX = se.Transform(x);
+				for (int y = 0; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+					int nextY = se.Transform(y);
+
+					for (int z = 0; z < 6; z++)
+					{
+						if (x / 2 == z / 2 || y / 2 == z / 2) continue;
+						int nextZ = se.Transform(z);
+
+						if (se.TransformColor(GetCornerColor(x, y, z)) != GetCornerColor(nextX, nextY, nextZ))
+							return false;
+					}
+
+				}
+			}
+
+			return true;
+		}
 
 		public string GetSimpleSideView()
 		{

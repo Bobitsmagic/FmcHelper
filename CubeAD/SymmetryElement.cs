@@ -62,6 +62,14 @@ namespace CubeAD
 				//flip color twice
 				return (CubeColor)((int)this[(((int)c) ^ 1) >> 1] ^ 1);
 		}
+		public int Transform(int c)
+		{
+			if ((c & 1) == 0)
+				return (int)this[c >> 1];
+			else
+				//flip color twice
+				return ((int)this[(c ^ 1) >> 1] ^ 1);
+		}
 
 		public List<SymmetryElement> GenerateMultGroup()
 		{

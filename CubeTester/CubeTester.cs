@@ -105,6 +105,8 @@ namespace CubeTester
 		public void GetCorners()
 		{
 			Cube c = new Cube();
+			//Super flip
+			c.ApplyScramble(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
 			for (int x = 0; x < 6; x++)
 			{
 				for (int y = 0; y < 6; y++)
@@ -121,5 +123,34 @@ namespace CubeTester
 			}
 		}
 
+		[Test] 
+		public void HasSymmetry()
+		{
+			Cube c = new Cube();
+
+			foreach(SymmetryElement se in SymmetryGroup.Elements)
+			{
+				Assert.True(c.HasSymmetry(se));
+			}
+
+			//Super flip
+			c.ApplyScramble(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			foreach (SymmetryElement se in SymmetryGroup.Elements)
+			{
+				Assert.True(c.HasSymmetry(se));
+			}
+
+			c.Reset();
+
+			SymmetryElement mirrorX = new SymmetryElement(CubeColor.Red, CubeColor.Yellow, CubeColor.Green);
+
+			c.MakeMove(CubeMove.R);
+
+			Assert.False(c.HasSymmetry(mirrorX));
+
+			c.MakeMove(CubeMove.LP);
+
+			Assert.True(c.HasSymmetry(mirrorX));
+		}
 	}
 }

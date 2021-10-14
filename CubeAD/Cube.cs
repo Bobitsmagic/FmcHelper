@@ -17,8 +17,6 @@ namespace CubeAD
 			new Side((CubeColor)5)
 		};
 
-
-
 		private static (int Side, int Stripe)[] BottomIndices =
 		{
 			(4, 0),
@@ -47,6 +45,11 @@ namespace CubeAD
 			(1, 2),
 			(2, 2)
 		};
+
+		private static int[] OrangeEdgeIndices =
+		{
+
+		}
 
 		private static (int side1, int square1, int side2, int square2)[] OrangeBlocks =
 		{
@@ -374,6 +377,21 @@ namespace CubeAD
 			}
 		}
 
+		public CubeColor GetEdgeColor(int side1, int side2)
+		{
+			switch (side1)
+			{
+				case 0:
+					
+					break;
+			}
+		}
+
+		public bool HasSymmetry(SymmetryElement se)
+		{
+			
+		}
+
 		public string GetSimpleSideView()
 		{
 			string s = "";
@@ -503,7 +521,7 @@ namespace CubeAD
 				}
 			}
 
-			return topCounter +bottomCounter;
+			return topCounter + bottomCounter;
 		}
 
 		public int CountSquares()

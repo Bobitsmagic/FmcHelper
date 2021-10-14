@@ -9,39 +9,32 @@ namespace CubeTester
 {
 	class SymmetryGroupTester
 	{
+		//Tests whether the Generator list is complete and minimal
 		[Test]
 		public void GeneratorTest()
 		{
-
-			List<SymmetryElement>[] subGroups = new List<SymmetryElement>[SymmetryGroup.ColorMap.Length];
-			for(int i = 0; i < subGroups.Length; i++)
+			List<SymmetryElement>[] subGroups = new List<SymmetryElement>[SymmetryGroup.Generators.Length];
+			for (int i = 0; i < subGroups.Length; i++)
 			{
-				subGroups[i] = SymmetryGroup.ColorMap[i].GenerateMultGroup();
+				subGroups[i] = SymmetryGroup.Generators[i].GenerateMultGroup();
 			}
 
 			List<SymmetryElement> genGroup = new List<SymmetryElement>();
 
-			int count = 0;
 			//skipping identity
-			for (int i = 1; i < SymmetryElement.AllSymmetryElements.Length; i++)
+			for (int i = 1; i < SymmetryGroup.Elements.Length; i++)
 			{
-				SymmetryElement element = SymmetryElement.AllSymmetryElements[i];
+				SymmetryElement element = SymmetryGroup.Elements[i];
 
 				element.GenerateMultGroup(genGroup);
 				Console.WriteLine(genGroup.Count);
 
 				int hits = 0;
-				foreach(List<SymmetryElement> group in subGroups)
+				foreach (List<SymmetryElement> group in subGroups)
 				{
 					if (group.Count != genGroup.Count) continue;
 
 					if (group.SequenceEqual(genGroup)) hits++;
-				}
-
-				if(hits != 1)
-				{
-					System.Diagnostics.Debug.WriteLine(count++ + " Kek " + genGroup.Count);
-					System.Diagnostics.Debug.WriteLine(string.Join("\n", genGroup));
 				}
 
 				Assert.AreEqual(1, hits);

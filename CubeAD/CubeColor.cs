@@ -2,6 +2,9 @@
 {
 	public enum CubeColor : byte
 	{
-		Orange, Red, Yellow, White, Green, Blue, None
+		Orange, Red, 
+		Yellow, White, 
+		Green, Blue, 
+		None
 	}
 }

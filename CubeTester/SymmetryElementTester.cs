@@ -9,14 +9,26 @@ namespace CubeTester
 	class SymmetryElementTester
 	{
 		[Test]
-		public void MultTest()
+		public void IdentityTest()
 		{
-			SymmetryElement rot90 = SymmetryGroup.ColorMap[0];
-			SymmetryElement rot180 = SymmetryGroup.ColorMap[1];
+			SymmetryElement identity = SymmetryGroup.Elements[0];
 
-			rot90 *= rot90;
+			Assert.IsTrue(identity.IsIdentity);
 
-			Assert.AreEqual(rot180, rot90);
+			foreach(SymmetryElement element in SymmetryGroup.Elements)
+			{
+				Assert.AreEqual(element, element * identity);
+				Assert.AreEqual(element, identity * element);
+			}			
+		}
+
+		[Test]
+		public void IndexTest()
+		{
+			for (int i = 0; i < SymmetryGroup.Elements.Length; i++)
+			{
+				Assert.AreEqual(i, SymmetryGroup.Elements[i].Index);
+			}
 		}
 
 	}

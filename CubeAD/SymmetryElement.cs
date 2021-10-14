@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace CubeAD
 {
@@ -19,7 +18,8 @@ namespace CubeAD
 					_ => CubeColor.None,
 				};
 			}
-			set{
+			set
+			{
 				switch (i)
 				{
 					case 0: Orange = value; break;
@@ -31,6 +31,17 @@ namespace CubeAD
 
 		public bool IsIdentity => Orange == CubeColor.Orange && Yellow == CubeColor.Yellow && Green == CubeColor.Green;
 
+		public int Index { get
+			{
+				return (int)Orange * 8 +
+					((int)Orange < 2
+						? ((int)Yellow - 2)
+						: ((int)Orange < 4
+							? ((int)Yellow >> 1) | ((int)Yellow & 1)
+							: (int)Yellow)) * 2 +
+					((int)Green & 1);
+			} }
+
 		public CubeColor Orange, Yellow, Green;
 
 
@@ -41,27 +52,7 @@ namespace CubeAD
 			Green = green;
 		}
 
-		public static SymmetryElement[] AllSymmetryElements;
-		static SymmetryElement()
-		{
-			AllSymmetryElements = new SymmetryElement[48];
 
-			int index = 0;
-			for(int x = 0; x < 6; x++)
-			{
-				for(int y = 0; y < 6; y++)
-				{
-					if (x / 2 == y / 2) continue;
-
-					for(int z = 0; z < 6; z++)
-					{
-						if (x / 2 == z / 2 || y / 2 == z / 2) continue;
-
-						AllSymmetryElements[index++] = new SymmetryElement((CubeColor)x, (CubeColor)y, (CubeColor)z);
-					}
-				}
-			}
-		} 
 
 		public CubeColor TransformColor(CubeColor c)
 		{
@@ -87,7 +78,7 @@ namespace CubeAD
 			subGroup.Sort();
 
 			return subGroup;
-		140}
+		}
 		public void GenerateMultGroup(List<SymmetryElement> subGroup)
 		{
 			SymmetryElement state = this;

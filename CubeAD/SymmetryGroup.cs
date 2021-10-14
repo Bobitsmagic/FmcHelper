@@ -1,14 +1,11 @@
-﻿using System;
-
-namespace CubeAD
+﻿namespace CubeAD
 {
 	public struct SymmetryGroup
 	{
-		public const int ORDER = 34;
-		// Orange, Yellow, Green
-		public static SymmetryElement[] ColorMap =
+		public const int ORDER = 48;
+		public static SymmetryElement[] Elements = new SymmetryElement[ORDER];
+		public static SymmetryElement[] Generators = new SymmetryElement[33]
 		{
-			new SymmetryElement(CubeColor.Orange, CubeColor.Yellow, CubeColor.Green),
 			//Center pieces
 			//X-Axis
 			new SymmetryElement(CubeColor.Orange, CubeColor.Green, CubeColor.White),
@@ -97,15 +94,34 @@ namespace CubeAD
 			new SymmetryElement(CubeColor.Blue, CubeColor.White, CubeColor.Orange),
 		};
 
+		static SymmetryGroup()
+		{
+			int index = 0;
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = 0; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+
+					for (int z = 0; z < 6; z++)
+					{
+						if (x / 2 == z / 2 || y / 2 == z / 2) continue;
+
+						Elements[index++] = new SymmetryElement((CubeColor)x, (CubeColor)y, (CubeColor)z);
+					}
+				}
+			}
+		}
+
 		public static CubeColor FlipColor(CubeColor c)
 		{
 			return (CubeColor)(((int)c) ^ 1);
 		}
-		
-		public static CubeColor TransformColor(Symmetry s, CubeColor c)
-		{
-			return ColorMap[Log2((uint)s)].TransformColor(c);
-		}
+
+		//public static CubeColor TransformColor(Symmetry s, CubeColor c)
+		//{
+		//	return ColorMap[Log2((uint)s)].TransformColor(c);
+		//}
 
 		public static uint Log2(uint val)
 		{

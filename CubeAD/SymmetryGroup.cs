@@ -1,4 +1,6 @@
-﻿namespace CubeAD
+﻿using System.Linq;
+
+namespace CubeAD
 {
 	public struct SymmetryGroup
 	{
@@ -93,6 +95,9 @@
 			//Rotate like "Green-Red (4 1) FR" and reflect like "Z-Axis"
 			new SymmetryElement(CubeColor.Blue, CubeColor.White, CubeColor.Orange),
 		};
+		public static int[,] GroupIndexTable = new int[ORDER, ORDER];
+		public static int[][] MultGroupIndices = new int[ORDER][];
+		public static BitArray FullSymmetry = new BitArray((1UL << ORDER) - 1);
 
 		static SymmetryGroup()
 		{
@@ -110,6 +115,19 @@
 						Elements[index++] = new SymmetryElement((CubeColor)x, (CubeColor)y, (CubeColor)z);
 					}
 				}
+			}
+
+			for(int i = 0; i < ORDER; i++)
+			{
+				for(int j = 0; j < ORDER; j++)
+				{
+					GroupIndexTable[i, j] = (Elements[i] * Elements[j]).Index;
+				}
+			}
+
+			for(int i = 0; i < ORDER; i++)
+			{
+				MultGroupIndices[i] = Elements[i].GenerateMultGroup().Select(x => x.Index).ToArray();
 			}
 		}
 

@@ -31,7 +31,9 @@ namespace CubeAD
 
 		public bool IsIdentity => Orange == CubeColor.Orange && Yellow == CubeColor.Yellow && Green == CubeColor.Green;
 
-		public int Index { get
+		public int Index 
+		{ 
+			get
 			{
 				return (int)Orange * 8 +
 					((int)Orange < 2
@@ -40,7 +42,19 @@ namespace CubeAD
 							? ((int)Yellow >> 1) | ((int)Yellow & 1)
 							: (int)Yellow)) * 2 +
 					((int)Green & 1);
-			} }
+			} 
+		}
+
+		public bool HasReflection 
+		{
+			get
+			{
+				//Dont even ask me
+				int index = Index;
+
+				return ((index ^ (index >> 1) ^ (index >> 2) ^ (index >> 3) ^ (index >> 4)) & 1) != 0;
+			}
+		}
 
 		public CubeColor Orange, Yellow, Green;
 
@@ -52,8 +66,6 @@ namespace CubeAD
 			Green = green;
 		}
 
-
-
 		public CubeColor TransformColor(CubeColor c)
 		{
 			if ((((int)c) & 1) == 0)
@@ -62,13 +74,27 @@ namespace CubeAD
 				//flip color twice
 				return (CubeColor)((int)this[(((int)c) ^ 1) >> 1] ^ 1);
 		}
-		public int Transform(int c)
+		public int TransformColor(int c)
 		{
 			if ((c & 1) == 0)
 				return (int)this[c >> 1];
 			else
 				//flip color twice
 				return ((int)this[(c ^ 1) >> 1] ^ 1);
+		}
+
+		public CubeMove TransformMove(CubeMove m)
+		{
+			int val = (int)m;
+
+			val += (TransformColor(val / 3) - (val / 3)) * 3;
+
+			if (HasReflection)
+				return (CubeMove)(val +
+					((val % 3) == 0 ? 2 :
+					(val % 3) == 1 ? 0 : -2));
+			else
+				return (CubeMove)val;
 		}
 
 		public List<SymmetryElement> GenerateMultGroup()

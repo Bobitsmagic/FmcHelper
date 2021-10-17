@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using CubeAD;
+using System;
 
 namespace CubeTester
 {
@@ -89,7 +90,7 @@ namespace CubeTester
 			}
 
 			//Super flip
-			c.ApplyScramble(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
 
 			for (int x = 0; x < 6; x++)
 			{
@@ -106,7 +107,7 @@ namespace CubeTester
 		{
 			Cube c = new Cube();
 			//Super flip
-			c.ApplyScramble(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
 			for (int x = 0; x < 6; x++)
 			{
 				for (int y = 0; y < 6; y++)
@@ -134,7 +135,7 @@ namespace CubeTester
 			}
 
 			//Super flip
-			c.ApplyScramble(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
 			foreach (SymmetryElement se in SymmetryGroup.Elements)
 			{
 				Assert.True(c.HasSymmetry(se));
@@ -151,6 +152,90 @@ namespace CubeTester
 			c.MakeMove(CubeMove.LP);
 
 			Assert.True(c.HasSymmetry(mirrorX));
+		}
+
+		[Test]
+		public void GetSymmetrySet()
+		{
+			Cube c = new Cube();
+
+			BitArray sym = c.GetSymmetrySet();
+			Assert.AreEqual(SymmetryGroup.FullSymmetry, sym);
+
+			//Super flip
+			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			sym = c.GetSymmetrySet();
+			Assert.AreEqual(SymmetryGroup.FullSymmetry, sym);
+
+			c.Reset();
+
+			//H perm
+			c.ApplyMoveSequenz(new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
+			sym = c.GetSymmetrySet();
+
+			//4 rotations (identity, 90, 180, 270) * 2 reflections (idenity, refelcted)
+			Assert.AreEqual(8, sym.BitCount);
+
+			//H perm of bottom side
+			c.ApplyMoveSequenz(new MoveSequenz("R2 D2 R' D2 R2 D2 R2 D2 R' D2 R2"));
+			sym = c.GetSymmetrySet();
+
+			//4 Y-rotations (identity, 90, 180, 270) * 2 Z-Rotation (0, 180) * 2 reflections (idenity, refelcted)
+			Assert.AreEqual(16, sym.BitCount);
+
+
+			c.Reset();
+			//checkerboard pattern
+			c.ApplyMoveSequenz(new MoveSequenz("U2 D2 R2 L2 F2 B2"));
+			sym = c.GetSymmetrySet();
+			Assert.AreEqual(SymmetryGroup.FullSymmetry, sym);
+
+			c.Reset();
+			c.ApplyMoveSequenz(new MoveSequenz("R2 L2 U2 R2 L2 D2"));
+			sym = c.GetSymmetrySet();
+			Assert.AreEqual(8, sym.BitCount);
+
+		}
+
+		[Test]
+		public void IsEqualWithSymmetry()
+		{
+			Cube c1 = new Cube();
+			Cube c2 = new Cube();
+
+			Random rnd = new Random(0);
+
+			//H perm
+			c1.ApplyMoveSequenz(new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
+			c2.ApplyMoveSequenz(new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
+			
+			BitArray sym = c1.GetSymmetrySet();
+			SymmetryElement[] elements = new SymmetryElement[sym.BitCount];
+
+			int counter = 0;
+			for(int i = 0; i < 48; i++)
+			{
+				if (sym[i])
+				{
+					elements[counter++] = SymmetryGroup.Elements[i];
+				}
+			}
+
+			Assert.IsTrue(c1.IsEqualWithSymmetry(c2));
+			Assert.IsTrue(c2.IsEqualWithSymmetry(c1));
+
+			SymmetryElement se = elements[rnd.Next(elements.Length)];
+			for (int i = 0; i < 100; i++)
+			{
+				CubeMove cm = (CubeMove)rnd.Next(18);
+
+				c1.MakeMove(cm);
+				c2.MakeMove(se.TransformMove(cm));
+
+				Assert.IsTrue(c1.IsEqualWithSymmetry(c2, se));
+			}
+
+
 		}
 	}
 }

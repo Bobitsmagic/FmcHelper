@@ -143,7 +143,7 @@ namespace CubeAD
 		}
 
 		//ALARM
-		public void ApplyScramble(MoveSequenz s)
+		public void ApplyMoveSequenz(MoveSequenz s)
 		{
 			for (int i = 0; i < s.Moves.Count; i++)
 				MakeMove(s.Moves[i]);
@@ -156,7 +156,6 @@ namespace CubeAD
 			Blocked = 0;
 		}
 
-		//[TODO] Clean up switch block
 		public void MakeMove(CubeMove m)
 		{
 			int side = (int)m / 3;
@@ -293,12 +292,12 @@ namespace CubeAD
 			//Check edges
 			for (int x = 0; x < 6; x++)
 			{
-				int nextX = se.Transform(x);
+				int nextX = se.TransformColor(x);
 				for (int y = 0; y < 6; y++)
 				{
 					if (x / 2 == y / 2) continue;
 
-					int nextY = se.Transform(y);
+					int nextY = se.TransformColor(y);
 
 					if (se.TransformColor(GetEdgeColor(x, y)) != GetEdgeColor(nextX, nextY))
 						return false;
@@ -308,16 +307,16 @@ namespace CubeAD
 			//Check corners
 			for (int x = 0; x < 6; x++)
 			{
-				int nextX = se.Transform(x);
+				int nextX = se.TransformColor(x);
 				for (int y = 0; y < 6; y++)
 				{
 					if (x / 2 == y / 2) continue;
-					int nextY = se.Transform(y);
+					int nextY = se.TransformColor(y);
 
 					for (int z = 0; z < 6; z++)
 					{
 						if (x / 2 == z / 2 || y / 2 == z / 2) continue;
-						int nextZ = se.Transform(z);
+						int nextZ = se.TransformColor(z);
 
 						if (se.TransformColor(GetCornerColor(x, y, z)) != GetCornerColor(nextX, nextY, nextZ))
 							return false;
@@ -328,6 +327,59 @@ namespace CubeAD
 
 			return true;
 		}
+		
+		public BitArray GetSymmetrySet()
+		{
+			BitArray ret = new BitArray();
+
+			ret[0] = true;
+			BitArray inverse = new BitArray();
+
+			var array = SymmetryGroup.Elements;
+
+			//skipping identity
+			for (int i = 1; i < array.Length; i++)
+			{
+				if (!ret[i] && !inverse[i])
+				{
+					if (HasSymmetry(array[i]))
+					{
+						ret[i] = true;
+
+						//multiplying all implied symmetries to avoid HasSymmetry calls
+						//skipping identity
+						for (int j = 1; j < array.Length; j++)
+						{
+							if (!ret[j]) continue;
+
+							for (int k = 1; k < SymmetryGroup.MultGroupIndices[i].Length; k++)
+							{
+								ret[SymmetryGroup.GroupIndexTable[SymmetryGroup.MultGroupIndices[i][k], j]] = true;  
+							}
+						}
+					}
+					else
+					{
+						inverse[i] = true;
+
+						//multiplying all implied symmetries to avoid HasSymmetry calls
+						//skipping identity
+						for (int j = 1; j < array.Length; j++)
+						{
+							//Alarm
+							if (!ret[j]) continue;
+
+							for (int k = 1; k < SymmetryGroup.MultGroupIndices[i].Length; k++)
+							{
+								inverse[SymmetryGroup.GroupIndexTable[SymmetryGroup.MultGroupIndices[i][k], j]] = true;
+							}
+						}
+					}
+				}
+			}
+
+			return ret;
+		}
 
 		public string GetSimpleSideView()
 		{
@@ -337,6 +389,62 @@ namespace CubeAD
 				s += Sides[i].WriteAsSide(((CubeColor)i).ToString()[0]) + "\n####################\n";
 			}
 			return s;
+		}
+
+		public bool IsEqualWithSymmetry(Cube other)
+		{
+			BitArray sym1 = GetSymmetrySet();
+			BitArray sym2 = other.GetSymmetrySet();
+
+			if (sym1 != sym2) return false;
+
+			for(int i = 0; i < SymmetryGroup.ORDER; i++)
+			{
+				if (IsEqualWithSymmetry(other, SymmetryGroup.Elements[i]))
+					return true;	
+			}
+
+			return false;
+		}
+		public bool IsEqualWithSymmetry(Cube other, SymmetryElement se)
+		{
+			//Check edges
+			for (int x = 0; x < 6; x++)
+			{
+				int nextX = se.TransformColor(x);
+				for (int y = 0; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+
+					int nextY = se.TransformColor(y);
+
+					if (se.TransformColor(GetEdgeColor(x, y)) != other.GetEdgeColor(nextX, nextY))
+						return false;
+				}
+			}
+
+			//Check corners
+			for (int x = 0; x < 6; x++)
+			{
+				int nextX = se.TransformColor(x);
+				for (int y = 0; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+					int nextY = se.TransformColor(y);
+
+					for (int z = 0; z < 6; z++)
+					{
+						if (x / 2 == z / 2 || y / 2 == z / 2) continue;
+						int nextZ = se.TransformColor(z);
+
+						if (se.TransformColor(GetCornerColor(x, y, z)) != other.GetCornerColor(nextX, nextY, nextZ))
+							return false;
+					}
+
+				}
+			}
+
+			return true;
 		}
 
 		public string GetSideView()

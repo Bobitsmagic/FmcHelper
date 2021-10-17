@@ -27,7 +27,7 @@ namespace CubeAD
 			//H
 			MoveSequenz ms = new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2").GetReverse();
 			Cube c = new Cube();
-			c.ApplyScramble(ms);
+			c.ApplyMoveSequenz(ms);
 
 			Console.WriteLine(ms);
 			c.PrintSideView();

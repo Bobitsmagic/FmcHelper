@@ -69,7 +69,7 @@ namespace CubeTester
 			cube.Reset();
 
 			//Super flip
-			cube.ApplyScramble(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			cube.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
 
 			Assert.AreEqual(cube.CountOrientedEgdes(), 0);
 		}

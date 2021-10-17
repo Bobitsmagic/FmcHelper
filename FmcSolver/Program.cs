@@ -11,9 +11,17 @@ namespace FmcSolver
 	{
 		static void Main(string[] args)
 		{
+			for (int i = 0; i < SymmetryGroup.ORDER; i += 2)
+			{
+				SymmetryElement se = SymmetryGroup.Elements[i];
+				Console.WriteLine(i.ToString("00") + "\t" + se.HasReflection + "\t" +  se);
+			}
+
+
+			Console.ReadLine();
 
 			Cube c = new Cube();
-			c.ApplyScramble(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
 			c.PrintSideView();
 
 			Console.ReadLine();
@@ -28,7 +36,7 @@ namespace FmcSolver
 			c = new Cube();
 			MoveSequenz s = new MoveSequenz(20);
 			Console.WriteLine(s);
-			c.ApplyScramble(s);
+			c.ApplyMoveSequenz(s);
 			c.PrintSideView();
 			c = FindSolution(c);
 			c.ResetBlocked();
@@ -49,7 +57,7 @@ namespace FmcSolver
 			Cube c = new Cube();
 			Console.WriteLine(c.GetValue().ToString("00 00 00"));
 
-			c.ApplyScramble(s);
+			c.ApplyMoveSequenz(s);
 
 			MoveSequenz solution = new MoveSequenz("FP U2 DP BP DP R D R2 D RP D2 L2 UP R");
 
@@ -119,7 +127,7 @@ namespace FmcSolver
 			Cube c = new Cube();
 			MoveSequenz s = new MoveSequenz(20);
 			//Console.WriteLine(s);
-			c.ApplyScramble(s);
+			c.ApplyMoveSequenz(s);
 			//c.PrintSideView();
 
 			bool FoundSolution = false;
@@ -193,7 +201,7 @@ namespace FmcSolver
 			Cube c = new Cube();
 			MoveSequenz s = new MoveSequenz(20);
 			Console.WriteLine(s);
-			c.ApplyScramble(s);
+			c.ApplyMoveSequenz(s);
 			c.PrintSideView();
 
 			int bestVal = 0;
@@ -432,12 +440,12 @@ namespace FmcSolver
 				Console.SetCursorPosition(0, 0);
 				MoveSequenz s = new MoveSequenz(Console.ReadLine());
 				Cube c = new Cube();
-				c.ApplyScramble(s);
+				c.ApplyMoveSequenz(s);
 				c.PrintSideView();
 
 				Console.WriteLine("\nReverse: ");
 				c = new Cube();
-				c.ApplyScramble(s.GetReverse());
+				c.ApplyMoveSequenz(s.GetReverse());
 				Console.WriteLine(s.GetReverse());
 				c.PrintSideView();
 

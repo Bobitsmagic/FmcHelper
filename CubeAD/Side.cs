@@ -22,7 +22,6 @@
 			63U | (7U << 21)
 		};
 
-
 		uint Data;
 
 		public uint this[int i]

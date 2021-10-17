@@ -9,7 +9,7 @@ namespace CubeTester
 	class SymmetryElementTester
 	{
 		[Test]
-		public void IdentityTest()
+		public void Identity()
 		{
 			SymmetryElement identity = SymmetryGroup.Elements[0];
 
@@ -23,7 +23,7 @@ namespace CubeTester
 		}
 
 		[Test]
-		public void IndexTest()
+		public void Index()
 		{
 			for (int i = 0; i < SymmetryGroup.Elements.Length; i++)
 			{
@@ -31,5 +31,18 @@ namespace CubeTester
 			}
 		}
 
+		[Test]
+		public void HasReflection()
+		{
+			//first 16 generators are rotations
+			for (int i = 0; i < 16; i++)
+			{
+				Assert.IsFalse(SymmetryGroup.Generators[i].HasReflection);
+			}
+			for (int i = 16; i < SymmetryGroup.Generators.Length; i++)
+			{
+				Assert.IsTrue(SymmetryGroup.Generators[i].HasReflection);
+			}
+		}
 	}
 }

@@ -3,6 +3,7 @@
 namespace CubeAD
 {
 	//A class that compresses a sequenz of moves into a single data permutation
+	//[TODO] unit tests
 	class Permutation
 	{
 		static byte[][] SideSwaps =

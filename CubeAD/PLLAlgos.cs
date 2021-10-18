@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace CubeAD
 {
+	//A set of all pll algorithms
 	public static class PLLAlgos
 	{
 		public static List<MoveSequenz>[] Cases = new List<MoveSequenz>[12];

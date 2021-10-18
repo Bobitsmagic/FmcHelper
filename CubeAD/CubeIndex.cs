@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Numerics;
 
 namespace CubeAD
 {
+	//Compressed representation of a cube
 	public struct CubeIndex
 	{
 		const uint MAX_EDGE_POSITIONS = 479001600;
@@ -47,36 +48,52 @@ namespace CubeAD
 				}
 			}
 		}
-			
-		public uint EdgePositions; //12! = 479001600   /2?
-		public ushort CornerPositions; //8! = 40320    /2?
-		public ushort EdgeFlips; //2^11 = 2048
-		public ushort CornerRotations; //3^7 = 2187
 
-		public CubeIndex(uint edgePositions, ushort cornerPositions, ushort edgeFlips, ushort cornerRotations)
+		public BigInteger Index
 		{
-			if (edgePositions >= MAX_EDGE_POSITIONS ||
-				cornerPositions >= MAX_CORNER_POSITIONS ||
-				edgeFlips >= MAX_EDGE_FLIPS ||
-				cornerRotations >= MAX_CORNER_ROTATIONS)
+			get
+			{
+				BigInteger ret = EdgePermutation;
+				ret *= MAX_CORNER_POSITIONS;
+				ret += CornerPermutation;
+				ret *= MAX_EDGE_FLIPS;
+				ret += EdgeOrientation;
+				ret *= MAX_CORNER_ROTATIONS;
+				ret += CornerOrientation;
+
+				return ret;
+			}
+		}
+
+		public uint EdgePermutation; //12! = 479001600   /2?
+		public ushort CornerPermutation; //8! = 40320    /2?
+		public ushort EdgeOrientation; //2^12 = 4096         /2?
+		public ushort CornerOrientation; //3^8 = 6561    /3?
+
+		public CubeIndex(uint edgePermutation, ushort cornerPermutation, ushort edgeOrientation, ushort cornerOrientation)
+		{
+			if (edgePermutation >= MAX_EDGE_POSITIONS ||
+				cornerPermutation >= MAX_CORNER_POSITIONS ||
+				edgeOrientation >= MAX_EDGE_FLIPS ||
+				cornerOrientation >= MAX_CORNER_ROTATIONS)
 				throw new ArgumentException();
 
-			EdgePositions = edgePositions;
-			CornerPositions = cornerPositions;
-			EdgeFlips = edgeFlips;
-			CornerRotations = cornerRotations;
+			EdgePermutation = edgePermutation;
+			CornerPermutation = cornerPermutation;
+			EdgeOrientation = edgeOrientation;
+			CornerOrientation = cornerOrientation;
 		}
 
 		public CubeIndex(Cube c)
 		{
-			EdgePositions = FindEdgePositionIndex(c);
-			CornerPositions = FindCornerPositionIndex(c);
-			EdgeFlips = FindEdgeOrientationIndex(c);
-			CornerRotations = FindCornerOrientationIndex(c);
+			EdgePermutation = FindEdgePermutationIndex(c);
+			CornerPermutation = FindCornerPermutationIndex(c);
+			EdgeOrientation = FindEdgeOrientationIndex(c);
+			CornerOrientation = FindCornerOrientationIndex(c);
 		}
 
 
-		public static uint FindEdgePositionIndex(Cube c)
+		public static uint FindEdgePermutationIndex(Cube c)
 		{
 			int[] perm = new int[12];
 
@@ -93,7 +110,7 @@ namespace CubeAD
 
 			return (uint)GetIndex(perm);
 		}
-		public static ushort FindCornerPositionIndex(Cube c)
+		public static ushort FindCornerPermutationIndex(Cube c)
 		{
 			int[] perm = new int[8];
 
@@ -135,7 +152,7 @@ namespace CubeAD
 				{
 					for (int z = 4; z < 6; z++)
 					{
-						ret = (ushort)((ret * 3) + c.CornerOrientaion(x,y,z));
+						ret = (ushort)((ret * 3) + c.CornerOrientaion(x, y, z));
 					}
 				}
 			}
@@ -229,16 +246,16 @@ namespace CubeAD
 
 		public override bool Equals(object obj)
 		{
-			return obj is CubeIndex index &&
-				   EdgePositions == index.EdgePositions &&
-				   CornerPositions == index.CornerPositions &&
-				   EdgeFlips == index.EdgeFlips &&
-				   CornerRotations == index.CornerRotations;
+			return obj is CubeIndex other &&
+				   EdgePermutation == other.EdgePermutation &&
+				   CornerPermutation == other.CornerPermutation &&
+				   EdgeOrientation == other.EdgeOrientation &&
+				   CornerOrientation == other.CornerOrientation;
 		}
 
 		public override int GetHashCode()
 		{
-			return HashCode.Combine(EdgePositions, CornerPositions, EdgeFlips, CornerRotations);
+			return HashCode.Combine(EdgePermutation, CornerPermutation, EdgeOrientation, CornerOrientation);
 		}
 	}
 }

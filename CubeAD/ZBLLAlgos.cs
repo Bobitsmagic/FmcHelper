@@ -4,6 +4,7 @@ using System.IO;
 
 namespace CubeAD
 {
+	//A set of all ZBLL algorithms
 	public static class ZBLLAlgos
 	{
 		public static List<List<MoveSequenz>> Cases = new List<List<MoveSequenz>>();

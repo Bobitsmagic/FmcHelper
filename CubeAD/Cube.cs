@@ -29,65 +29,65 @@ namespace CubeAD
 			//Left
 			new (int Side, int Stripe)[]
 			{
-				(BOTTOM,	1),
-				(BACK,		3),
-				(TOP,		3),
-				(FRONT,		3)
+				(BOTTOM,    1),
+				(BACK,      3),
+				(TOP,       3),
+				(FRONT,     3)
 			},
 
 			//Right
 			new (int Side, int Stripe)[]
 			{
-				(BOTTOM,	3),
-				(FRONT,		1),
-				(TOP,		1),
-				(BACK,		1)
+				(BOTTOM,    3),
+				(FRONT,     1),
+				(TOP,       1),
+				(BACK,      1)
 			},
 
 			//Bottom
 			new (int Side, int Stripe)[]
 			{
-				(LEFT,		3),
-				(FRONT,		2),
-				(RIGHT,		1),
-				(BACK,		0)
+				(LEFT,      3),
+				(FRONT,     2),
+				(RIGHT,     1),
+				(BACK,      0)
 			},
 
 			//Top
 			new (int Side, int Stripe)[]
 			{
-				(LEFT,		1),
-				(BACK,		2),
-				(RIGHT,		3),
-				(FRONT,		0)
+				(LEFT,      1),
+				(BACK,      2),
+				(RIGHT,     3),
+				(FRONT,     0)
 			},
 
 			//Front
 			new (int Side, int Stripe)[]
 			{
-				(LEFT,		2),
-				(TOP,		2),
-				(RIGHT,		2),
-				(BOTTOM,	2)
+				(LEFT,      2),
+				(TOP,       2),
+				(RIGHT,     2),
+				(BOTTOM,    2)
 			},
 
 			//Back
 			new (int Side, int Stripe)[]
 			{
-				(LEFT,		0),
-				(BOTTOM,	0),
-				(RIGHT,		0),
-				(TOP,		0)
+				(LEFT,      0),
+				(BOTTOM,    0),
+				(RIGHT,     0),
+				(TOP,       0)
 			}
 		};
-		
+
 		//Squares that form a block (Clockwise after squares of main side)
 		private static (int side1, int square1, int side2, int square2)[] OrangeBlocks =
 		{
-			(TOP,		3, BACK,	2),
-			(TOP,		2, FRONT,	3),
-			(BOTTOM,	1, FRONT,	2),
-			(BOTTOM,	0, BACK,	3)
+			(TOP,       3, BACK,    2),
+			(TOP,       2, FRONT,   3),
+			(BOTTOM,    1, FRONT,   2),
+			(BOTTOM,    0, BACK,    3)
 		};
 
 		private static (int side1, int square1, int side2, int square2)[] RedBlocks =
@@ -286,7 +286,7 @@ namespace CubeAD
 
 			return (CubeColor)Sides[side1][AdjCorners[side1, lower * 2 + (higher & 1)]];
 		}
-		
+
 		public bool HasSymmetry(SymmetryElement se)
 		{
 			//Check edges
@@ -327,7 +327,7 @@ namespace CubeAD
 
 			return true;
 		}
-		
+
 		public BitArray GetSymmetrySet()
 		{
 			BitArray ret = new BitArray();
@@ -335,7 +335,7 @@ namespace CubeAD
 			ret[0] = true;
 			BitArray inverse = new BitArray();
 
-			var array = SymmetryGroup.Elements;
+			var array = SymmetryElement.Elements;
 
 			//skipping identity
 			for (int i = 1; i < array.Length; i++)
@@ -352,9 +352,9 @@ namespace CubeAD
 						{
 							if (!ret[j]) continue;
 
-							for (int k = 1; k < SymmetryGroup.MultGroupIndices[i].Length; k++)
+							for (int k = 1; k < SymmetryElement.MultGroupIndices[i].Length; k++)
 							{
-								ret[SymmetryGroup.GroupIndexTable[SymmetryGroup.MultGroupIndices[i][k], j]] = true;  
+								ret[SymmetryElement.GroupIndexTable[SymmetryElement.MultGroupIndices[i][k], j]] = true;
 							}
 						}
 					}
@@ -369,9 +369,9 @@ namespace CubeAD
 							//Alarm
 							if (!ret[j]) continue;
 
-							for (int k = 1; k < SymmetryGroup.MultGroupIndices[i].Length; k++)
+							for (int k = 1; k < SymmetryElement.MultGroupIndices[i].Length; k++)
 							{
-								inverse[SymmetryGroup.GroupIndexTable[SymmetryGroup.MultGroupIndices[i][k], j]] = true;
+								inverse[SymmetryElement.GroupIndexTable[SymmetryElement.MultGroupIndices[i][k], j]] = true;
 							}
 						}
 					}
@@ -398,10 +398,10 @@ namespace CubeAD
 
 			if (sym1 != sym2) return false;
 
-			for(int i = 0; i < SymmetryGroup.ORDER; i++)
+			for (int i = 0; i < SymmetryElement.ORDER; i++)
 			{
-				if (IsEqualWithSymmetry(other, SymmetryGroup.Elements[i]))
-					return true;	
+				if (IsEqualWithSymmetry(other, SymmetryElement.Elements[i]))
+					return true;
 			}
 
 			return false;
@@ -599,28 +599,28 @@ namespace CubeAD
 		public static (int Side1, int Side2, int pair1, int Pair2)[] F2LPairs =
 		{
 			//LEFT
-			(LEFT, BACK,	0, 7),
-			(LEFT, BACK,	1, 6),
-			(LEFT, TOP,		2, 7),
-			(LEFT, TOP,		3, 6),
-			(LEFT, FRONT,	4, 7),
-			(LEFT, FRONT,	5, 6),
-			(LEFT, BOTTOM,	6, 3),
-			(LEFT, BOTTOM,	7, 2),
+			(LEFT, BACK,    0, 7),
+			(LEFT, BACK,    1, 6),
+			(LEFT, TOP,     2, 7),
+			(LEFT, TOP,     3, 6),
+			(LEFT, FRONT,   4, 7),
+			(LEFT, FRONT,   5, 6),
+			(LEFT, BOTTOM,  6, 3),
+			(LEFT, BOTTOM,  7, 2),
 
 			//1
-			(RIGHT, BACK,	0, 3),
-			(RIGHT, BACK,	1, 2),
+			(RIGHT, BACK,   0, 3),
+			(RIGHT, BACK,   1, 2),
 			(RIGHT, BOTTOM, 2, 7),
 			(RIGHT, BOTTOM, 3, 6),
-			(RIGHT, FRONT,	4, 3),
-			(RIGHT, FRONT,	5, 2),
-			(RIGHT, TOP,	6, 3),
-			(RIGHT, TOP,	7, 2),
+			(RIGHT, FRONT,  4, 3),
+			(RIGHT, FRONT,  5, 2),
+			(RIGHT, TOP,    6, 3),
+			(RIGHT, TOP,    7, 2),
 
 			//2
-			(BOTTOM, BACK,	0, 1),
-			(BOTTOM, BACK,	1, 0),
+			(BOTTOM, BACK,  0, 1),
+			(BOTTOM, BACK,  1, 0),
 			(BOTTOM, FRONT, 4, 5),
 			(BOTTOM, FRONT, 5, 4),
 
@@ -669,7 +669,7 @@ namespace CubeAD
 
 
 			//if contains white or yellow
-			if(c1 / 2 == 1 || c2 / 2 == 1)
+			if (c1 / 2 == 1 || c2 / 2 == 1)
 			{
 				if (side1 / 2 == 0)
 					return c2 / 2 == 1;
@@ -723,7 +723,7 @@ namespace CubeAD
 			//Check green/blue containing edges on top/bottom
 
 			//all none bot/top sides
-			for(int x = 0; x < 6; x++)
+			for (int x = 0; x < 6; x++)
 			{
 				if (x / 2 == 1) continue;
 				//main color (blue/green) on bot/top and secondary color (orange/red) on another side 
@@ -733,7 +733,7 @@ namespace CubeAD
 				if ((int)GetEdgeColor(TOP, x) / 2 == 2 &&
 					(int)GetEdgeColor(x, TOP) / 2 == 0) counter++;
 			}
-			
+
 
 			if (Sides[BACK][3] / 2 == 2 && Sides[RIGHT][1] / 2 != 1)
 				counter++;
@@ -775,7 +775,7 @@ namespace CubeAD
 					cube.AddPossibleMoves(list);
 
 					foreach (CubeMove move in list)
-					{						
+					{
 						depth++;
 						currentMoves.Push(move);
 						Solve(new Cube(cube, move));

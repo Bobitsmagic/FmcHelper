@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
+﻿using CubeAD;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using CubeAD;
+using System.Linq;
 
 namespace CubeTester
 {
@@ -11,23 +11,23 @@ namespace CubeTester
 		[Test]
 		public void Identity()
 		{
-			SymmetryElement identity = SymmetryGroup.Elements[0];
+			SymmetryElement identity = SymmetryElement.Elements[0];
 
 			Assert.IsTrue(identity.IsIdentity);
 
-			foreach(SymmetryElement element in SymmetryGroup.Elements)
+			foreach (SymmetryElement element in SymmetryElement.Elements)
 			{
 				Assert.AreEqual(element, element * identity);
 				Assert.AreEqual(element, identity * element);
-			}			
+			}
 		}
 
 		[Test]
 		public void Index()
 		{
-			for (int i = 0; i < SymmetryGroup.Elements.Length; i++)
+			for (int i = 0; i < SymmetryElement.Elements.Length; i++)
 			{
-				Assert.AreEqual(i, SymmetryGroup.Elements[i].Index);
+				Assert.AreEqual(i, SymmetryElement.Elements[i].Index);
 			}
 		}
 
@@ -37,11 +37,43 @@ namespace CubeTester
 			//first 16 generators are rotations
 			for (int i = 0; i < 16; i++)
 			{
-				Assert.IsFalse(SymmetryGroup.Generators[i].HasReflection);
+				Assert.IsFalse(SymmetryElement.Generators[i].HasReflection);
 			}
-			for (int i = 16; i < SymmetryGroup.Generators.Length; i++)
+			for (int i = 16; i < SymmetryElement.Generators.Length; i++)
 			{
-				Assert.IsTrue(SymmetryGroup.Generators[i].HasReflection);
+				Assert.IsTrue(SymmetryElement.Generators[i].HasReflection);
+			}
+		}
+
+		//Tests whether the Generator list is complete and minimal
+		[Test]
+		public void GeneratorTest()
+		{
+			List<SymmetryElement>[] subGroups = new List<SymmetryElement>[SymmetryElement.Generators.Length];
+			for (int i = 0; i < subGroups.Length; i++)
+			{
+				subGroups[i] = SymmetryElement.Generators[i].GenerateMultGroup();
+			}
+
+			List<SymmetryElement> genGroup = new List<SymmetryElement>();
+
+			//skipping identity
+			for (int i = 1; i < SymmetryElement.Elements.Length; i++)
+			{
+				SymmetryElement element = SymmetryElement.Elements[i];
+
+				element.GenerateMultGroup(genGroup);
+				Console.WriteLine(genGroup.Count);
+
+				int hits = 0;
+				foreach (List<SymmetryElement> group in subGroups)
+				{
+					if (group.Count != genGroup.Count) continue;
+
+					if (group.SequenceEqual(genGroup)) hits++;
+				}
+
+				Assert.AreEqual(1, hits);
 			}
 		}
 	}

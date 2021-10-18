@@ -1,5 +1,5 @@
-using NUnit.Framework;
 using CubeAD;
+using NUnit.Framework;
 
 
 namespace CubeTester
@@ -10,11 +10,11 @@ namespace CubeTester
 		public void InitialValueTest()
 		{
 			Side side;
-			for(int i = 0; i < 6; i++)
+			for (int i = 0; i < 6; i++)
 			{
 				side = new Side((CubeColor)i);
 
-				for(int j = 0; j < 8; j++)
+				for (int j = 0; j < 8; j++)
 				{
 					Assert.AreEqual(side[j], (uint)i);
 				}
@@ -80,9 +80,9 @@ namespace CubeTester
 					System.Diagnostics.Debug.WriteLine(dest.ToString());
 
 					Assert.AreEqual(dest.GetStripe(i), src.GetStripe(j));
-					for(int k = 0; k < 4; k++)
+					for (int k = 0; k < 4; k++)
 					{
-						if(k != i)
+						if (k != i)
 							Assert.AreNotEqual(dest.GetStripe(k), src.GetStripe(j));
 					}
 				}

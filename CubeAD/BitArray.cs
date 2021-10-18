@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CubeAD
 {
+	//Bool array of size 64
 	public struct BitArray
 	{
-
 		public bool this[int i]
 		{
 			get

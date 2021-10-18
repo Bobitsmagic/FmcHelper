@@ -1,5 +1,5 @@
-﻿using NUnit.Framework;
-using CubeAD;
+﻿using CubeAD;
+using NUnit.Framework;
 using System;
 
 namespace CubeTester
@@ -12,10 +12,10 @@ namespace CubeTester
 			Cube cube = new Cube();
 			Assert.IsTrue(cube.IsSolved);
 
-			for(int i = 0; i < 6; i++)
+			for (int i = 0; i < 6; i++)
 			{
 				cube.MakeMove((CubeMove)(i * 3 + 0));
-				for(int j = 0; j < 3; j++)
+				for (int j = 0; j < 3; j++)
 				{
 					Assert.IsFalse(cube.IsSolved);
 					cube.MakeMove((CubeMove)(i * 3 + 0));
@@ -43,14 +43,14 @@ namespace CubeTester
 		[Test]
 		public void Rotate()
 		{
-			for(int i = 0; i < 6; i++)
+			for (int i = 0; i < 6; i++)
 			{
-				for(int j = 0; j < 6; j++)
+				for (int j = 0; j < 6; j++)
 				{
 					if (i / 2 == j / 2) continue;
 
 					CubeMove[] cubeMoves = new CubeMove[4 * 6];
-					for(int k = 0; k < cubeMoves.Length; k += 4)
+					for (int k = 0; k < cubeMoves.Length; k += 4)
 					{
 						cubeMoves[k + 0] = (CubeMove)(i * 3);
 						cubeMoves[k + 1] = (CubeMove)(j * 3);
@@ -61,7 +61,7 @@ namespace CubeTester
 					Cube cube = new Cube();
 					Assert.IsTrue(cube.IsSolved);
 
-					for(int k = 0; k < cubeMoves.Length - 1; k++)
+					for (int k = 0; k < cubeMoves.Length - 1; k++)
 					{
 						cube.MakeMove(cubeMoves[k]);
 						Assert.IsFalse(cube.IsSolved);
@@ -124,19 +124,19 @@ namespace CubeTester
 			}
 		}
 
-		[Test] 
+		[Test]
 		public void HasSymmetry()
 		{
 			Cube c = new Cube();
 
-			foreach(SymmetryElement se in SymmetryGroup.Elements)
+			foreach (SymmetryElement se in SymmetryElement.Elements)
 			{
 				Assert.True(c.HasSymmetry(se));
 			}
 
 			//Super flip
 			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
-			foreach (SymmetryElement se in SymmetryGroup.Elements)
+			foreach (SymmetryElement se in SymmetryElement.Elements)
 			{
 				Assert.True(c.HasSymmetry(se));
 			}
@@ -160,12 +160,12 @@ namespace CubeTester
 			Cube c = new Cube();
 
 			BitArray sym = c.GetSymmetrySet();
-			Assert.AreEqual(SymmetryGroup.FullSymmetry, sym);
+			Assert.AreEqual(SymmetryElement.FullSymmetry, sym);
 
 			//Super flip
 			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
 			sym = c.GetSymmetrySet();
-			Assert.AreEqual(SymmetryGroup.FullSymmetry, sym);
+			Assert.AreEqual(SymmetryElement.FullSymmetry, sym);
 
 			c.Reset();
 
@@ -188,7 +188,7 @@ namespace CubeTester
 			//checkerboard pattern
 			c.ApplyMoveSequenz(new MoveSequenz("U2 D2 R2 L2 F2 B2"));
 			sym = c.GetSymmetrySet();
-			Assert.AreEqual(SymmetryGroup.FullSymmetry, sym);
+			Assert.AreEqual(SymmetryElement.FullSymmetry, sym);
 
 			c.Reset();
 			c.ApplyMoveSequenz(new MoveSequenz("R2 L2 U2 R2 L2 D2"));
@@ -208,16 +208,16 @@ namespace CubeTester
 			//H perm
 			c1.ApplyMoveSequenz(new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
 			c2.ApplyMoveSequenz(new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
-			
+
 			BitArray sym = c1.GetSymmetrySet();
 			SymmetryElement[] elements = new SymmetryElement[sym.BitCount];
 
 			int counter = 0;
-			for(int i = 0; i < 48; i++)
+			for (int i = 0; i < 48; i++)
 			{
 				if (sym[i])
 				{
-					elements[counter++] = SymmetryGroup.Elements[i];
+					elements[counter++] = SymmetryElement.Elements[i];
 				}
 			}
 
@@ -236,6 +236,103 @@ namespace CubeTester
 			}
 
 
+		}
+
+		[Test]
+		public void CountSquares()
+		{
+			Cube cube = new Cube();
+
+			Assert.AreEqual(24, cube.CountSquares());
+
+			cube.MakeMove(CubeMove.L);
+			Assert.AreEqual(16, cube.CountSquares());
+
+			cube.MakeMove(CubeMove.R);
+			Assert.AreEqual(8, cube.CountSquares());
+		}
+
+		[Test]
+		public void CheckBlocks()
+		{
+			Cube cube = new Cube();
+
+			Assert.AreEqual(8, cube.CountBlocks());
+
+			cube.MakeMove(CubeMove.R);
+			Assert.AreEqual(4, cube.CountBlocks());
+
+			cube.MakeMove(CubeMove.L);
+			Assert.AreEqual(0, cube.CountBlocks());
+		}
+
+		[Test]
+		public void CountOrientedEdges()
+		{
+			Cube cube = new Cube();
+
+			Assert.AreEqual(12, cube.CountOrientedEgdes());
+
+			cube.MakeMove(CubeMove.R);
+			Assert.AreEqual(12, cube.CountOrientedEgdes());
+
+			cube.MakeMove(CubeMove.L);
+			Assert.AreEqual(12, cube.CountOrientedEgdes());
+
+			cube.MakeMove(CubeMove.D);
+			Assert.AreEqual(12, cube.CountOrientedEgdes());
+
+			cube.MakeMove(CubeMove.U);
+			Assert.AreEqual(12, cube.CountOrientedEgdes());
+
+			cube.MakeMove(CubeMove.F);
+			Assert.AreEqual(8, cube.CountOrientedEgdes());
+
+			cube.MakeMove(CubeMove.B);
+			Assert.AreEqual(4, cube.CountOrientedEgdes());
+
+			cube.MakeMove(CubeMove.U);
+			cube.MakeMove(CubeMove.F);
+			Assert.AreEqual(6, cube.CountOrientedEgdes());
+
+			cube.MakeMove(CubeMove.B);
+			Assert.AreEqual(8, cube.CountOrientedEgdes());
+
+			cube.Reset();
+
+			//Super flip
+			cube.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+
+			Assert.AreEqual(cube.CountOrientedEgdes(), 0);
+		}
+
+		[Test]
+		public void SingleEdges()
+		{
+			Cube cube = new Cube();
+
+			Random rnd = new Random(0);
+
+			for (int i = 0; i < 100; i++)
+			{
+				CubeMove cm = (CubeMove)rnd.Next(18);
+
+				cube.MakeMove(cm);
+
+				int counter = 0;
+				for (int x = 0; x < 6; x++)
+				{
+					for (int y = x + 1; y < 6; y++)
+					{
+						if (x / 2 == y / 2) continue;
+
+						if (cube.EdgeIsOriented(x, y))
+							counter++;
+					}
+				}
+
+				Assert.AreEqual(cube.CountOrientedEgdes(), counter);
+			}
 		}
 	}
 }

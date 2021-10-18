@@ -659,7 +659,42 @@ namespace CubeAD
 			return counter;
 		}
 
-		//[TODO] Fix green/blue pieces 
+		public bool EdgeIsOriented(int side1, int side2)
+		{
+			if (side2 < side1)
+				(side1, side2) = (side2, side1);
+
+			int c1 = (int)GetEdgeColor(side1, side2);
+			int c2 = (int)GetEdgeColor(side2, side1);
+
+
+			//if contains white or yellow
+			if(c1 / 2 == 1 || c2 / 2 == 1)
+			{
+				if (side1 / 2 == 0)
+					return c2 / 2 == 1;
+				else
+					return c1 / 2 == 1;
+			}
+			else
+			{
+				if (side1 / 2 == 0)
+					return c2 / 2 == 2;
+				else
+					return c1 / 2 == 2;
+			}
+		}
+		public int CornerOrientaion(int side1, int side2, int side3)
+		{
+			if ((int)GetCornerColor(side1, side2, side3) / 2 == 1)
+				return side1 / 2;
+
+			if ((int)GetCornerColor(side2, side1, side3) / 2 == 1)
+				return side2 / 2;
+
+			return side3 / 2;
+		}
+
 		public int CountOrientedEgdes()
 		{
 			int counter = 0;
@@ -712,6 +747,45 @@ namespace CubeAD
 
 			return counter;
 		}
+
+		public static HashSet<Cube> GetSolvedCubes(int maxDepth)
+		{
+			HashSet<Cube> ret = new HashSet<Cube>();
+
+			Stack<CubeMove> currentMoves = new Stack<CubeMove>();
+
+			//Avoid GC Pressure
+			List<CubeMove>[] moveBuffer = new List<CubeMove>[20];
+			for (int i = 0; i < moveBuffer.Length; i++)
+				moveBuffer[i] = new List<CubeMove>(18);
+			int depth = 0;
+
+			Solve(new Cube());
+
+			return ret;
+
+			void Solve(Cube cube)
+			{
+				ret.Add(cube);
+
+				if (depth < maxDepth)
+				{
+					List<CubeMove> list = moveBuffer[depth];
+					list.Clear();
+					cube.AddPossibleMoves(list);
+
+					foreach (CubeMove move in list)
+					{						
+						depth++;
+						currentMoves.Push(move);
+						Solve(new Cube(cube, move));
+						currentMoves.Pop();
+						depth--;
+					}
+				}
+			}
+		}
+
 
 		public override bool Equals(object obj)
 		{

@@ -11,13 +11,10 @@ namespace FmcSolver
 	{
 		static void Main(string[] args)
 		{
-			for (int i = 0; i < SymmetryGroup.ORDER; i += 2)
+			for(int i = 0; i < 12; i++)
 			{
-				SymmetryElement se = SymmetryGroup.Elements[i];
-				Console.WriteLine(i.ToString("00") + "\t" + se.HasReflection + "\t" +  se);
+				Console.WriteLine(i + " " +  Cube.GetSolvedCubes(i).Count);
 			}
-
-
 			Console.ReadLine();
 
 			Cube c = new Cube();

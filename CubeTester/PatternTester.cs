@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using CubeAD;
-
+using System;
 
 namespace CubeTester
 {
@@ -72,6 +72,35 @@ namespace CubeTester
 			cube.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
 
 			Assert.AreEqual(cube.CountOrientedEgdes(), 0);
+		}
+
+		[Test]
+		public void SingleEdges()
+		{
+			Cube cube = new Cube();
+
+			Random rnd = new Random(0);
+
+			for (int i = 0; i < 100; i++)
+			{
+				CubeMove cm = (CubeMove)rnd.Next(18);
+
+				cube.MakeMove(cm);
+
+				int counter = 0;
+				for (int x = 0; x < 6; x++)
+				{
+					for (int y = x + 1; y < 6; y++)
+					{
+						if (x / 2 == y / 2) continue;
+
+						if (cube.EdgeIsOriented(x, y))
+							counter++;
+					}
+				}
+
+				Assert.AreEqual(cube.CountOrientedEgdes(), counter);
+			}
 		}
 	}
 }

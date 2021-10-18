@@ -2,6 +2,7 @@
 
 namespace CubeAD
 {
+	//A class that compresses a sequenz of moves into a single data permutation
 	class Permutation
 	{
 		static byte[][] SideSwaps =

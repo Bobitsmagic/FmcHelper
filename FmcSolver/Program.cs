@@ -18,7 +18,7 @@ namespace FmcSolver
 			Console.ReadLine();
 
 			Cube c = new Cube();
-			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 			c.PrintSideView();
 
 			Console.ReadLine();

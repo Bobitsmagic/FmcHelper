@@ -90,7 +90,7 @@ namespace CubeTester
 			}
 
 			//Super flip
-			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 
 			for (int x = 0; x < 6; x++)
 			{
@@ -107,7 +107,7 @@ namespace CubeTester
 		{
 			Cube c = new Cube();
 			//Super flip
-			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 			for (int x = 0; x < 6; x++)
 			{
 				for (int y = 0; y < 6; y++)
@@ -135,7 +135,7 @@ namespace CubeTester
 			}
 
 			//Super flip
-			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 			foreach (SymmetryElement se in SymmetryElement.Elements)
 			{
 				Assert.True(c.HasSymmetry(se));
@@ -163,7 +163,7 @@ namespace CubeTester
 			Assert.AreEqual(SymmetryElement.FullSymmetry, sym);
 
 			//Super flip
-			c.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 			sym = c.GetSymmetrySet();
 			Assert.AreEqual(SymmetryElement.FullSymmetry, sym);
 
@@ -301,7 +301,7 @@ namespace CubeTester
 			cube.Reset();
 
 			//Super flip
-			cube.ApplyMoveSequenz(new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"));
+			cube.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 
 			Assert.AreEqual(cube.CountOrientedEgdes(), 0);
 		}

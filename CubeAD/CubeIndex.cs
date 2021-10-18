@@ -7,10 +7,10 @@ namespace CubeAD
 	//Compressed representation of a cube
 	public struct CubeIndex
 	{
-		const uint MAX_EDGE_POSITIONS = 479001600;
-		const ushort MAX_CORNER_POSITIONS = 40320;
-		const ushort MAX_EDGE_FLIPS = 2048;
-		const ushort MAX_CORNER_ROTATIONS = 2187;
+		public const uint MAX_EDGE_PERMUTATION = 479001600; //12!
+		public const ushort MAX_CORNER_PERMUTATION = 40320; //8!
+		public const ushort MAX_EDGE_ORIENTATION = 4096;	//2^12
+		public const ushort MAX_CORNER_ORIENTATION = 6561;  //3^8
 
 		public static int[,] EdgeIndices = new int[6, 6];
 		public static int[,,] CornerIndices = new int[6, 6, 6];
@@ -54,28 +54,28 @@ namespace CubeAD
 			get
 			{
 				BigInteger ret = EdgePermutation;
-				ret *= MAX_CORNER_POSITIONS;
+				ret *= MAX_CORNER_PERMUTATION;
 				ret += CornerPermutation;
-				ret *= MAX_EDGE_FLIPS;
+				ret *= MAX_EDGE_ORIENTATION;
 				ret += EdgeOrientation;
-				ret *= MAX_CORNER_ROTATIONS;
+				ret *= MAX_CORNER_ORIENTATION;
 				ret += CornerOrientation;
 
 				return ret;
 			}
 		}
 
-		public uint EdgePermutation; //12! = 479001600   /2?
+		public uint EdgePermutation; 
 		public ushort CornerPermutation; //8! = 40320    /2?
 		public ushort EdgeOrientation; //2^12 = 4096         /2?
 		public ushort CornerOrientation; //3^8 = 6561    /3?
 
 		public CubeIndex(uint edgePermutation, ushort cornerPermutation, ushort edgeOrientation, ushort cornerOrientation)
 		{
-			if (edgePermutation >= MAX_EDGE_POSITIONS ||
-				cornerPermutation >= MAX_CORNER_POSITIONS ||
-				edgeOrientation >= MAX_EDGE_FLIPS ||
-				cornerOrientation >= MAX_CORNER_ROTATIONS)
+			if (edgePermutation >= MAX_EDGE_PERMUTATION ||
+				cornerPermutation >= MAX_CORNER_PERMUTATION ||
+				edgeOrientation >= MAX_EDGE_ORIENTATION ||
+				cornerOrientation >= MAX_CORNER_ORIENTATION)
 				throw new ArgumentException();
 
 			EdgePermutation = edgePermutation;
@@ -107,7 +107,6 @@ namespace CubeAD
 					perm[counter++] = EdgeIndices[(int)c.GetEdgeColor(x, y), (int)c.GetEdgeColor(y, x)];
 				}
 			}
-
 			return (uint)GetIndex(perm);
 		}
 		public static ushort FindCornerPermutationIndex(Cube c)
@@ -121,7 +120,7 @@ namespace CubeAD
 				{
 					for (int z = 4; z < 6; z++)
 					{
-						perm[counter++] = EdgeIndices[(int)c.GetEdgeColor(x, y), (int)c.GetEdgeColor(y, x)];
+						perm[counter++] = CornerIndices[(int)c.GetCornerColor(x, y, z), (int)c.GetCornerColor(y, x, z), (int)c.GetCornerColor(z, x, y)];
 					}
 				}
 			}
@@ -130,34 +129,34 @@ namespace CubeAD
 		}
 		public static ushort FindEdgeOrientationIndex(Cube c)
 		{
-			ushort ret = 0;
+			int ret = 0;
 			for (int x = 0; x < 6; x++)
 			{
 				for (int y = x + 1; y < 6; y++)
 				{
 					if (x / 2 == y / 2) continue;
 
-					ret = (ushort)((ret << 1) | (c.EdgeIsOriented(x, y) ? 0 : 1));
+					ret = (ret << 1) | (c.EdgeIsOriented(x, y) ? 0 : 1);
 				}
 			}
 
-			return ret;
+			return (ushort)ret;
 		}
 		public static ushort FindCornerOrientationIndex(Cube c)
 		{
-			ushort ret = 0;
+			int ret = 0;
 			for (int x = 0; x < 2; x++)
 			{
 				for (int y = 2; y < 4; y++)
 				{
 					for (int z = 4; z < 6; z++)
 					{
-						ret = (ushort)((ret * 3) + c.CornerOrientaion(x, y, z));
+						ret = (ret * 3) + c.CornerOrientaion(x, y, z);
 					}
 				}
 			}
 
-			return ret;
+			return (ushort)ret;
 		}
 
 

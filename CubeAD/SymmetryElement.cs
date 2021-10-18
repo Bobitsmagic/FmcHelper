@@ -186,7 +186,6 @@ namespace CubeAD
 
 		public CubeColor Orange, Yellow, Green;
 
-
 		public SymmetryElement(CubeColor orange, CubeColor yellow, CubeColor green)
 		{
 			Orange = orange;

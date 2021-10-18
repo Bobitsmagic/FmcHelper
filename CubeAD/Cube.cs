@@ -686,10 +686,10 @@ namespace CubeAD
 		}
 		public int CornerOrientaion(int side1, int side2, int side3)
 		{
-			if ((int)GetCornerColor(side1, side2, side3) / 2 == 1)
+			if ((int)GetCornerColor(side1, side2, side3) / 2 == 0)
 				return side1 / 2;
 
-			if ((int)GetCornerColor(side2, side1, side3) / 2 == 1)
+			if ((int)GetCornerColor(side2, side1, side3) / 2 == 0)
 				return side2 / 2;
 
 			return side3 / 2;

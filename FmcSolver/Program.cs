@@ -1,6 +1,8 @@
-﻿using CubeAD;
+﻿using BenchmarkDotNet.Running;
+using CubeAD;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,41 +13,21 @@ namespace FmcSolver
 	{
 		static void Main(string[] args)
 		{
-			for(int i = 0; i < 12; i++)
-			{
-				Console.WriteLine(i + " " +  Cube.GetSolvedCubes(i).Count);
-			}
-			Console.ReadLine();
-
-			Cube c = new Cube();
-			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
-			c.PrintSideView();
-
-			Console.ReadLine();
-
-			PLLAlgos.Init();
-
-			Console.ReadLine();
-			ZBLLAlgos.FromFile();
-
-			//Console.WriteLine(FindMinmalCycle());
-
-			c = new Cube();
-			MoveSequenz s = new MoveSequenz(20);
-			Console.WriteLine(s);
-			c.ApplyMoveSequenz(s);
-			c.PrintSideView();
-			c = FindSolution(c);
-			c.ResetBlocked();
-			c = FindSolution(c);
-			c.ResetBlocked();
-			c = FindSolution(c);
-			//NissHelper();
-
-			//PrintValues();
+			var summary = BenchmarkRunner.Run<SolvedSetContainsBenchmark>();
 
 			Console.WriteLine("\nDone");
 			Console.ReadLine();
+		}
+
+		private static void SolvedSetBenchmarking()
+		{
+			Stopwatch sw = new Stopwatch();
+			for (int i = 0; i < 12; i++)
+			{
+				sw.Restart();
+				Console.WriteLine(i + " " + Cube.GetSolvedCubeIndicesHS(i).Count);
+				Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000"));
+			}
 		}
 
 		static void PrintValues()

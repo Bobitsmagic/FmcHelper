@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CubeAD
 {
@@ -127,6 +128,16 @@ namespace CubeAD
 			MakeMove(m);
 		}
 
+		public void CopyValuesFrom(Cube c)
+		{
+			Blocked = c.Blocked;
+
+			for(int i = 0; i < 6; i++)
+			{
+				Sides[i] = c.Sides[i];
+			}
+		}
+
 		public void AddPossibleMoves(List<CubeMove> list)
 		{
 			list.Clear();
@@ -162,18 +173,7 @@ namespace CubeAD
 
 			Sides[side].Rotate(((int)m % 3) + 1);
 
-			Blocked |= (byte)(1 << side);
-
-			if (side % 2 == 0)
-				Blocked |= (byte)(1 << (side + 1));
-
-			for (int i = 0; i < 6; i++)
-			{
-				if (i / 2 != side / 2)
-				{
-					Blocked &= (byte)(~(1 << i));
-				}
-			}
+			UpdateBlocked(side);
 
 			uint buffer;
 			int moveType = (int)m % 3;
@@ -222,6 +222,22 @@ namespace CubeAD
 
 					Sides[stripes[3].Side].SetStripe(stripes[3].Stripe, buffer);
 					break;
+			}
+		}
+
+		public void UpdateBlocked(int side)
+		{
+			Blocked |= (byte)(1 << side);
+
+			if (side % 2 == 0)
+				Blocked |= (byte)(1 << (side + 1));
+
+			for (int i = 0; i < 6; i++)
+			{
+				if (i / 2 != side / 2)
+				{
+					Blocked &= (byte)(~(1 << i));
+				}
 			}
 		}
 
@@ -748,39 +764,246 @@ namespace CubeAD
 			return counter;
 		}
 
-		public static HashSet<Cube> GetSolvedCubes(int maxDepth)
+		public static HashSet<CubeIndex> GetSolvedCubeIndicesBFS(int maxDepth)
 		{
-			HashSet<Cube> ret = new HashSet<Cube>();
+			HashSet<CubeIndex> ret = new HashSet<CubeIndex>(100000000);
 
+			//Avoid GC Pressure
+			Stack<Cube> cubes = new Stack<Cube>();
+
+			List<CubeMove> list = new List<CubeMove>();
+
+			HashSet<Cube>[] bfs = new HashSet<Cube>[maxDepth + 1];
+			for (int i = 0; i < bfs.Length; i++)
+				bfs[i] = new HashSet<Cube>(Power(15, i));
+			bfs[0].Add(new Cube());
+			ret.Add(new CubeIndex(bfs[0].ElementAt(0)));
+
+			long bytes = GC.GetTotalMemory(true);
+
+
+			for (int i = 0; i < maxDepth; i++)
+			{
+				HashSet<Cube> current = bfs[i], next = bfs[i +1];
+				foreach(Cube c in current)
+				{
+					list.Clear();
+					
+					c.AddPossibleMoves(list);
+
+					foreach (CubeMove move in list)
+					{
+						Cube cube;
+						if (cubes.Count == 0)
+							cube = new Cube(c, move);
+						else
+						{
+							cube = cubes.Pop();
+							cube.CopyValuesFrom(c);
+							c.MakeMove(move);
+						}
+						
+						if (!current.Contains(cube))
+						{
+							if (next.Add(cube))
+							{
+								ret.Add(new CubeIndex(cube));
+							}
+							else
+							{
+								cubes.Push(cube);
+
+							}
+						}
+						else
+						{
+							cubes.Push(cube);
+						}
+					}
+				}
+			}
+			Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
+
+
+			return ret;
+
+			int Power(int x, int y)
+			{
+				int ret = 1;
+				for (int i = 0; i < y; i++)
+				{
+					ret *= x;
+				}
+				return ret;
+			}
+		}
+		public static HashSet<CubeIndex> GetRandomCubes(int moveCount, int count, Random rnd)
+		{
+			HashSet<CubeIndex> ret = new HashSet<CubeIndex>(count);
+
+			List<CubeMove> list = new List<CubeMove>();
+			while(ret.Count < count)
+			{
+				Cube c = new Cube();
+				for(int j = 0; j < moveCount; j++)
+				{
+					c.AddPossibleMoves(list);
+
+					c.MakeMove(list[rnd.Next(list.Count)]);
+				}
+
+				ret.Add(new CubeIndex(c));
+			}
+
+			return ret;
+
+		}
+		public static HashSet<CubeIndex> GetSolvedCubeIndicesHS(int maxDepth)
+		{
+
+			HashSet<CubeIndex> ret = new HashSet<CubeIndex>();
 			Stack<CubeMove> currentMoves = new Stack<CubeMove>();
 
 			//Avoid GC Pressure
 			List<CubeMove>[] moveBuffer = new List<CubeMove>[20];
 			for (int i = 0; i < moveBuffer.Length; i++)
 				moveBuffer[i] = new List<CubeMove>(18);
-			int depth = 0;
 
-			Solve(new Cube());
+			Cube[] cubeBuffer = new Cube[20];
+			for (int i = 0; i < cubeBuffer.Length; i++)
+				cubeBuffer[i] = new Cube();
+
+
+			long bytes = GC.GetTotalMemory(true);
+
+			Solve(0);
+
+			Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
 
 			return ret;
 
-			void Solve(Cube cube)
+			void Solve(int depth)
 			{
-				ret.Add(cube);
+				Cube cube = cubeBuffer[depth];
+				ret.Add(new CubeIndex(cube));
 
 				if (depth < maxDepth)
 				{
 					List<CubeMove> list = moveBuffer[depth];
 					list.Clear();
 					cube.AddPossibleMoves(list);
+					Cube next = cubeBuffer[depth + 1];
 
 					foreach (CubeMove move in list)
 					{
-						depth++;
-						currentMoves.Push(move);
-						Solve(new Cube(cube, move));
-						currentMoves.Pop();
-						depth--;
+						next.CopyValuesFrom(cube);
+						next.MakeMove(move);
+						//depth++;
+						//currentMoves.Push(move);
+						
+						Solve(depth + 1);
+						//currentMoves.Pop();
+						//depth--;
+					}
+				}
+			}
+		}
+		public static RadixTreeDictionary GetSolvedCubeIndicesRTD(int maxDepth)
+		{
+
+			RadixTreeDictionary ret = new RadixTreeDictionary();
+			Stack<CubeMove> currentMoves = new Stack<CubeMove>();
+
+			//Avoid GC Pressure
+			List<CubeMove>[] moveBuffer = new List<CubeMove>[20];
+			for (int i = 0; i < moveBuffer.Length; i++)
+				moveBuffer[i] = new List<CubeMove>(18);
+
+			Cube[] cubeBuffer = new Cube[20];
+			for (int i = 0; i < cubeBuffer.Length; i++)
+				cubeBuffer[i] = new Cube();
+
+
+			long bytes = GC.GetTotalMemory(true);
+
+			Solve(0);
+
+			Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
+
+			return ret;
+
+			void Solve(int depth)
+			{
+				Cube cube = cubeBuffer[depth];
+				ret.Add(new CubeIndex(cube));
+
+				if (depth < maxDepth)
+				{
+					List<CubeMove> list = moveBuffer[depth];
+					list.Clear();
+					cube.AddPossibleMoves(list);
+					Cube next = cubeBuffer[depth + 1];
+
+					foreach (CubeMove move in list)
+					{
+						next.CopyValuesFrom(cube);
+						next.MakeMove(move);
+						//depth++;
+						//currentMoves.Push(move);
+
+						Solve(depth + 1);
+						//currentMoves.Pop();
+						//depth--;
+					}
+				}
+			}
+		}
+		public static RadixTreeArray GetSolvedCubeIndicesRTA(int maxDepth)
+		{
+
+			RadixTreeArray ret = new RadixTreeArray();
+			Stack<CubeMove> currentMoves = new Stack<CubeMove>();
+
+			//Avoid GC Pressure
+			List<CubeMove>[] moveBuffer = new List<CubeMove>[20];
+			for (int i = 0; i < moveBuffer.Length; i++)
+				moveBuffer[i] = new List<CubeMove>(18);
+
+			Cube[] cubeBuffer = new Cube[20];
+			for (int i = 0; i < cubeBuffer.Length; i++)
+				cubeBuffer[i] = new Cube();
+
+
+			long bytes = GC.GetTotalMemory(true);
+
+			Solve(0);
+
+			Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
+
+			return ret;
+
+			void Solve(int depth)
+			{
+				Cube cube = cubeBuffer[depth];
+				ret.Add(new CubeIndex(cube));
+
+				if (depth < maxDepth)
+				{
+					List<CubeMove> list = moveBuffer[depth];
+					list.Clear();
+					cube.AddPossibleMoves(list);
+					Cube next = cubeBuffer[depth + 1];
+
+					foreach (CubeMove move in list)
+					{
+						next.CopyValuesFrom(cube);
+						next.MakeMove(move);
+						//depth++;
+						//currentMoves.Push(move);
+
+						Solve(depth + 1);
+						//currentMoves.Pop();
+						//depth--;
 					}
 				}
 			}

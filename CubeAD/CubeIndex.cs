@@ -49,6 +49,24 @@ namespace CubeAD
 			}
 		}
 
+		public byte this[int index]
+		{
+			get
+			{
+				if (index >= 10) Console.WriteLine("Alarm");
+
+				if (index< 4)
+					return (byte) (EdgePermutation >> (index* 8));
+
+				if (index< 6)
+					return (byte) (CornerPermutation >> ((index - 4) * 8));
+				
+				if(index< 8)
+					return (byte) (EdgeOrientation >> ((index - 6) * 8));
+
+				return (byte) (CornerOrientation >> ((index - 8) * 8));
+			}
+		}
 		public BigInteger Index
 		{
 			get

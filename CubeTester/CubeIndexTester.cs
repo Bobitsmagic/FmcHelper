@@ -1,6 +1,5 @@
 ﻿using CubeAD;
 using NUnit.Framework;
-using System;
 
 namespace CubeTester
 {
@@ -95,8 +94,8 @@ namespace CubeTester
 			c.ApplyMoveSequenz(new MoveSequenz("R U R' U R U' R' U R U2 R'"));
 			index = new CubeIndex(c);
 
-			int val =  (Power(3, 7 - 2) + Power(3, 7 - 3) + Power(3, 7 - 6) + Power(3, 7 - 7));
-			
+			int val = (Power(3, 7 - 2) + Power(3, 7 - 3) + Power(3, 7 - 6) + Power(3, 7 - 7));
+
 			Assert.AreEqual(val, index.CornerOrientation);
 
 			c.ApplyMoveSequenz(new MoveSequenz("R U R' U R U' R' U R U2 R'"));
@@ -107,7 +106,7 @@ namespace CubeTester
 			int Power(int x, int y)
 			{
 				int ret = 1;
-				for(int i = 0; i < y; i++)
+				for (int i = 0; i < y; i++)
 				{
 					ret *= x;
 				}

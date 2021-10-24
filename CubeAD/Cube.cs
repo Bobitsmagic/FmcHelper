@@ -132,7 +132,7 @@ namespace CubeAD
 		{
 			Blocked = c.Blocked;
 
-			for(int i = 0; i < 6; i++)
+			for (int i = 0; i < 6; i++)
 			{
 				Sides[i] = c.Sides[i];
 			}
@@ -784,11 +784,11 @@ namespace CubeAD
 
 			for (int i = 0; i < maxDepth; i++)
 			{
-				HashSet<Cube> current = bfs[i], next = bfs[i +1];
-				foreach(Cube c in current)
+				HashSet<Cube> current = bfs[i], next = bfs[i + 1];
+				foreach (Cube c in current)
 				{
 					list.Clear();
-					
+
 					c.AddPossibleMoves(list);
 
 					foreach (CubeMove move in list)
@@ -802,7 +802,7 @@ namespace CubeAD
 							cube.CopyValuesFrom(c);
 							c.MakeMove(move);
 						}
-						
+
 						if (!current.Contains(cube))
 						{
 							if (next.Add(cube))
@@ -842,10 +842,10 @@ namespace CubeAD
 			HashSet<CubeIndex> ret = new HashSet<CubeIndex>(count);
 
 			List<CubeMove> list = new List<CubeMove>();
-			while(ret.Count < count)
+			while (ret.Count < count)
 			{
 				Cube c = new Cube();
-				for(int j = 0; j < moveCount; j++)
+				for (int j = 0; j < moveCount; j++)
 				{
 					c.AddPossibleMoves(list);
 
@@ -900,7 +900,7 @@ namespace CubeAD
 						next.MakeMove(move);
 						//depth++;
 						//currentMoves.Push(move);
-						
+
 						Solve(depth + 1);
 						//currentMoves.Pop();
 						//depth--;

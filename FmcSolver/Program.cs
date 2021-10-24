@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace FmcSolver
@@ -41,7 +40,7 @@ namespace FmcSolver
 			MoveSequenz solution = new MoveSequenz("FP U2 DP BP DP R D R2 D RP D2 L2 UP R");
 
 
-			foreach(CubeMove m in solution.Moves)
+			foreach (CubeMove m in solution.Moves)
 			{
 				Console.WriteLine(c.GetValue().ToString("00 00 00"));
 
@@ -67,7 +66,7 @@ namespace FmcSolver
 				Console.WriteLine("Depth: " + depth);
 
 				Console.WriteLine("Count: " + CloseList.Count);
-				foreach(Cube c in CloseList)
+				foreach (Cube c in CloseList)
 				{
 					c.AddPossibleMoves(moves);
 
@@ -136,7 +135,7 @@ namespace FmcSolver
 			{
 				counter++;
 
-				if(cube.CountOrientedEgdes() == 12)
+				if (cube.CountOrientedEgdes() == 12)
 				{
 					if (!FoundSolution)
 					{
@@ -145,7 +144,7 @@ namespace FmcSolver
 						solution.Clear();
 						solution.AddRange(currentMoves);
 					}
-					
+
 					solutionCounter++;
 				}
 
@@ -168,7 +167,7 @@ namespace FmcSolver
 			solution.Reverse();
 			//Console.WriteLine(string.Join(" ", solution));
 			//Console.WriteLine("Time: " + (end - start).ToString("000 000"));
-			if(solution.Count > 5)
+			if (solution.Count > 5)
 				Console.WriteLine("Solutions found: " + solutionCounter + "\tLength: " + solution.Count);
 			//Console.WriteLine("Positions searched: " + counter.ToString("000 000 000"));
 			//best.PrintSideView();
@@ -186,7 +185,7 @@ namespace FmcSolver
 			int bestVal = 0;
 			Cube best = null;
 			List<CubeMove>[] moveBuffer = new List<CubeMove>[MAX_DEPTH + 1];
-			for (int i = 0; i < moveBuffer.Length; i++) 
+			for (int i = 0; i < moveBuffer.Length; i++)
 				moveBuffer[i] = new List<CubeMove>(18);
 
 
@@ -196,7 +195,7 @@ namespace FmcSolver
 			long counter = 0;
 			long start = Environment.TickCount64;
 			int depthStop;
-			for(int i = 1; i <= MAX_DEPTH; i++)
+			for (int i = 1; i <= MAX_DEPTH; i++)
 			{
 				depthStop = i;
 				Console.WriteLine(depthStop);
@@ -237,7 +236,7 @@ namespace FmcSolver
 			}
 
 			solution.Reverse();
-			Console.WriteLine(string.Join(" " , solution));
+			Console.WriteLine(string.Join(" ", solution));
 			Console.WriteLine("Time: " + (end - start).ToString("000 000"));
 			Console.WriteLine("Positions searched: " + counter.ToString("000 000 000 000"));
 			Console.WriteLine("Bestval: " + bestVal);

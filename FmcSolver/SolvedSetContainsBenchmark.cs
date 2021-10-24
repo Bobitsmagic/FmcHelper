@@ -1,10 +1,8 @@
-﻿using System;
+﻿using BenchmarkDotNet.Attributes;
+using CubeAD;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using CubeAD;
-using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Running;
 
 
 namespace FmcSolver
@@ -30,14 +28,14 @@ namespace FmcSolver
 			RadixTreeArray = new RadixTreeArray();
 			RadixTreeIt = new RadixTreeIterative();
 
-			int count = 0; 
+			int count = 0;
 			foreach (CubeIndex index in HashSet)
 			{
 				//RadixTreeArray.Add(index);
 				//RadixTreeDic.Add(index);
 				RadixTreeIt.Add(index);
 
-				if(count++ % 10000 == 0)
+				if (count++ % 10000 == 0)
 				{
 					Console.WriteLine(count + " / " + HashSet.Count);
 				}
@@ -45,13 +43,13 @@ namespace FmcSolver
 			Console.WriteLine("Created dic and array");
 			Console.WriteLine(HashSet.Count + " " + RadixTreeArray.Count + " " + RadixTreeDic.Count + " " + RadixTreeIt.Count);
 
-			for(int i = 0; i < Cubes.Length / 10; i++)
+			for (int i = 0; i < Cubes.Length / 10; i++)
 			{
 				Cubes[i] = HashSet.ElementAt(rnd.Next(HashSet.Count));
 			}
 
 			count = Cubes.Length / 10;
-			foreach(CubeIndex index in Cube.GetRandomCubes(7, 9000, rnd))
+			foreach (CubeIndex index in Cube.GetRandomCubes(7, 9000, rnd))
 			{
 				Cubes[count++] = index;
 
@@ -63,10 +61,10 @@ namespace FmcSolver
 		[Benchmark]
 		public void BenchHashSet()
 		{
-			for(int i = 0; i < Cubes.Length; i++)
+			for (int i = 0; i < Cubes.Length; i++)
 			{
 				HashSet.Contains(Cubes[i]);
-			}	
+			}
 		}
 		//[Benchmark]
 		//public void BenchRadixTreeArray()

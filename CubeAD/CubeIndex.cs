@@ -9,7 +9,7 @@ namespace CubeAD
 	{
 		public const uint MAX_EDGE_PERMUTATION = 479001600; //12!
 		public const ushort MAX_CORNER_PERMUTATION = 40320; //8!
-		public const ushort MAX_EDGE_ORIENTATION = 4096;	//2^12
+		public const ushort MAX_EDGE_ORIENTATION = 4096;    //2^12
 		public const ushort MAX_CORNER_ORIENTATION = 6561;  //3^8
 
 		public static int[,] EdgeIndices = new int[6, 6];
@@ -55,16 +55,16 @@ namespace CubeAD
 			{
 				if (index >= 10) Console.WriteLine("Alarm");
 
-				if (index< 4)
-					return (byte) (EdgePermutation >> (index* 8));
+				if (index < 4)
+					return (byte)(EdgePermutation >> (index * 8));
 
-				if (index< 6)
-					return (byte) (CornerPermutation >> ((index - 4) * 8));
-				
-				if(index< 8)
-					return (byte) (EdgeOrientation >> ((index - 6) * 8));
+				if (index < 6)
+					return (byte)(CornerPermutation >> ((index - 4) * 8));
 
-				return (byte) (CornerOrientation >> ((index - 8) * 8));
+				if (index < 8)
+					return (byte)(EdgeOrientation >> ((index - 6) * 8));
+
+				return (byte)(CornerOrientation >> ((index - 8) * 8));
 			}
 		}
 		public BigInteger Index
@@ -83,7 +83,7 @@ namespace CubeAD
 			}
 		}
 
-		public uint EdgePermutation; 
+		public uint EdgePermutation;
 		public ushort CornerPermutation; //8! = 40320    /2?
 		public ushort EdgeOrientation; //2^12 = 4096         /2?
 		public ushort CornerOrientation; //3^8 = 6561    /3?

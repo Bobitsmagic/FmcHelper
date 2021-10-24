@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CubeAD
+﻿namespace CubeAD
 {
 	public class RadixTreeArray
 	{
@@ -23,7 +19,7 @@ namespace CubeAD
 		{
 			Depth = depth;
 
-			if(Depth < MAX_DEPTH)
+			if (Depth < MAX_DEPTH)
 			{
 				SubTree = new RadixTreeArray[BRANCHING_FACTOR];
 
@@ -44,7 +40,7 @@ namespace CubeAD
 				else
 					return SubTree[index].Add(value);
 			}
-			else 
+			else
 				return false;
 		}
 
@@ -57,7 +53,7 @@ namespace CubeAD
 			int sum = 0;
 			for (int i = 0; i < SubTree.Length; i++)
 			{
-				if(SubTree[i] != null)
+				if (SubTree[i] != null)
 				{
 					sum += SubTree[i].GetCount();
 				}
@@ -82,13 +78,13 @@ namespace CubeAD
 		{
 			long sum = 8;
 
-			if(SubTree != null)
+			if (SubTree != null)
 			{
 				sum += SubTree.Length * 4;
 
-				for(int i = 0; i < SubTree.Length; i++)
+				for (int i = 0; i < SubTree.Length; i++)
 				{
-					if(SubTree[i] != null)
+					if (SubTree[i] != null)
 					{
 						sum += SubTree[i].Size();
 					}

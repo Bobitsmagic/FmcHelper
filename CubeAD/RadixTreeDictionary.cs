@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace CubeAD
 {
@@ -41,7 +39,7 @@ namespace CubeAD
 					SubTree.Add(index, new RadixTreeDictionary(Depth + 1, value));
 					return true;
 				}
-					
+
 			}
 			else
 				return false;
@@ -54,7 +52,7 @@ namespace CubeAD
 				return 1;
 
 			int sum = 0;
-			foreach(RadixTreeDictionary tree in SubTree.Values)
+			foreach (RadixTreeDictionary tree in SubTree.Values)
 				sum += tree.GetCount();
 
 			return sum;

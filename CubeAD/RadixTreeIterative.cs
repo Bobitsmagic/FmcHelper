@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CubeAD
+﻿namespace CubeAD
 {
 	public class RadixTreeIterative
 	{
@@ -24,11 +20,11 @@ namespace CubeAD
 		{
 			int[] currentArray = Data[0];
 			byte index;
-			for(int d = 0; d < MAX_DEPTH - 1; d++)
+			for (int d = 0; d < MAX_DEPTH - 1; d++)
 			{
 				index = value[d];
 
-				if(currentArray[index] == 0)
+				if (currentArray[index] == 0)
 				{
 					Data[NextFree] = new int[BRANCHING_FACTOR];
 					currentArray[index] = NextFree;
@@ -72,10 +68,10 @@ namespace CubeAD
 			int RecCount(int[] array, int depth)
 			{
 				int sum = 0;
-				if(depth < MAX_DEPTH - 1)
+				if (depth < MAX_DEPTH - 1)
 				{
-					for(int i = 0; i < BRANCHING_FACTOR; i++)
-						if(array[i] != 0)
+					for (int i = 0; i < BRANCHING_FACTOR; i++)
+						if (array[i] != 0)
 							sum += RecCount(Data[array[i]], depth + 1);
 				}
 				else

@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NISSHelper
@@ -82,7 +78,9 @@ namespace NISSHelper
 			try
 			{
 				solution = TBSolution.Text.Split(new char[] { ' ', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(x => FromString(x)).ToList();
-			} catch {
+			}
+			catch
+			{
 				solution = new List<Move>();
 			}
 

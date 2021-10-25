@@ -69,5 +69,10 @@ namespace CubeAD
 			else
 				return true;
 		}
+
+		public override string ToString()
+		{
+			return "Count: " + Count;
+		}
 	}
 }

@@ -177,14 +177,19 @@ namespace CubeAD
 			return (ushort)ret;
 		}
 
-		public static void RadixSortCubeIndices(CubeIndex[] data)
+
+		public static void RadixSortCubeIndices(CubeIndex[] data, CubeIndex[] CubeBuffer)
 		{
 			const int BIT_COUNT = 8;
 			const int RADIX = 1 << BIT_COUNT;
 
 			int[] indices = new int[RADIX];
 
-			CubeIndex[] buffer = new CubeIndex[data.Length];
+			if (CubeBuffer.Length != data.Length)
+			{
+				CubeBuffer = new CubeIndex[data.Length];
+				Console.WriteLine("Reallocated");
+			}
 
 			for(int i = 0; i < 10; i++)
 			{
@@ -196,10 +201,10 @@ namespace CubeAD
 				for (int j = 1; j < RADIX; j++)
 					indices[j] += indices[j - 1];
 				for(int j = data.Length - 1; j >= 0; j--)
-					buffer[--indices[data[j][i]]] = data[j];
+					CubeBuffer[--indices[data[j][i]]] = data[j];
 
-				CubeIndex[] swap = buffer;
-				buffer = data;
+				CubeIndex[] swap = CubeBuffer;
+				CubeBuffer = data;
 				data = swap;
 			}
 		}
@@ -280,6 +285,38 @@ namespace CubeAD
 			}
 
 			return index;
+		}
+
+
+		//Operator
+		public static bool operator ==(CubeIndex a, CubeIndex b)
+		{
+			return a.EdgePermutation == b.EdgePermutation &&
+				a.EdgeOrientation == b.EdgeOrientation &&
+				a.CornerPermutation == b.CornerPermutation &&
+				a.CornerOrientation == b.CornerOrientation;
+		}
+
+		public static bool operator !=(CubeIndex a, CubeIndex b)
+		{
+			return !(a == b);
+		}
+
+		public static bool operator <(CubeIndex a, CubeIndex b)
+		{
+			if (a.EdgePermutation != b.EdgePermutation) return a.EdgePermutation < b.EdgePermutation;
+			if (a.CornerPermutation != b.CornerPermutation) return a.CornerPermutation < b.CornerPermutation;
+			if (a.EdgeOrientation != b.EdgeOrientation) return a.EdgeOrientation < b.EdgeOrientation;
+
+			return a.CornerOrientation < b.CornerOrientation;
+		}
+		public static bool operator >(CubeIndex a, CubeIndex b)
+		{
+			if (a.EdgePermutation != b.EdgePermutation) return a.EdgePermutation > b.EdgePermutation;
+			if (a.CornerPermutation != b.CornerPermutation) return a.CornerPermutation > b.CornerPermutation;
+			if (a.EdgeOrientation != b.EdgeOrientation) return a.EdgeOrientation > b.EdgeOrientation;
+
+			return a.CornerOrientation > b.CornerOrientation;
 		}
 
 		public override string ToString()

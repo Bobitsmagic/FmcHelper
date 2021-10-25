@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace FmcSolver
+namespace CubeBenchmarks
 {
 	public class SolvedSetContainsBenchmark
 	{
-		const int DEPTH = 5;
+		const int DEPTH = 6;
 		static Random rnd = new Random(0);
 
 		static CubeIndex[] Cubes = new CubeIndex[10000];
@@ -17,6 +17,7 @@ namespace FmcSolver
 		static RadixTreeArray RadixTreeArray;
 		static RadixTreeDictionary RadixTreeDic;
 		static RadixTreeIterative RadixTreeIt;
+		static SortedCubeIndices SortCubeInd;
 
 		static SolvedSetContainsBenchmark()
 		{
@@ -27,13 +28,15 @@ namespace FmcSolver
 			RadixTreeDic = new RadixTreeDictionary();
 			RadixTreeArray = new RadixTreeArray();
 			RadixTreeIt = new RadixTreeIterative();
+			SortCubeInd = new SortedCubeIndices();
 
 			int count = 0;
 			foreach (CubeIndex index in HashSet)
 			{
 				//RadixTreeArray.Add(index);
 				//RadixTreeDic.Add(index);
-				RadixTreeIt.Add(index);
+				//RadixTreeIt.Add(index);
+				SortCubeInd.Add(index);
 
 				if (count++ % 10000 == 0)
 				{
@@ -41,7 +44,9 @@ namespace FmcSolver
 				}
 			}
 			Console.WriteLine("Created dic and array");
-			Console.WriteLine(HashSet.Count + " " + RadixTreeArray.Count + " " + RadixTreeDic.Count + " " + RadixTreeIt.Count);
+			SortCubeInd.RemoveDuplicates();
+			Console.WriteLine(HashSet.Count + " " + RadixTreeArray.Count + " " + RadixTreeDic.Count + " " + RadixTreeIt.Count + " " + SortCubeInd.Count);
+
 
 			for (int i = 0; i < Cubes.Length / 10; i++)
 			{
@@ -49,13 +54,13 @@ namespace FmcSolver
 			}
 
 			count = Cubes.Length / 10;
-			foreach (CubeIndex index in Cube.GetRandomCubes(7, 9000, rnd))
+			foreach (CubeIndex index in Cube.GetRandomCubesHS(7, 9000, rnd))
 			{
 				Cubes[count++] = index;
 
 			}
 
-			Console.WriteLine("Alarm");
+			Console.WriteLine("Finished intializing Sets");
 		}
 
 		[Benchmark]
@@ -82,15 +87,23 @@ namespace FmcSolver
 		//		RadixTreeDic.Contains(Cubes[i]);
 		//	}
 		//}
+		//[Benchmark]
+		//public void BenchRadixTreeIterative()
+		//{
+		//	for (int i = 0; i < Cubes.Length; i++)
+		//	{
+		//		RadixTreeIt.Contains(Cubes[i]);
+		//	}
+		//}
+
 		[Benchmark]
-		public void BenchRadixTreeIterative()
+		public void BenchSortedCubeIndices()
 		{
 			for (int i = 0; i < Cubes.Length; i++)
 			{
-				RadixTreeIt.Contains(Cubes[i]);
+				SortCubeInd.Contains(Cubes[i]);
 			}
 		}
-
 	}
 }
 

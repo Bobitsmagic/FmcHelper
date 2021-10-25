@@ -773,7 +773,7 @@ namespace CubeAD
 			return counter;
 		}
 
-		public static HashSet<CubeIndex> GetRandomCubes(int moveCount, int count, Random rnd)
+		public static HashSet<CubeIndex> GetRandomCubesHS(int moveCount, int count, Random rnd)
 		{
 			HashSet<CubeIndex> ret = new HashSet<CubeIndex>(count);
 
@@ -790,9 +790,30 @@ namespace CubeAD
 
 				ret.Add(new CubeIndex(c));
 			}
+			Console.WriteLine("Found random cubes");
 
 			return ret;
+		}
+		public static List<CubeIndex> GetRandomCubesList(int moveCount, int count, Random rnd)
+		{
+			List<CubeIndex> ret = new List<CubeIndex>(count);
 
+			List<CubeMove> list = new List<CubeMove>();
+			while (ret.Count < count)
+			{
+				Cube c = new Cube();
+				for (int j = 0; j < moveCount; j++)
+				{
+					c.AddPossibleMoves(list);
+
+					c.MakeMove(list[rnd.Next(list.Count)]);
+				}
+
+				ret.Add(new CubeIndex(c));
+			}
+			Console.WriteLine("Found random cubes");
+
+			return ret;
 		}
 		public static HashSet<CubeIndex> GetSolvedCubeIndicesHS(int maxDepth)
 		{
@@ -814,7 +835,7 @@ namespace CubeAD
 			Stopwatch sw = new Stopwatch();
 			sw.Start();
 			Solve(0);
-			Console.WriteLine("CC: " + cubeCount);
+			//Console.WriteLine("CC: " + cubeCount);
 			//Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
 
 			return ret;
@@ -843,9 +864,9 @@ namespace CubeAD
 						if (depth == 0)
 						{
 							Console.WriteLine(move + " done");
-							Console.WriteLine("CubeCount: " + ret.Count.ToString("0 000 000 000"));
-							Console.WriteLine("Memeory: " + GC.GetTotalMemory(true).ToString("000 000 000 000"));
-							Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000 000"));
+							//Console.WriteLine("CubeCount: " + ret.Count.ToString("0 000 000 000"));
+							//Console.WriteLine("Memeory: " + GC.GetTotalMemory(true).ToString("000 000 000 000"));
+							//Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000 000"));
 						}
 
 						//currentMoves.Pop();

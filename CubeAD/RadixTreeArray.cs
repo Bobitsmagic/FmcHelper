@@ -93,5 +93,10 @@
 
 			return sum;
 		}
+
+		public override string ToString()
+		{
+			return "Count: " + Count;
+		}
 	}
 }

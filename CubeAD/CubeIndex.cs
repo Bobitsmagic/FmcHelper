@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 namespace CubeAD
 {
 	//Compressed representation of a cube
-	public struct CubeIndex
+	public struct CubeIndex : IComparable<CubeIndex>
 	{
 		public const uint MAX_EDGE_PERMUTATION = 479001600; //12!
 		public const ushort MAX_CORNER_PERMUTATION = 40320; //8!
@@ -53,18 +54,18 @@ namespace CubeAD
 		{
 			get
 			{
-				if (index >= 10) Console.WriteLine("Alarm");
+				if (index >= 10) Console.WriteLine("CubeIndex[i] out of range");
+
+				if (index < 2)
+					return (byte)(CornerOrientation >> (index * 8));
 
 				if (index < 4)
-					return (byte)(EdgePermutation >> (index * 8));
+					return (byte)(EdgeOrientation >> ((index - 2) * 8));
 
 				if (index < 6)
 					return (byte)(CornerPermutation >> ((index - 4) * 8));
 
-				if (index < 8)
-					return (byte)(EdgeOrientation >> ((index - 6) * 8));
-
-				return (byte)(CornerOrientation >> ((index - 8) * 8));
+				return (byte)(EdgePermutation >> ((index - 6) * 8));
 			}
 		}
 		public BigInteger Index
@@ -84,9 +85,9 @@ namespace CubeAD
 		}
 
 		public uint EdgePermutation;
-		public ushort CornerPermutation; //8! = 40320    /2?
-		public ushort EdgeOrientation; //2^12 = 4096         /2?
-		public ushort CornerOrientation; //3^8 = 6561    /3?
+		public ushort CornerPermutation;
+		public ushort EdgeOrientation;
+		public ushort CornerOrientation;
 
 		public CubeIndex(uint edgePermutation, ushort cornerPermutation, ushort edgeOrientation, ushort cornerOrientation)
 		{
@@ -109,7 +110,6 @@ namespace CubeAD
 			EdgeOrientation = FindEdgeOrientationIndex(c);
 			CornerOrientation = FindCornerOrientationIndex(c);
 		}
-
 
 		public static uint FindEdgePermutationIndex(Cube c)
 		{
@@ -177,6 +177,32 @@ namespace CubeAD
 			return (ushort)ret;
 		}
 
+		public static void RadixSortCubeIndices(CubeIndex[] data)
+		{
+			const int BIT_COUNT = 8;
+			const int RADIX = 1 << BIT_COUNT;
+
+			int[] indices = new int[RADIX];
+
+			CubeIndex[] buffer = new CubeIndex[data.Length];
+
+			for(int i = 0; i < 10; i++)
+			{
+				for(int j = 0; j < RADIX; j++)
+					indices[j] = 0;
+				for(int j = 0; j < data.Length; j++)
+					indices[data[j][i]]++;
+
+				for (int j = 1; j < RADIX; j++)
+					indices[j] += indices[j - 1];
+				for(int j = data.Length - 1; j >= 0; j--)
+					buffer[--indices[data[j][i]]] = data[j];
+
+				CubeIndex[] swap = buffer;
+				buffer = data;
+				data = swap;
+			}
+		}
 
 		public static int Factorial(int n)
 		{
@@ -258,7 +284,7 @@ namespace CubeAD
 
 		public override string ToString()
 		{
-			return base.ToString();
+			return Index.ToString("000 000 000 000 000 000 000");
 		}
 
 		public override bool Equals(object obj)
@@ -273,6 +299,15 @@ namespace CubeAD
 		public override int GetHashCode()
 		{
 			return HashCode.Combine(EdgePermutation, CornerPermutation, EdgeOrientation, CornerOrientation);
+		}
+
+		public int CompareTo(CubeIndex other)
+		{
+			if (EdgePermutation != other.EdgePermutation) return EdgePermutation.CompareTo(other.EdgePermutation);
+			if (CornerPermutation != other.CornerPermutation) return CornerPermutation.CompareTo(other.CornerPermutation);
+			if (EdgeOrientation != other.EdgeOrientation) return EdgeOrientation.CompareTo(other.EdgeOrientation);
+
+			return CornerOrientation.CompareTo(other.CornerOrientation);
 		}
 	}
 }

@@ -1,5 +1,8 @@
 ﻿using CubeAD;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CubeTester
 {
@@ -112,6 +115,26 @@ namespace CubeTester
 				}
 				return ret;
 			}
+		}
+
+		[Test]
+		public void CubeIndexSorting()
+		{
+			HashSet<CubeIndex> indices = Cube.GetRandomCubes(10, 1000, new System.Random(0));
+
+			CubeIndex[] array1 = indices.ToArray();
+			CubeIndex[] array2 = array1.ToArray();
+
+			Array.Sort(array1);
+
+			for(int i = 0; i < array1.Length - 1; i++)
+			{
+				Assert.IsTrue(array1[i].Index < array1[i + 1].Index);
+			}
+
+			CubeIndex.RadixSortCubeIndices(array2);
+
+			Assert.IsTrue(array1.SequenceEqual(array2));
 		}
 	}
 }

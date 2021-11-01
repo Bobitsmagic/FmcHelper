@@ -334,5 +334,11 @@ namespace CubeTester
 				Assert.AreEqual(cube.CountOrientedEgdes(), counter);
 			}
 		}
+
+		[Test]
+		public void GetSolvedCubeIndice()
+		{
+			
+		}
 	}
 }

@@ -13,7 +13,7 @@ namespace CubeBenchmarks
 		const int COUNT = 100_000_000;
 		Random Rnd = new Random(0);
 
-		CubeIndex[] Indices = Cube.GetRandomCubesHS(15, COUNT, new Random(0)).ToArray();
+		CubeIndex[] Indices = Cube.GetRandomCubesDistinct(15, COUNT, new Random(0)).ToArray();
 		CubeIndex[] Buffer = new CubeIndex[COUNT];
 
 		[IterationSetup]

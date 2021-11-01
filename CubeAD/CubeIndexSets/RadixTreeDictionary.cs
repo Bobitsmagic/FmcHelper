@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CubeAD
+namespace CubeAD.CubeIndexSets
 {
 	public class RadixTreeDictionary
 	{
@@ -45,6 +45,15 @@ namespace CubeAD
 				return false;
 		}
 
+		public void Clear()
+		{
+			foreach(var tree in SubTree.Values)
+			{
+				tree.Clear();
+			}
+
+			SubTree.Clear();
+		}
 
 		private int GetCount()
 		{

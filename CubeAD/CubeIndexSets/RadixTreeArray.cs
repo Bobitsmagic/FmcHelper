@@ -1,4 +1,4 @@
-﻿namespace CubeAD
+﻿namespace CubeAD.CubeIndexSets
 {
 	public class RadixTreeArray
 	{
@@ -43,7 +43,14 @@
 			else
 				return false;
 		}
+		public void Clear()
+		{
+			for (int i = 0; i < SubTree.Length; i++)
+			{
 
+				SubTree[i] = null;
+			}
+		}
 
 		private int GetCount()
 		{

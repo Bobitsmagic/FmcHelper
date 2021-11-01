@@ -1,10 +1,14 @@
-﻿namespace CubeAD
+﻿using System.Buffers;
+
+namespace CubeAD.CubeIndexSets
 {
 	public class RadixTreeIterative
 	{
 		const int MAX_DEPTH = 10;
 		const int BRANCHING_FACTOR = 256;
 		const int ARRAY_COUNT = 1 << 25;
+
+		static ArrayPool<int> ArrayPool = ArrayPool<int>.Create();
 
 		public int Count => GetCount();
 
@@ -13,7 +17,7 @@
 
 		public RadixTreeIterative()
 		{
-			Data[0] = new int[BRANCHING_FACTOR];
+			Data[0] = ArrayPool.Rent(BRANCHING_FACTOR);
 		}
 
 		public bool Add(CubeIndex value)
@@ -26,7 +30,8 @@
 
 				if (currentArray[index] == 0)
 				{
-					Data[NextFree] = new int[BRANCHING_FACTOR];
+					Data[NextFree] = ArrayPool.Rent(BRANCHING_FACTOR);
+
 					currentArray[index] = NextFree;
 					currentArray = Data[NextFree++];
 				}
@@ -43,6 +48,21 @@
 			}
 			else
 				return false;
+		}
+
+		public void Clear()
+		{
+			for(int i = 0; i < Data.Length; i++)
+			{
+				if(Data[i] != null)
+				{
+					ArrayPool.Return(Data[i], true);
+					Data[i] = null;
+				}
+			}
+
+			NextFree = 1;
+			Data[0] = ArrayPool.Rent(BRANCHING_FACTOR);
 		}
 
 		public bool Contains(CubeIndex value)

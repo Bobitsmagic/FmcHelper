@@ -287,6 +287,11 @@ namespace CubeAD
 			return (CubeColor)Sides[(int)side1][AdjEdges[(int)side1, (int)side2]];
 		}
 
+		public void SetEdgeColor(int side1, int side2, int color)
+		{
+			Sides[side1][AdjEdges[side1, side2]] = (uint)color;
+		}
+
 		public static int[,] AdjCorners =
 		{
 			//Left						removed cuz redundancy
@@ -310,6 +315,14 @@ namespace CubeAD
 			int higher = Math.Max(side2, side3);
 
 			return (CubeColor)Sides[side1][AdjCorners[side1, lower * 2 + (higher & 1)]];
+		}
+
+		public void SetCornerColor(int side1, int side2, int side3, int color)
+		{
+			int lower = Math.Min(side2, side3);
+			int higher = Math.Max(side2, side3);
+
+			Sides[side1][AdjCorners[side1, lower * 2 + (higher & 1)]] = (uint)color;
 		}
 
 		public bool HasSymmetry(SymmetryElement se)
@@ -709,15 +722,17 @@ namespace CubeAD
 					return c1 / 2 == 2;
 			}
 		}
+
+
 		public int CornerOrientaion(int side1, int side2, int side3)
 		{
-			if ((int)GetCornerColor(side1, side2, side3) / 2 == 0)
-				return side1 / 2;
+			if (side1 / 2 == 0)
+				return (int)GetCornerColor(side1, side2, side3) / 2;
 
-			if ((int)GetCornerColor(side2, side1, side3) / 2 == 0)
-				return side2 / 2;
+			if (side2 / 2 == 0)
+				return (int)GetCornerColor(side2, side1, side3) / 2;
 
-			return side3 / 2;
+			return (int)GetCornerColor(side3, side1, side2) / 2;
 		}
 
 		public int CountOrientedEgdes()
@@ -773,7 +788,7 @@ namespace CubeAD
 			return counter;
 		}
 
-		public static HashSet<CubeIndex> GetRandomCubesHS(int moveCount, int count, Random rnd)
+		public static HashSet<CubeIndex> GetRandomCubesDistinct(int moveCount, int count, Random rnd)
 		{
 			HashSet<CubeIndex> ret = new HashSet<CubeIndex>(count);
 
@@ -794,7 +809,7 @@ namespace CubeAD
 
 			return ret;
 		}
-		public static List<CubeIndex> GetRandomCubesList(int moveCount, int count, Random rnd)
+		public static List<CubeIndex> GetRandomCubes(int moveCount, int count, Random rnd)
 		{
 			List<CubeIndex> ret = new List<CubeIndex>(count);
 
@@ -815,7 +830,70 @@ namespace CubeAD
 
 			return ret;
 		}
-		public static HashSet<CubeIndex> GetSolvedCubeIndicesHS(int maxDepth)
+		public static HashSet<Cube> GetSolvedCubesDFS(int maxDepth)
+		{
+			HashSet<Cube> ret = new HashSet<Cube>();
+
+			//Avoid GC Pressure
+			List<CubeMove>[] moveBuffer = new List<CubeMove>[20];
+			for (int i = 0; i < moveBuffer.Length; i++)
+				moveBuffer[i] = new List<CubeMove>(18);
+
+			Cube[] cubeBuffer = new Cube[20];
+			for (int i = 0; i < cubeBuffer.Length; i++)
+				cubeBuffer[i] = new Cube();
+
+			Stack<CubeMove> currentMoves = new Stack<CubeMove>(20);
+
+			long bytes = GC.GetTotalMemory(true);
+			long cubeCount = 0;
+
+			Stopwatch sw = new Stopwatch();
+			sw.Start();
+			Solve(0);
+			//Console.WriteLine("CC: " + cubeCount);
+			//Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
+
+			return ret;
+
+			void Solve(int depth)
+			{
+				Cube cube = cubeBuffer[depth];
+				ret.Add(new Cube(cube));
+
+				if (depth < maxDepth)
+				{
+					List<CubeMove> list = moveBuffer[depth];
+					list.Clear();
+					cube.AddPossibleMoves(list);
+					Cube next = cubeBuffer[depth + 1];
+
+					foreach (CubeMove move in list)
+					{
+						next.CopyValuesFrom(cube);
+						next.MakeMove(move);
+
+						//depth++;
+						currentMoves.Push(move);
+
+						Solve(depth + 1);
+						if (depth == 0)
+						{
+							//Console.WriteLine(move + " done");
+							//Console.WriteLine("CubeCount: " + ret.Count.ToString("0 000 000 000"));
+							//Console.WriteLine("Memeory: " + GC.GetTotalMemory(true).ToString("000 000 000 000"));
+							//Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000 000"));
+						}
+
+						currentMoves.Pop();
+						//depth--;
+					}
+
+					cubeCount += list.Count;
+				}
+			}
+		}
+		public static HashSet<CubeIndex> GetSolvedCubeIndicesDFS(int maxDepth)
 		{
 			HashSet<CubeIndex> ret = new HashSet<CubeIndex>();
 
@@ -863,7 +941,7 @@ namespace CubeAD
 						Solve(depth + 1);
 						if (depth == 0)
 						{
-							Console.WriteLine(move + " done");
+							//Console.WriteLine(move + " done");
 							//Console.WriteLine("CubeCount: " + ret.Count.ToString("0 000 000 000"));
 							//Console.WriteLine("Memeory: " + GC.GetTotalMemory(true).ToString("000 000 000 000"));
 							//Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000 000"));
@@ -919,7 +997,7 @@ namespace CubeAD
 				next.Clear();
 			}
 			//Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
-			Console.WriteLine("MakeMoveCount: " + cubeCount);
+			//Console.WriteLine("MakeMoveCount: " + cubeCount);
 
 			return ret;
 
@@ -934,7 +1012,64 @@ namespace CubeAD
 			}
 		}
 
+		public static HashSet<Cube> GetSolvedCubesBFSNaive(int maxDepth)
+		{
+			const int CAPACITY = 1_000_000;
+			HashSet<Cube> ret = new HashSet<Cube>(CAPACITY);
 
+			//Avoid GC Pressure
+			Cube cube = new Cube();
+			List<Cube> next = new List<Cube>();
+
+			ret.Add(new Cube(cube));
+			for (int i = 0; i < maxDepth; i++)
+			{
+				foreach (Cube c in ret)
+				{
+					for (int j = 0; j < 18; j++)
+					{
+						cube.CopyValuesFrom(c);
+						cube.MakeMove((CubeMove)j);
+
+						if (!ret.Contains(cube))
+						{
+							next.Add(new Cube(cube));
+						}
+					}
+				}
+
+				for (int j = 0; j < next.Count; j++)
+					ret.Add(next[j]);
+
+				next.Clear();
+			}
+			//Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
+			//Console.WriteLine("MakeMoveCount: " + cubeCount);
+
+			return ret;
+
+			int Power(int x, int y)
+			{
+				int ret = 1;
+				for (int i = 0; i < y; i++)
+				{
+					ret *= x;
+				}
+				return ret;
+			}
+		}
+
+		public static bool operator ==(Cube a, Cube b)
+		{
+			for (int i = 0; i < 6; i++)
+				if (a.Sides[i] != b.Sides[i]) return false;
+
+			return true;
+		}
+		public static bool operator !=(Cube a, Cube b)
+		{
+			return !(a == b);
+		}
 		public override bool Equals(object obj)
 		{
 			Cube c = (Cube)obj;

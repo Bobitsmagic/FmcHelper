@@ -1,9 +1,12 @@
 ﻿using BenchmarkDotNet.Running;
 using CubeAD;
+using CubeAD.CubeIndexSets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace FmcSolver
@@ -12,19 +15,93 @@ namespace FmcSolver
 	{
 		static void Main(string[] args)
 		{
-			var summary = BenchmarkRunner.Run<SolvedSetContainsBenchmark>();
+			//long sum = 0;
+			//for (int i = 0; i < 18; i += 3)
+			//{
+			//	sum +=  CubeIndex.FindCycle((CubeMove)i);
+			//	GC.Collect();
+			//}
+
+			//Console.WriteLine("Sum: " + sum);
+			CubeIndex.Factorial(1);
+
+			//CubeIndex.DoPermThings(4);
 
 			Console.WriteLine("\nDone");
 			Console.ReadLine();
 		}
 
+		private static void SaveSetGeneration(int depth)
+		{
+			string path = Directory.GetCurrentDirectory() + "\\fullset.bin";
+
+			Console.WriteLine("Generating buckets");
+			BucketCubeIndices bucket = new BucketCubeIndices(109043123 / CubeIndex.MAX_CORNER_PERMUTATION);
+			//HashSet<CubeIndex> bucket = new HashSet<CubeIndex>();
+
+			Console.WriteLine(GC.GetTotalMemory(true).ToString("000 000 000 000"));
+
+			Console.WriteLine("Finding cubes of depth: " + depth);
+			Cube[] set = Cube.GetSolvedCubesDFS(depth).ToArray();
+
+			Console.WriteLine(GC.GetTotalMemory(true).ToString("000 000 000 000"));
+
+			Console.WriteLine("Set count: " + set.Length.ToString("0 000 000 000"));
+			//CubeIndex.WriteCubeIndicesToFile(set, path);
+
+			Console.WriteLine("Inserting into buckets");
+			for (int i = 0; i < set.Length; i++)
+				bucket.Add(new CubeIndex(set[i]));
+
+			Console.WriteLine(GC.GetTotalMemory(true).ToString("000 000 000 000"));
+
+			bucket.RemoveDuplicates();
+			Console.WriteLine("Bucket count:  " + bucket.Count.ToString("0 000 000 000"));
+
+			Console.WriteLine("Expanding");
+			Cube bufferCube = new Cube();
+
+
+			for (int i = 0; i < set.Length; i++)
+			{
+				Cube c = set[i];
+				for (int j = 0; j < 18; j++)
+				{
+					bufferCube.CopyValuesFrom(c);
+
+					bufferCube.MakeMove((CubeMove)j);
+
+					bucket.Add(new CubeIndex(bufferCube));
+
+				}
+				set[i] = null;
+
+				if(i % 100_000 == 0)
+				{
+					Console.WriteLine(i.ToString("000 000 000") + " / " + set.Length);
+					bucket.RemoveDuplicates();
+					GC.Collect();
+				}
+				//Console.WriteLine((CubeMove)i + " done");
+			}
+			Console.WriteLine(GC.GetTotalMemory(true).ToString("000 000 000 000"));
+
+			bucket.RemoveDuplicates();
+			Console.WriteLine("Bucket count:  " + bucket.Count.ToString("0 000 000 000"));
+
+			bucket.SaveDistribution(Directory.GetCurrentDirectory() + "\\dist_" + depth + ".txt");
+			Console.WriteLine("Saved file");
+
+			bucket.SaveData(Directory.GetCurrentDirectory() + "\\data_" + depth + ".bin");
+		}
+
 		private static void SolvedSetBenchmarking()
 		{
 			Stopwatch sw = new Stopwatch();
-			for (int i = 0; i < 12; i++)
+			for (int i = 1; i < 12; i++)
 			{
 				sw.Restart();
-				Console.WriteLine(i + " " + Cube.GetSolvedCubeIndicesHS(i).Count);
+				Console.WriteLine(i + " " + Cube.GetSolvedCubesBFSNaive(i).Count);
 				Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000"));
 			}
 		}

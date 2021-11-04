@@ -27,18 +27,25 @@ namespace FmcSolver
 
 			//Console.WriteLine("Sum: " + sum);
 			CubeIndex.Factorial(1);
-			//CubeIndex.GenerateSolvedEdgeSet(7);
-
-			MoveSequenz ms = new MoveSequenz(20);
-			Console.WriteLine(ms);
-			Cube c = new Cube();
-			c.ApplyMoveSequenz(ms);
-			c.PrintSideView();
-
-			var list =  CubeIndex.FindSolution(new CubeIndex(c));
+			//CubeIndex.GenerateSolvedEdgeSet(8);
 
 
-			Console.WriteLine(string.Join(" ", list));
+			//MoveSequenz ms = new MoveSequenz("R' U' F D2 L2 F R2 U2 R2 B D2 L B2 D' B2 L' R' B D2 B U2 L U2 R' U' F");
+
+			while (true)
+			{
+				MoveSequenz ms = MoveSequenz.SuperFlip;
+				Console.WriteLine(ms);
+				Cube c = new Cube();
+				c.ApplyMoveSequenz(ms);
+				c.PrintSideView();
+
+				var list =  CubeIndex.FindSolution(new CubeIndex(c));
+
+				Console.WriteLine("Solution: " + string.Join(" ", list));
+
+			}
+			
 			//CubeIndex.DoPermThings(4);
 
 			//OrientEdges();

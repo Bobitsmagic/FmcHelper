@@ -79,14 +79,33 @@ namespace CubeAD
 		public MoveSequenz GetReverse()
 		{
 			return new MoveSequenz(Moves.Select(x => ReverseMove(x)).Reverse().ToList());
+		}
 
-			CubeMove ReverseMove(CubeMove m)
+		public MoveSequenz Rotate(SymmetryElement se)
+		{
+			List<CubeMove> ret = new List<CubeMove>();
+
+			foreach(CubeMove m in Moves)
 			{
-				int val = (int)m;
-				return (CubeMove)(val +
-					((val % 3) == 0 ? 2 :
-					(val % 3) == 1 ? 0 : -2));
+				int side = ((int)m) / 3;
+				int nextSide = se.TransformColor(side);
+				CubeMove nextMove = (CubeMove)(((int)m) - side + nextSide);
+
+				if (se.HasReflection)
+					ret.Add(ReverseMove(nextMove));
+				else
+					ret.Add(nextMove);
 			}
+
+			return new MoveSequenz(ret);
+		}
+
+		public static CubeMove ReverseMove(CubeMove m)
+		{
+			int val = (int)m;
+			return (CubeMove)(val +
+				((val % 3) == 0 ? 2 :
+				(val % 3) == 1 ? 0 : -2));
 		}
 		public void ReRoll()
 		{

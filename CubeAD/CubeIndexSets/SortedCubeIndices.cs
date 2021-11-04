@@ -7,6 +7,8 @@ namespace CubeAD.CubeIndexSets
 {
 	public class SortedCubeIndices
 	{
+		public static List<CubeIndex> CubeIndexBuffer = new List<CubeIndex>();
+
 		public int Count => Data.Count;
 
 		public List<CubeIndex> Data;
@@ -38,7 +40,8 @@ namespace CubeAD.CubeIndexSets
 		{
 			if (Data.Count > 1 && IsDirty)
 			{
-				Data.Sort();
+				CubeIndex.RadixSortCubeIndices(Data, CubeIndexBuffer);
+				//Data.Sort();
 				CubeIndex current = Data[0];
 
 				int deleteCount = 0;

@@ -62,18 +62,18 @@ namespace CubeAD.CubeIndexSets
 			}
 		}
 
-		public void RemoveDuplicatesParallel()
-		{
-			if (IsDirty)
-			{
-				Parallel.ForEach(Data, x =>
-				{
-					x.RemoveDuplicates();
-				});
+		//public void RemoveDuplicatesParallel()
+		//{
+		//	if (IsDirty)
+		//	{
+		//		Parallel.ForEach(Data, x =>
+		//		{
+		//			x.RemoveDuplicates();
+		//		});
 
-				IsDirty = false;
-			}
-		}
+		//		IsDirty = false;
+		//	}
+		//}
 
 		public void Clear()
 		{
@@ -96,7 +96,10 @@ namespace CubeAD.CubeIndexSets
 
 				for(int j = 0; j < list.Count; j++)
 				{
-					ret.Add(list[j]);
+					if (!ret.Add(list[j]))
+					{
+						Console.WriteLine("Alarm");
+					}
 				}
 			}
 

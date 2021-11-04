@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CubeAD.CubeIndexSets
 {
@@ -29,6 +30,19 @@ namespace CubeAD.CubeIndexSets
 			}
 		}
 
+		public BucketCubeIndices(string path)
+		{
+			MemoryStream ms = new MemoryStream(File.ReadAllBytes(path));
+			BinaryReader br = new BinaryReader(ms);
+			
+			for (int i = 0; i < Data.Length; i++)
+			{
+				Data[i] = new SortedCubeIndices(br);
+			}
+
+			RemoveDuplicates();
+		}
+
 		public void Add(CubeIndex element)
 		{
 			Data[element.CornerPermutation].Add(element);
@@ -48,6 +62,19 @@ namespace CubeAD.CubeIndexSets
 			}
 		}
 
+		public void RemoveDuplicatesParallel()
+		{
+			if (IsDirty)
+			{
+				Parallel.ForEach(Data, x =>
+				{
+					x.RemoveDuplicates();
+				});
+
+				IsDirty = false;
+			}
+		}
+
 		public void Clear()
 		{
 			for (int i = 0; i < Data.Length; i++)
@@ -58,6 +85,27 @@ namespace CubeAD.CubeIndexSets
 			IsDirty = false;
 		}
 
+		public HashSet<CubeIndex> GetHashSet()
+		{
+			RemoveDuplicates();
+			HashSet<CubeIndex> ret = new HashSet<CubeIndex>();
+
+			for(int i = 0; i < Data.Length; i++)
+			{
+				List<CubeIndex> list = Data[i].Data;
+
+				for(int j = 0; j < list.Count; j++)
+				{
+					ret.Add(list[j]);
+				}
+			}
+
+			if(ret.Count != Count)
+				Console.WriteLine("This should not happen kek");
+
+			return ret;
+		}
+
 		public void SaveDistribution(string path)
 		{
 			File.WriteAllLines(path, Data.Select(x => x.Count.ToString()));
@@ -65,6 +113,8 @@ namespace CubeAD.CubeIndexSets
 
 		public void SaveData(string path)
 		{
+			RemoveDuplicates();
+
 			FileStream fs = File.Create(path);
 
 			MemoryStream ms = new MemoryStream(Data[0].Count * CubeIndex.SIZE_IN_BYTES);

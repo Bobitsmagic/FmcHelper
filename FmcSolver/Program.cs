@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FmcSolver
@@ -15,6 +16,8 @@ namespace FmcSolver
 	{
 		static void Main(string[] args)
 		{
+
+
 			//long sum = 0;
 			//for (int i = 0; i < 18; i += 3)
 			//{
@@ -24,11 +27,108 @@ namespace FmcSolver
 
 			//Console.WriteLine("Sum: " + sum);
 			CubeIndex.Factorial(1);
+			//CubeIndex.GenerateSolvedEdgeSet(7);
 
+			MoveSequenz ms = new MoveSequenz(20);
+			Console.WriteLine(ms);
+			Cube c = new Cube();
+			c.ApplyMoveSequenz(ms);
+			c.PrintSideView();
+
+			var list =  CubeIndex.FindSolution(new CubeIndex(c));
+
+
+			Console.WriteLine(string.Join(" ", list));
 			//CubeIndex.DoPermThings(4);
+
+			//OrientEdges();
 
 			Console.WriteLine("\nDone");
 			Console.ReadLine();
+		}
+
+		private static string ToBase(int value, int newBase)
+		{
+			string s = "";
+			do
+			{
+				s = value % newBase + s;
+				value /= newBase;
+			}
+			while (value != 0);
+
+			return s;
+		}
+
+		private static void DFSComparison()
+		{
+			Stopwatch sw = new Stopwatch();
+			for (int i = 0; i < 9; i++)
+			{
+				Console.WriteLine("Max depth: " + i);
+
+				sw.Restart();
+				var indices = CubeIndex.SolvedTreeOrientedEdges(i);
+				sw.Stop();
+				Console.WriteLine("Index: " + indices.Count + " in " + sw.ElapsedMilliseconds + " ms");
+
+				//sw.Restart();
+				//HashSet<CubeIndex> set = Cube.GetSolvedCubeIndicesDFS(i);
+				//sw.Stop();
+
+				//Console.WriteLine("Cube:  " + set.Count + " in " + sw.ElapsedMilliseconds + " ms");
+			}
+		}
+
+		private static void EdgeOrientationDistribution()
+		{
+			List<int> list = new List<int>();
+			int counter = 0;
+			Stopwatch sw = new Stopwatch();
+			for (int i = 0; i <= 12; i += 2)
+			{
+				ushort value = 0;
+				for (int j = 0; j < i; j++)
+				{
+					value |= (ushort)(1 << j);
+				}
+
+				Console.WriteLine(i);
+				while (value < 4096)
+				{
+					counter++;
+					////Console.WriteLine(Convert.ToString(value, 2));
+					//CubeIndex ci = new CubeIndex(0, 0, value, 0);
+					//ci.ApplyToCube(c);
+					sw.Start();
+
+					list.Add(CubeIndex.FindEdgeOrientationMoves(value).Count);
+					//bins[OrientEdges(c)]++;
+
+
+					sw.Stop();
+
+					value = NextLexicographic(value);
+				}
+			}
+
+
+
+			Console.WriteLine(string.Join("\n", list));
+
+			Console.WriteLine("Sum: " + counter);
+			Console.WriteLine(sw.ElapsedMilliseconds.ToString("000 000"));
+			Console.WriteLine((double)sw.ElapsedMilliseconds / counter);
+		}
+
+		static ushort NextLexicographic(ushort x)
+		{
+			ushort t = (ushort)(x | (x - 1));
+			return (ushort)((t + 1) | ((~t & -(~t)) - 1) >> (BSF(x) + 1));
+		}
+		static ushort BSF(ushort x)
+		{
+			return (ushort) System.Runtime.Intrinsics.X86.Bmi1.X64.TrailingZeroCount(x);
 		}
 
 		private static void SaveSetGeneration(int depth)
@@ -175,14 +275,9 @@ namespace FmcSolver
 			return depth;
 		}
 
-		static void OrientEdges()
+		static int OrientEdges(Cube c)
 		{
 			const int MAX_DEPTH = 7;
-
-			Cube c = new Cube();
-			MoveSequenz s = new MoveSequenz(20);
-			//Console.WriteLine(s);
-			c.ApplyMoveSequenz(s);
 			//c.PrintSideView();
 
 			bool FoundSolution = false;
@@ -198,7 +293,7 @@ namespace FmcSolver
 			long counter = 0;
 			long solutionCounter = 0;
 			long start = Environment.TickCount64;
-			int depthStop;
+			int depthStop = 0;
 			for (int i = 1; i <= MAX_DEPTH && !FoundSolution; i++)
 			{
 				depthStop = i;
@@ -206,7 +301,9 @@ namespace FmcSolver
 				FindBestCube(c, 0);
 			}
 
+
 			long end = Environment.TickCount64;
+			return depthStop;
 
 			void FindBestCube(Cube cube, int depth)
 			{

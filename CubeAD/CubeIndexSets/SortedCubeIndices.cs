@@ -9,12 +9,23 @@ namespace CubeAD.CubeIndexSets
 	{
 		public int Count => Data.Count;
 
-		List<CubeIndex> Data;
+		public List<CubeIndex> Data;
 		bool IsDirty = false;
 
 		public SortedCubeIndices(int capacity = 0)
 		{
 			Data = new List<CubeIndex>(capacity);
+		}
+
+		public SortedCubeIndices(BinaryReader br)
+		{
+			int length = br.ReadInt32();
+			Data = new List<CubeIndex>(length);
+
+			for(int i = 0; i < Data.Capacity; i++)
+			{
+				Data.Add(new CubeIndex(br));
+			}
 		}
 
 		public void Add(CubeIndex element)

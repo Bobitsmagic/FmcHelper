@@ -723,16 +723,18 @@ namespace CubeAD
 			}
 		}
 
-
 		public int CornerOrientaion(int side1, int side2, int side3)
 		{
-			if (side1 / 2 == 0)
-				return (int)GetCornerColor(side1, side2, side3) / 2;
+			if (!(side1 < side2 && side2 < side3))
+				throw new ArgumentException("Sides need to be in ascending order");
 
-			if (side2 / 2 == 0)
-				return (int)GetCornerColor(side2, side1, side3) / 2;
+			if ((int)GetCornerColor(side1, side2, side3) / 2 == 0)
+				return 0;
 
-			return (int)GetCornerColor(side3, side1, side2) / 2;
+			if ((int)GetCornerColor(side2, side1, side3) / 2 == 0)
+				return 1;
+
+			return 2;
 		}
 
 		public int CountOrientedEgdes()

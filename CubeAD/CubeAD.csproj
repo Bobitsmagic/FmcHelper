@@ -8,22 +8,22 @@
     <None Update="casesmap.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ShortenedEdgePermArrays\B.bin">
+    <None Update="PreCompFiles\B.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ShortenedEdgePermArrays\D.bin">
+    <None Update="PreCompFiles\D.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ShortenedEdgePermArrays\F.bin">
+    <None Update="PreCompFiles\F.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ShortenedEdgePermArrays\L.bin">
+    <None Update="PreCompFiles\L.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ShortenedEdgePermArrays\R.bin">
+    <None Update="PreCompFiles\R.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ShortenedEdgePermArrays\U.bin">
+    <None Update="PreCompFiles\U.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

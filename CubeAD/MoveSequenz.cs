@@ -14,6 +14,10 @@ namespace CubeAD
 		public int Length { get { return Moves.Count; } }
 		public readonly List<CubeMove> Moves;
 
+		public MoveSequenz(IEnumerable<CubeMove> moves)
+		{
+			Moves = moves.ToList();
+		}
 		public MoveSequenz(List<CubeMove> moves)
 		{
 			Moves = moves;

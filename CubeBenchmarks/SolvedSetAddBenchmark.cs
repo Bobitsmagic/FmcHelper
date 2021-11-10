@@ -18,8 +18,9 @@ namespace CubeBenchmarks
 		//static RadixTreeArray radixTreeArray;
 		//static RadixTreeDictionary radixTreeDic;
 		//static RadixTreeIterative radixTreeIt;
-		static SortedCubeIndices sortCubeInd;
-		static BucketCubeIndices bucketCubeIndices;
+		static SortedCubeIndexList sortCubeInd;
+		static SortedBuckets bucketCubeIndices;
+		static SetBuckets setBuckets;
 
 		static SolvedSetAddBenchmark()
 		{
@@ -27,8 +28,9 @@ namespace CubeBenchmarks
 			//radixTreeDic = new RadixTreeDictionary();
 			////radixTreeArray = new RadixTreeArray();
 			//radixTreeIt = new RadixTreeIterative();
-			sortCubeInd = new SortedCubeIndices();
-			bucketCubeIndices = new BucketCubeIndices();
+			sortCubeInd = new SortedCubeIndexList();
+			bucketCubeIndices = new SortedBuckets();
+			setBuckets = new SetBuckets(0);
 
 			Console.WriteLine("Created other sets");
 
@@ -50,6 +52,7 @@ namespace CubeBenchmarks
 			//radixTreeIt.Clear();
 			sortCubeInd.Clear();
 			bucketCubeIndices.Clear();
+			setBuckets.Clear();
 
 			Console.WriteLine("Run Setup");
 		}
@@ -60,6 +63,15 @@ namespace CubeBenchmarks
 			for (int i = 0; i < Cubes.Length; i++)
 			{
 				hashset.Add(Cubes[i]);
+			}
+		}
+
+		[Benchmark]
+		public void SetBucket()
+		{
+			for (int i = 0; i < Cubes.Length; i++)
+			{
+				setBuckets.Add(Cubes[i]);
 			}
 		}
 		//[Benchmark]
@@ -111,11 +123,12 @@ namespace CubeBenchmarks
 	}
 
 	//N=10000000
-	//|            Method |    Mean |    Error |   StdDev |      Gen 0 |      Gen 1 |     Gen 2 | Allocated |
-	//|------------------ |--------:|---------:|---------:|-----------:|-----------:|----------:|----------:|
-	//|           HashSet | 1.532 s | 0.0157 s | 0.0139 s |  3000.0000 |  1000.0000 | 1000.0000 |    556 MB |
-	//| SortedCubeIndices | 1.728 s | 0.0051 s | 0.0045 s |  1000.0000 |  1000.0000 | 1000.0000 |    384 MB |
-	//| BucketCubeIndices | 1.334 s | 0.0250 s | 0.0245 s | 45000.0000 | 24000.0000 | 5000.0000 |    328 MB |
+//|            Method |    Mean |    Error |   StdDev |  Median |      Gen 0 |      Gen 1 |     Gen 2 | Allocated |
+//|------------------ |--------:|---------:|---------:|--------:|-----------:|-----------:|----------:|----------:|
+//|           HashSet | 1.692 s | 0.0308 s | 0.0367 s | 1.679 s |  2000.0000 |          - |         - |    556 MB |
+//|         SetBucket | 2.024 s | 0.0403 s | 0.0551 s | 2.005 s |  1000.0000 |          - |         - |     16 MB |
+//| SortedCubeIndices | 1.483 s | 0.0392 s | 0.1155 s | 1.533 s |          - |          - |         - |    384 MB |
+//| BucketCubeIndices | 2.052 s | 0.0406 s | 0.0679 s | 2.059 s | 50000.0000 | 25000.0000 | 5000.0000 |    368 MB |
 
 	//N=100000
 	//|              Method |         Mean |      Error |     StdDev |       Median |       Gen 0 |      Gen 1 |     Gen 2 | Allocated |

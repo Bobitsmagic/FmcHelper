@@ -27,25 +27,28 @@ namespace FmcSolver
 
 			//Console.WriteLine("Sum: " + sum);
 			CubeIndex.Factorial(1);
+			string path = Directory.GetCurrentDirectory() + "\\test.dat";
+			
+
 			//CubeIndex.GenerateSolvedEdgeSet(8);
 
 
 			//MoveSequenz ms = new MoveSequenz("R' U' F D2 L2 F R2 U2 R2 B D2 L B2 D' B2 L' R' B D2 B U2 L U2 R' U' F");
 
-			while (true)
-			{
-				MoveSequenz ms = MoveSequenz.SuperFlip;
-				Console.WriteLine(ms);
-				Cube c = new Cube();
-				c.ApplyMoveSequenz(ms);
-				c.PrintSideView();
+			//while (true)
+			//{
+			//	MoveSequenz ms = MoveSequenz.SuperFlip;
+			//	Console.WriteLine(ms);
+			//	Cube c = new Cube();
+			//	c.ApplyMoveSequenz(ms);
+			//	c.PrintSideView();
 
-				var list =  CubeIndex.FindSolution(new CubeIndex(c));
+			//	var list =  CubeIndex.FindSolution(new CubeIndex(c));
 
-				Console.WriteLine("Solution: " + string.Join(" ", list));
+			//	Console.WriteLine("Solution: " + string.Join(" ", list));
 
-			}
-			
+			//}
+
 			//CubeIndex.DoPermThings(4);
 
 			//OrientEdges();
@@ -143,7 +146,7 @@ namespace FmcSolver
 			string path = Directory.GetCurrentDirectory() + "\\fullset.bin";
 
 			Console.WriteLine("Generating buckets");
-			BucketCubeIndices bucket = new BucketCubeIndices(109043123 / CubeIndex.MAX_CORNER_PERMUTATION);
+			SortedBuckets bucket = new SortedBuckets(109043123 / CubeIndex.MAX_CORNER_PERMUTATION);
 			//HashSet<CubeIndex> bucket = new HashSet<CubeIndex>();
 
 			Console.WriteLine(GC.GetTotalMemory(true).ToString("000 000 000 000"));

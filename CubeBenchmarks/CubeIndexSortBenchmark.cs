@@ -10,7 +10,7 @@ namespace CubeBenchmarks
 	[MemoryDiagnoser]
 	public class CubeIndexSortBenchmark
 	{
-		const int COUNT = 100_000_000;
+		const int COUNT = 10_000_000;
 		Random Rnd = new Random(0);
 
 		CubeIndex[] Indices = Cube.GetRandomCubesDistinct(15, COUNT, new Random(0)).ToArray();

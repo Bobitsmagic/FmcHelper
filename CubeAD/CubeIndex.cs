@@ -5,10 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Diagnostics;
 
 namespace CubeAD
 {
 	//Compressed representation of a cube
+	[Serializable]
 	public struct CubeIndex : IComparable<CubeIndex>
 	{
 		public const int SIZE_IN_BYTES = 11;
@@ -58,10 +62,17 @@ namespace CubeAD
 		public static ushort[,] NextEdgeOrient = new ushort[MAX_EDGE_ORIENTATION, 18];
 		public static ushort[,] NextCornerOrient = new ushort[MAX_CORNER_ORIENTATION, 18];
 
+		public static byte[] OrientedEdgeCount = new byte[MAX_EDGE_ORIENTATION];
+		public static byte[] OrientedCornersCount = new byte[MAX_CORNER_ORIENTATION];
+		public static byte[] PositionedEdgesCount = new byte[MAX_EDGE_PERMUTATION];
+		public static byte[] PositionedCornersCount = new byte[MAX_CORNER_PERMUTATION];
+
 		public static HashSet<CubeIndex> EOTree;
 
 		static CubeIndex()
 		{
+			Stopwatch sw = Stopwatch.StartNew();
+
 			int counter = 0;
 			for (int x = 0; x < 6; x++)
 			{
@@ -120,22 +131,9 @@ namespace CubeAD
 
 				for (int j = 0; j < 18; j++)
 				{
-					if(i == 2460 && j == (int)CubeMove.F2)
-					{
-						Console.WriteLine("kek");
-					}
 
 					buffer.CopyValuesFrom(c);
-
-					//Cube c2 = new CubeIndex(buffer).GetCube();
-					//Console.WriteLine(buffer == c2);
-					//buffer.PrintSideView();
-
 					buffer.MakeMove((CubeMove)j);
-
-					//c2 = new CubeIndex(buffer).GetCube();
-					//Console.WriteLine(buffer == c2);
-					//buffer.PrintSideView();
 
 					NextCornerOrient[i, j] = FindCornerOrientationIndex(buffer);
 				}
@@ -165,13 +163,15 @@ namespace CubeAD
 			}
 
 
-			EOTree = new BucketCubeIndices(Directory.GetCurrentDirectory() + "\\PreCompFiles\\solvedEOset_8.bin").GetHashSet();
+			//EOTree = new SortedBuckets(Directory.GetCurrentDirectory() + "\\PreCompFiles\\solvedEOset_7.bin").GetHashSet();
 			//EOTree = SolvedTreeOrientedEdges(7).GetHashSet();
 
+			//EOTree = DeserializeHashset(Directory.GetCurrentDirectory() + "\\test.dat");
 
 			GC.Collect();
+			Console.WriteLine("TotalRamUsage: " + GC.GetTotalMemory(true).ToString("0 000 000 000"));
 
-			Console.WriteLine("Initialized CubeIndex class");
+			Console.WriteLine("Initialized CubeIndex class in " + sw.ElapsedMilliseconds + " ms");
 		}
 
 		public static void GenerateShortendEdgePermArrays()
@@ -344,6 +344,22 @@ namespace CubeAD
 				File.WriteAllBytes(Directory.GetCurrentDirectory() + "\\" + m + ".bin", byteArray);
 			}
 		}
+
+		public static void SerializeHashset(HashSet<CubeIndex> set, string path)
+		{
+			Stream s = File.Create(path);
+			BinaryFormatter b = new BinaryFormatter();
+			b.Serialize(s, set);
+			s.Close();
+		}
+		public static HashSet<CubeIndex> DeserializeHashset(string path)
+		{
+			MemoryStream ms = new MemoryStream(File.ReadAllBytes(path));
+			
+			BinaryFormatter b = new BinaryFormatter();
+			return (HashSet<CubeIndex>)b.Deserialize(ms);
+		}
+
 
 		public static void GenerateSolvedEdgeSet(int depth)
 		{
@@ -808,10 +824,10 @@ namespace CubeAD
 			}
 		}
 
-		public static BucketCubeIndices SolvedTree(int maxDepth)
+		public static SortedBuckets SolvedTree(int maxDepth)
 		{
 			Stack<CubeMove> currentMoves = new Stack<CubeMove>(maxDepth);
-			BucketCubeIndices set = new BucketCubeIndices(20_000);
+			SortedBuckets set = new SortedBuckets(20_000);
 
 			//HashSet<CubeIndex> set = new HashSet<CubeIndex>();
 
@@ -876,10 +892,10 @@ namespace CubeAD
 				}
 			}
 		}
-		public static BucketCubeIndices SolvedTreeOrientedEdges(int maxDepth)
+		public static SortedBuckets SolvedTreeOrientedEdges(int maxDepth)
 		{
 			Stack<CubeMove> currentMoves = new Stack<CubeMove>(maxDepth);
-			BucketCubeIndices set = new BucketCubeIndices(2_000);
+			SortedBuckets set = new SortedBuckets(2_000);
 
 			//HashSet<CubeIndex> set = new HashSet<CubeIndex>();
 
@@ -1023,7 +1039,7 @@ namespace CubeAD
 
 			while (!cube.IsSovled)
 			{
-				if(EOTree.TryGetValue(cube, out cube))
+				if (EOTree.TryGetValue(cube, out cube))
 				{
 					if (!cube.IsSovled)
 					{

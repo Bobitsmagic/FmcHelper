@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CubeAD.CubeIndexSets
 {
-	public class SortedCubeIndices
+	public class SortedCubeIndexList
 	{
 		public static List<CubeIndex> CubeIndexBuffer = new List<CubeIndex>();
 
@@ -14,12 +14,12 @@ namespace CubeAD.CubeIndexSets
 		public List<CubeIndex> Data;
 		bool IsDirty = false;
 
-		public SortedCubeIndices(int capacity = 0)
+		public SortedCubeIndexList(int capacity = 0)
 		{
 			Data = new List<CubeIndex>(capacity);
 		}
 
-		public SortedCubeIndices(BinaryReader br)
+		public SortedCubeIndexList(BinaryReader br)
 		{
 			int length = br.ReadInt32();
 			Data = new List<CubeIndex>(length);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CubeAD.CubeIndexSets
 {
-	public class BucketCubeIndices
+	public class SortedBuckets
 	{
 		public int Count { get
 			{
@@ -18,29 +18,31 @@ namespace CubeAD.CubeIndexSets
 				return sum;
 			} }
 
-		SortedCubeIndices[] Data = new SortedCubeIndices[CubeIndex.MAX_CORNER_PERMUTATION];
+		SortedCubeIndexList[] Data = new SortedCubeIndexList[CubeIndex.MAX_CORNER_PERMUTATION];
 		
 		bool IsDirty = false;
 
-		public BucketCubeIndices(int bucketCapacity = 0)
+		public SortedBuckets(int bucketCapacity = 0)
 		{
 			for (int i = 0; i < Data.Length; i++)
 			{
-				Data[i] = new SortedCubeIndices(bucketCapacity);
+				Data[i] = new SortedCubeIndexList(bucketCapacity);
 			}
 		}
 
-		public BucketCubeIndices(string path)
+		public SortedBuckets(string path)
 		{
 			MemoryStream ms = new MemoryStream(File.ReadAllBytes(path));
 			BinaryReader br = new BinaryReader(ms);
 			
 			for (int i = 0; i < Data.Length; i++)
 			{
-				Data[i] = new SortedCubeIndices(br);
+				Data[i] = new SortedCubeIndexList(br);
 			}
 
+			Console.WriteLine("Done reading");
 			RemoveDuplicates();
+			Console.WriteLine("Done sorting");
 		}
 
 		public void Add(CubeIndex element)
@@ -88,7 +90,7 @@ namespace CubeAD.CubeIndexSets
 		public HashSet<CubeIndex> GetHashSet()
 		{
 			RemoveDuplicates();
-			HashSet<CubeIndex> ret = new HashSet<CubeIndex>();
+			HashSet<CubeIndex> ret = new HashSet<CubeIndex>(Count);
 
 			for(int i = 0; i < Data.Length; i++)
 			{
@@ -104,6 +106,49 @@ namespace CubeAD.CubeIndexSets
 			}
 
 			if(ret.Count != Count)
+				Console.WriteLine("This should not happen kek");
+
+			return ret;
+		}
+		public CubeIndex[] GetArray()
+		{
+			RemoveDuplicates();
+			CubeIndex[] cubeIndices = new CubeIndex[Count];
+
+			int counter = 0;
+			for (int i = 0; i < Data.Length; i++)
+			{
+				List<CubeIndex> list = Data[i].Data;
+
+				for (int j = 0; j < list.Count; j++)
+				{
+					cubeIndices[counter++] = list[j];
+				}
+			}
+
+			return cubeIndices;
+		}
+
+
+		public SetBuckets GetSetBuckets()
+		{
+			RemoveDuplicates();
+			SetBuckets ret = new SetBuckets(Count / Data.Length);
+
+			for (int i = 0; i < Data.Length; i++)
+			{
+				List<CubeIndex> list = Data[i].Data;
+
+				for (int j = 0; j < list.Count; j++)
+				{
+					if (!ret.Add(list[j]))
+					{
+						Console.WriteLine("Alarm");
+					}
+				}
+			}
+
+			if (ret.Count != Count)
 				Console.WriteLine("This should not happen kek");
 
 			return ret;

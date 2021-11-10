@@ -14,68 +14,58 @@ namespace CubeBenchmarks
 		static Random rnd = new Random(0);
 
 		static CubeIndex[] Cubes = new CubeIndex[10000];
-		static HashSet<CubeIndex> HashSet;
-		static RadixTreeArray RadixTreeArray;
-		static RadixTreeDictionary RadixTreeDic;
-		static RadixTreeIterative RadixTreeIt;
-		static SortedCubeIndices SortCubeInd;
-		static BucketCubeIndices BucketCubeIndices;
+		//static HashSet<CubeIndex> HashSet;
+		//static SetBuckets SetBuckets;
+		static SealedHashset SealedHS;
 
 		static SolvedSetContainsBenchmark()
 		{
-			HashSet = Cube.GetSolvedCubeIndicesDFS(DEPTH);
+			CubeIndex[] array = CubeIndex.SolvedTree(DEPTH).GetArray();
 
-			Console.WriteLine("Created hashset");
+			Console.WriteLine("Created Array");
 
-			RadixTreeDic = new RadixTreeDictionary();
-			RadixTreeArray = new RadixTreeArray();
-			RadixTreeIt = new RadixTreeIterative();
-			SortCubeInd = new SortedCubeIndices();
-			BucketCubeIndices = new BucketCubeIndices();
+			//HashSet = new HashSet<CubeIndex>();
+			//SetBuckets = new SetBuckets();
+			//foreach (CubeIndex index in array)
+			//{
+			//	//SetBuckets.Add(index);
+			//	//HashSet.Add(index);
+			//}
 
-			int count = 0;
-			foreach (CubeIndex index in HashSet)
-			{
-				//RadixTreeArray.Add(index);
-				//RadixTreeDic.Add(index);
-				//RadixTreeIt.Add(index);
-				SortCubeInd.Add(index);
-				BucketCubeIndices.Add(index);
-
-				//if (count++ % 10000 == 0)
-				//{
-				//	Console.WriteLine(count + " / " + HashSet.Count);
-				//}
-			}
-			Console.WriteLine("Created dic and array");
-			SortCubeInd.RemoveDuplicates();
-			BucketCubeIndices.RemoveDuplicates();
-			Console.WriteLine(HashSet.Count + " " + RadixTreeArray.Count + " " + RadixTreeDic.Count + " " + RadixTreeIt.Count + " " + SortCubeInd.Count + " " + BucketCubeIndices.Count);
+			SealedHS = new SealedHashset(array);
+			Console.WriteLine("Added to other sets");
+			Console.WriteLine(array.Length);
 
 
 			for (int i = 0; i < Cubes.Length / 10; i++)
 			{
-				Cubes[i] = HashSet.ElementAt(rnd.Next(HashSet.Count));
+				Cubes[i] = array[rnd.Next(array.Length)];
 			}
 
-			count = Cubes.Length / 10;
+			int count = Cubes.Length / 10;
 			foreach (CubeIndex index in Cube.GetRandomCubesDistinct(7, 9000, rnd))
 			{
 				Cubes[count++] = index;
 
 			}
 
+			GC.Collect();
+
 			Console.WriteLine("Finished intializing Sets");
 		}
 
-		[Benchmark]
-		public void BenchHashSet()
-		{
-			for (int i = 0; i < Cubes.Length; i++)
-			{
-				HashSet.Contains(Cubes[i]);
-			}
-		}
+		//[Benchmark]
+		//public void BenchHashSet()
+		//{
+		//	for (int i = 0; i < Cubes.Length; i++)
+		//	{
+		//		HashSet.Contains(Cubes[i]);
+		//	}
+		//}
+
+		//|       Method |     Mean |     Error |    StdDev |
+		//|------------- |---------:|----------:|----------:|
+		//| BenchHashSet | 1.004 ms | 0.0191 ms | 0.0205 ms |
 		//[Benchmark]
 		//public void BenchRadixTreeArray()
 		//{
@@ -100,24 +90,39 @@ namespace CubeBenchmarks
 		//		RadixTreeIt.Contains(Cubes[i]);
 		//	}
 		//}
-
 		[Benchmark]
-		public void BenchSortedCubeIndices()
+		public void BenchSealedHS()
 		{
 			for (int i = 0; i < Cubes.Length; i++)
 			{
-				SortCubeInd.Contains(Cubes[i]);
+				SealedHS.Contains(Cubes[i]);
 			}
 		}
+		//[Benchmark]
+		//public void BenchSetBuckets()
+		//{
+		//	for (int i = 0; i < Cubes.Length; i++)
+		//	{
+		//		SetBuckets.Contains(Cubes[i]);
+		//	}
+		//}
+		//[Benchmark]
+		//public void BenchSortedCubeIndices()
+		//{
+		//	for (int i = 0; i < Cubes.Length; i++)
+		//	{
+		//		SortCubeInd.Contains(Cubes[i]);
+		//	}
+		//}
 
-		[Benchmark]
-		public void BenchBucketCubeIndices()
-		{
-			for (int i = 0; i < Cubes.Length; i++)
-			{
-				BucketCubeIndices.Contains(Cubes[i]);
-			}
-		}
+		//[Benchmark]
+		//public void BenchBucketCubeIndices()
+		//{
+		//	for (int i = 0; i < Cubes.Length; i++)
+		//	{
+		//		BucketCubeIndices.Contains(Cubes[i]);
+		//	}
+		//}
 	}
 }
 //7
@@ -129,6 +134,7 @@ namespace CubeBenchmarks
 //6
 //|                 Method |       Mean |    Error |    StdDev |
 //|----------------------- |-----------:|---------:|----------:|
-//|           BenchHashSet |   462.5 us |  1.12 us |   0.94 us |
-//| BenchSortedCubeIndices | 5,070.6 us | 98.74 us | 147.80 us |
-//| BenchBucketCubeIndices | 3,158.7 us | 60.01 us |  69.11 us |
+//|           BenchHashSet |   459.8 us |  0.37 us |   0.33 us |
+//|        BenchSetBuckets |   589.3 us |  1.07 us |   1.00 us |
+//| BenchSortedCubeIndices | 4,787.6 us | 77.49 us | 113.59 us |
+//| BenchBucketCubeIndices | 2,991.7 us | 57.65 us |  53.92 us |

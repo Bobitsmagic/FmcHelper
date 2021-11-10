@@ -7,7 +7,7 @@ namespace CubeBenchmarks
 	{
 		static void Main(string[] args)
 		{
-			var summary = BenchmarkRunner.Run<SolvedSetAddBenchmark>();
+			var summary = BenchmarkRunner.Run<SolvedSetContainsBenchmark>();
 		}
 	}
 }

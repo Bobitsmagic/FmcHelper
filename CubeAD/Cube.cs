@@ -936,7 +936,7 @@ namespace CubeAD
 					{
 						next.CopyValuesFrom(cube);
 						next.MakeMove(move);
-						
+
 						//depth++;
 						//currentMoves.Push(move);
 
@@ -978,17 +978,17 @@ namespace CubeAD
 			{
 				foreach (Cube c in current)
 				{
-					for(int j = 0; j < 18; j++)
+					for (int j = 0; j < 18; j++)
 					{
 						cube.CopyValuesFrom(c);
 						cube.MakeMove((CubeMove)j);
-						if(ret.Add(new CubeIndex(cube)))
+						if (ret.Add(new CubeIndex(cube)))
 							next.Add(new Cube(cube));
-						
+
 					}
 				}
 
-				if(next.Count >= next.Capacity)
+				if (next.Count >= next.Capacity)
 					Console.WriteLine("Alarm");
 				cubeCount += current.Count * 18;
 

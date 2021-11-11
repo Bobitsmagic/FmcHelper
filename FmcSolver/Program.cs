@@ -1,13 +1,10 @@
-﻿using BenchmarkDotNet.Running;
-using CubeAD;
+﻿using CubeAD;
 using CubeAD.CubeIndexSets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Numerics;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace FmcSolver
@@ -17,19 +14,44 @@ namespace FmcSolver
 		static void Main(string[] args)
 		{
 
-
-			//long sum = 0;
-			//for (int i = 0; i < 18; i += 3)
-			//{
-			//	sum +=  CubeIndex.FindCycle((CubeMove)i);
-			//	GC.Collect();
-			//}
-
-			//Console.WriteLine("Sum: " + sum);
 			CubeIndex.Factorial(1);
-			string path = Directory.GetCurrentDirectory() + "\\test.dat";
-			
 
+			const int COUNT = 10000;
+			CubeIndex[] cubeIndices = new CubeIndex[COUNT];
+			Random rnd = new Random(0);
+			for (int i = 0; i < COUNT; i++)
+			{
+				cubeIndices[i] = new CubeIndex(rnd);
+			}
+
+			byte[] array = new byte[COUNT * 12];
+
+
+
+			CubeIndex[] copy = new CubeIndex[COUNT];
+
+			unsafe
+			{
+				fixed (void* source = cubeIndices)
+				{
+					fixed (void* dest = copy)
+					{
+						Buffer.MemoryCopy(source, dest, array.Length, array.Length);
+					}
+				}
+			}
+
+
+			bool ret = false;
+			for (int i = 0; i < COUNT; i++)
+			{
+				if (cubeIndices[i] != copy[i])
+				{
+					ret = true;
+				}
+			}
+
+			Console.WriteLine(ret);
 			//CubeIndex.GenerateSolvedEdgeSet(8);
 
 
@@ -138,7 +160,7 @@ namespace FmcSolver
 		}
 		static ushort BSF(ushort x)
 		{
-			return (ushort) System.Runtime.Intrinsics.X86.Bmi1.X64.TrailingZeroCount(x);
+			return (ushort)System.Runtime.Intrinsics.X86.Bmi1.X64.TrailingZeroCount(x);
 		}
 
 		private static void SaveSetGeneration(int depth)
@@ -186,7 +208,7 @@ namespace FmcSolver
 				}
 				set[i] = null;
 
-				if(i % 100_000 == 0)
+				if (i % 100_000 == 0)
 				{
 					Console.WriteLine(i.ToString("000 000 000") + " / " + set.Length);
 					bucket.RemoveDuplicates();

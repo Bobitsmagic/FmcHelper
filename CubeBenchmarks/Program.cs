@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Running;
-using System;
 
 namespace CubeBenchmarks
 {
@@ -7,7 +6,7 @@ namespace CubeBenchmarks
 	{
 		static void Main(string[] args)
 		{
-			var summary = BenchmarkRunner.Run<SolvedSetContainsBenchmark>();
+			var summary = BenchmarkRunner.Run<CubeIndexSerilization>();
 		}
 	}
 }

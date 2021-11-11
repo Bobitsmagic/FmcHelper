@@ -1,9 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using CubeAD;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace CubeBenchmarks
 {
@@ -19,7 +17,7 @@ namespace CubeBenchmarks
 		[IterationSetup]
 		public void Setup()
 		{
-			for(int i = 0; i < COUNT - 1; i++)
+			for (int i = 0; i < COUNT - 1; i++)
 			{
 				int index = Rnd.Next(i + 1, COUNT);
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace CubeAD.CubeIndexSets
 {
@@ -24,7 +23,7 @@ namespace CubeAD.CubeIndexSets
 			int length = br.ReadInt32();
 			Data = new List<CubeIndex>(length);
 
-			for(int i = 0; i < Data.Capacity; i++)
+			for (int i = 0; i < Data.Capacity; i++)
 			{
 				Data.Add(new CubeIndex(br));
 			}

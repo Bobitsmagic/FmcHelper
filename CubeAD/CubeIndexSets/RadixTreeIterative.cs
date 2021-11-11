@@ -52,9 +52,9 @@ namespace CubeAD.CubeIndexSets
 
 		public void Clear()
 		{
-			for(int i = 0; i < Data.Length; i++)
+			for (int i = 0; i < Data.Length; i++)
 			{
-				if(Data[i] != null)
+				if (Data[i] != null)
 				{
 					ArrayPool.Return(Data[i], true);
 					Data[i] = null;

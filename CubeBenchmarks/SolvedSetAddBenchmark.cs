@@ -3,8 +3,6 @@ using CubeAD;
 using CubeAD.CubeIndexSets;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace CubeBenchmarks
 {
@@ -123,12 +121,12 @@ namespace CubeBenchmarks
 	}
 
 	//N=10000000
-//|            Method |    Mean |    Error |   StdDev |  Median |      Gen 0 |      Gen 1 |     Gen 2 | Allocated |
-//|------------------ |--------:|---------:|---------:|--------:|-----------:|-----------:|----------:|----------:|
-//|           HashSet | 1.692 s | 0.0308 s | 0.0367 s | 1.679 s |  2000.0000 |          - |         - |    556 MB |
-//|         SetBucket | 2.024 s | 0.0403 s | 0.0551 s | 2.005 s |  1000.0000 |          - |         - |     16 MB |
-//| SortedCubeIndices | 1.483 s | 0.0392 s | 0.1155 s | 1.533 s |          - |          - |         - |    384 MB |
-//| BucketCubeIndices | 2.052 s | 0.0406 s | 0.0679 s | 2.059 s | 50000.0000 | 25000.0000 | 5000.0000 |    368 MB |
+	//|            Method |    Mean |    Error |   StdDev |  Median |      Gen 0 |      Gen 1 |     Gen 2 | Allocated |
+	//|------------------ |--------:|---------:|---------:|--------:|-----------:|-----------:|----------:|----------:|
+	//|           HashSet | 1.692 s | 0.0308 s | 0.0367 s | 1.679 s |  2000.0000 |          - |         - |    556 MB |
+	//|         SetBucket | 2.024 s | 0.0403 s | 0.0551 s | 2.005 s |  1000.0000 |          - |         - |     16 MB |
+	//| SortedCubeIndices | 1.483 s | 0.0392 s | 0.1155 s | 1.533 s |          - |          - |         - |    384 MB |
+	//| BucketCubeIndices | 2.052 s | 0.0406 s | 0.0679 s | 2.059 s | 50000.0000 | 25000.0000 | 5000.0000 |    368 MB |
 
 	//N=100000
 	//|              Method |         Mean |      Error |     StdDev |       Median |       Gen 0 |      Gen 1 |     Gen 2 | Allocated |

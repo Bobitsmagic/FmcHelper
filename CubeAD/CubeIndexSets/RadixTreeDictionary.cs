@@ -47,7 +47,7 @@ namespace CubeAD.CubeIndexSets
 
 		public void Clear()
 		{
-			foreach(var tree in SubTree.Values)
+			foreach (var tree in SubTree.Values)
 			{
 				tree.Clear();
 			}

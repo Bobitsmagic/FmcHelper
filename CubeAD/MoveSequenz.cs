@@ -85,7 +85,7 @@ namespace CubeAD
 		{
 			List<CubeMove> ret = new List<CubeMove>();
 
-			foreach(CubeMove m in Moves)
+			foreach (CubeMove m in Moves)
 			{
 				int side = ((int)m) / 3;
 				int nextSide = se.TransformColor(side);

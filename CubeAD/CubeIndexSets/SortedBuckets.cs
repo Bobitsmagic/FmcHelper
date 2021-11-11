@@ -2,24 +2,25 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CubeAD.CubeIndexSets
 {
 	public class SortedBuckets
 	{
-		public int Count { get
+		public int Count
+		{
+			get
 			{
 				int sum = 0;
-				for(int i = 0; i < Data.Length; i++)
+				for (int i = 0; i < Data.Length; i++)
 					sum += Data[i].Count;
 
 				return sum;
-			} }
+			}
+		}
 
 		SortedCubeIndexList[] Data = new SortedCubeIndexList[CubeIndex.MAX_CORNER_PERMUTATION];
-		
+
 		bool IsDirty = false;
 
 		public SortedBuckets(int bucketCapacity = 0)
@@ -34,7 +35,7 @@ namespace CubeAD.CubeIndexSets
 		{
 			MemoryStream ms = new MemoryStream(File.ReadAllBytes(path));
 			BinaryReader br = new BinaryReader(ms);
-			
+
 			for (int i = 0; i < Data.Length; i++)
 			{
 				Data[i] = new SortedCubeIndexList(br);
@@ -55,7 +56,7 @@ namespace CubeAD.CubeIndexSets
 		{
 			if (IsDirty)
 			{
-				for(int i = 0; i < Data.Length; i++)
+				for (int i = 0; i < Data.Length; i++)
 				{
 					Data[i].RemoveDuplicates();
 				}
@@ -92,11 +93,11 @@ namespace CubeAD.CubeIndexSets
 			RemoveDuplicates();
 			HashSet<CubeIndex> ret = new HashSet<CubeIndex>(Count);
 
-			for(int i = 0; i < Data.Length; i++)
+			for (int i = 0; i < Data.Length; i++)
 			{
 				List<CubeIndex> list = Data[i].Data;
 
-				for(int j = 0; j < list.Count; j++)
+				for (int j = 0; j < list.Count; j++)
 				{
 					if (!ret.Add(list[j]))
 					{
@@ -105,7 +106,7 @@ namespace CubeAD.CubeIndexSets
 				}
 			}
 
-			if(ret.Count != Count)
+			if (ret.Count != Count)
 				Console.WriteLine("This should not happen kek");
 
 			return ret;
@@ -168,7 +169,7 @@ namespace CubeAD.CubeIndexSets
 			MemoryStream ms = new MemoryStream(Data[0].Count * CubeIndex.SIZE_IN_BYTES);
 			BinaryWriter bw = new BinaryWriter(ms);
 
-			foreach(var list in Data)
+			foreach (var list in Data)
 			{
 				ms.Position = 0;
 				list.Write(bw);

@@ -128,7 +128,7 @@ namespace CubeTester
 
 			Array.Sort(array1);
 
-			for(int i = 0; i < array1.Length - 1; i++)
+			for (int i = 0; i < array1.Length - 1; i++)
 			{
 				Assert.IsTrue(array1[i].Index < array1[i + 1].Index);
 			}
@@ -158,16 +158,16 @@ namespace CubeTester
 		public void CubeGenerator()
 		{
 			Random rnd = new Random(0);
-			
+
 			Cube c = new Cube();
-			for(int i = 0; i < 1000; i++)
+			for (int i = 0; i < 1000; i++)
 			{
-				c.MakeMove((CubeMove) rnd.Next(18));
+				c.MakeMove((CubeMove)rnd.Next(18));
 				Assert.AreEqual(c, (new CubeIndex(c)).GetCube());
 			}
 		}
 
-		[Test] 
+		[Test]
 		public void MakeMove()
 		{
 			Random rnd = new Random(0);
@@ -176,7 +176,7 @@ namespace CubeTester
 			CubeIndex index = new CubeIndex();
 			Assert.AreEqual(new CubeIndex(cube), index);
 
-			for(int i = 0; i < 18; i++)
+			for (int i = 0; i < 18; i++)
 			{
 				index = new CubeIndex();
 				cube.Reset();

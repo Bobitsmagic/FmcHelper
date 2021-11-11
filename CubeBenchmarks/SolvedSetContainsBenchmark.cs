@@ -2,8 +2,6 @@
 using CubeAD;
 using CubeAD.CubeIndexSets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 
 namespace CubeBenchmarks

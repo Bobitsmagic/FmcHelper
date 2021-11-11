@@ -338,7 +338,7 @@ namespace CubeTester
 		[Test]
 		public void GetSolvedCubeIndice()
 		{
-			
+
 		}
 	}
 }

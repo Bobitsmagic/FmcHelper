@@ -4,7 +4,6 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 
 
@@ -149,7 +148,7 @@ namespace CubeTester
 			var sealedHS = new SealedHashset(hashset.ToArray());
 
 
-			foreach(CubeIndex index in list)
+			foreach (CubeIndex index in list)
 			{
 				Assert.AreEqual(hashset.Contains(index), radixTreeArray.Contains(index));
 				Assert.AreEqual(hashset.Contains(index), radixTreeDic.Contains(index));
@@ -158,7 +157,7 @@ namespace CubeTester
 				Assert.AreEqual(hashset.Contains(index), bucketCubeInd.Contains(index));
 				Assert.AreEqual(hashset.Contains(index), setBuckets.Contains(index));
 				Assert.AreEqual(hashset.Contains(index), sealedHS.Contains(index));
-				
+
 			}
 		}
 	}

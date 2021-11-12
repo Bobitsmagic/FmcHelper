@@ -35,6 +35,10 @@ namespace CubeBenchmarks
 		{
 			set.ToByteArray();
 		}
-
 	}
+
+	//| Method |       Mean |     Error |    StdDev |     Median |
+	//|------- |-----------:|----------:|----------:|-----------:|
+	//| Unsafe |   314.0 ms |   6.53 ms |  19.06 ms |   304.5 ms |
+	//|   Safe | 5,555.5 ms | 110.09 ms | 250.73 ms | 5,561.8 ms |
 }

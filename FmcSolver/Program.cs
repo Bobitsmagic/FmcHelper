@@ -15,43 +15,20 @@ namespace FmcSolver
 		{
 
 			CubeIndex.Factorial(1);
+			Stopwatch sw = Stopwatch.StartNew();
+			Console.WriteLine(CubeIndex.GetEdgeOrientedMoveTree);
+			Console.WriteLine(CubeIndex.GetMoveTree);
+			Console.WriteLine(sw.ElapsedMilliseconds);
 
-			const int COUNT = 10000;
-			CubeIndex[] cubeIndices = new CubeIndex[COUNT];
-			Random rnd = new Random(0);
-			for (int i = 0; i < COUNT; i++)
-			{
-				cubeIndices[i] = new CubeIndex(rnd);
-			}
+			//for(int i = 1; i < 9; i++)
+			//{
+			//	CubeIndex.GenerateEOTreeFile(i);
+			//}
+			//for (int i = 1; i < 8; i++)
+			//{
+			//	CubeIndex.GenerateTreeFile(i);
+			//}
 
-			byte[] array = new byte[COUNT * 12];
-
-
-
-			CubeIndex[] copy = new CubeIndex[COUNT];
-
-			unsafe
-			{
-				fixed (void* source = cubeIndices)
-				{
-					fixed (void* dest = copy)
-					{
-						Buffer.MemoryCopy(source, dest, array.Length, array.Length);
-					}
-				}
-			}
-
-
-			bool ret = false;
-			for (int i = 0; i < COUNT; i++)
-			{
-				if (cubeIndices[i] != copy[i])
-				{
-					ret = true;
-				}
-			}
-
-			Console.WriteLine(ret);
 			//CubeIndex.GenerateSolvedEdgeSet(8);
 
 

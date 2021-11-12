@@ -48,15 +48,21 @@ namespace CubeAD.CubeIndexSets
 			StartIndex[0] = 0;
 		}
 
-		public SealedHashset(BinaryReader br)
+		public SealedHashset(string file)
 		{
-			int count = br.ReadInt32();
-
-			Data = new CubeIndex[count];
-			for (int i = 0; i < Data.Length; i++)
+			byte[] array = File.ReadAllBytes(file);
+			Data = new CubeIndex[array.Length / CubeIndex.PADDED_SIZE_IN_BYTES];
+			unsafe
 			{
-				Data[i] = new CubeIndex(br);
+				fixed (void* source = array)
+				{
+					fixed (void* dest = Data)
+					{
+						Buffer.MemoryCopy(source, dest, array.Length, array.Length);
+					}
+				}
 			}
+			
 			Console.WriteLine("Done reading " + Data.Length + " cubes");
 
 			//count cubes
@@ -75,13 +81,35 @@ namespace CubeAD.CubeIndexSets
 			Console.WriteLine("Finished creating sealed HS");
 		}
 
-		public void Write(BinaryWriter bw)
+		public void SaveToFile(string file)
 		{
-			bw.Write(Data.Length);
+			byte[] array = new byte[Data.Length * CubeIndex.PADDED_SIZE_IN_BYTES];
+			unsafe
+			{
+				fixed (void* source = Data)
+				{
+					fixed (void* dest = array)
+					{
+						Buffer.MemoryCopy(source, dest, array.Length, array.Length);
+					}
+				}
+			}
+
+			File.WriteAllBytes(file, array);
+		}
+
+		public byte[] ToByteArray()
+		{
+			byte[] array = new byte[Data.Length * CubeIndex.SIZE_IN_BYTES];
+			MemoryStream ms = new MemoryStream(array);
+			BinaryWriter bw = new BinaryWriter(ms);
+
 			for (int i = 0; i < Data.Length; i++)
 			{
 				Data[i].Write(bw);
 			}
+
+			return array;
 		}
 
 		public byte[] ToByteArrayUnsafe()
@@ -96,19 +124,6 @@ namespace CubeAD.CubeIndexSets
 						Buffer.MemoryCopy(source, dest, array.Length, array.Length);
 					}
 				}
-			}
-
-			return array;
-		}
-		public byte[] ToByteArray()
-		{
-			byte[] array = new byte[Data.Length * CubeIndex.SIZE_IN_BYTES];
-			MemoryStream ms = new MemoryStream(array);
-			BinaryWriter bw = new BinaryWriter(ms);
-
-			for (int i = 0; i < Data.Length; i++)
-			{
-				Data[i].Write(bw);
 			}
 
 			return array;

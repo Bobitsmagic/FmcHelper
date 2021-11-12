@@ -13,6 +13,9 @@ namespace CubeAD
 	[Serializable]
 	public struct CubeIndex : IComparable<CubeIndex>
 	{
+		public const int MAX_EO_MOVE_DEPTH = 8;
+		public const int MAX_MOVE_DEPTH = 7;
+
 		public const int SIZE_IN_BYTES = 11;
 		public const int PADDED_SIZE_IN_BYTES = 12;
 
@@ -20,7 +23,6 @@ namespace CubeAD
 		public const ushort MAX_CORNER_PERMUTATION = 40320; //8!
 		public const ushort MAX_EDGE_ORIENTATION = 4096;    //2^12
 		public const ushort MAX_CORNER_ORIENTATION = 6561;  //3^8
-
 
 		public static int[,] EdgeIndices = new int[6, 6];
 		public static int[,,] CornerIndices = new int[6, 6, 6];
@@ -66,7 +68,28 @@ namespace CubeAD
 		public static byte[] PositionedEdgesCount = new byte[MAX_EDGE_PERMUTATION];
 		public static byte[] PositionedCornersCount = new byte[MAX_CORNER_PERMUTATION];
 
-		public static SealedHashset EOTree;
+		public static SealedHashset GetEdgeOrientedMoveTree 
+		{ get
+			{
+				if (_EOMoveTree is null)
+					_EOMoveTree = new SealedHashset(Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solvedEOtree_" + MAX_EO_MOVE_DEPTH + ".bin"));
+
+				return _EOMoveTree;
+			} 
+		}
+		public static SealedHashset GetMoveTree
+		{
+			get
+			{
+				if (_MoveTree is null)
+					_MoveTree = new SealedHashset(Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solvedtree_" + MAX_MOVE_DEPTH + ".bin"));
+
+				return _MoveTree;
+			}
+		}
+
+		private static SealedHashset _EOMoveTree = null;
+		private static SealedHashset _MoveTree = null;
 
 		static CubeIndex()
 		{
@@ -151,6 +174,8 @@ namespace CubeAD
 					NextEdgeOrient[i, j] = FindEdgeOrientationIndex(buffer);
 				}
 			}
+			Console.WriteLine("Cpu stuff in " + sw.ElapsedMilliseconds + " ms");
+
 
 			for (int i = 0; i < 18; i += 3)
 			{
@@ -161,12 +186,6 @@ namespace CubeAD
 				Buffer.BlockCopy(byteArray, 0, NextEdgePerm[i / 3], 0, byteArray.Length);
 			}
 
-
-			using (MemoryStream ms = new MemoryStream(File.ReadAllBytes("PreCompFiles\\solvedEOset_7.bin")))
-			{
-				EOTree = new SealedHashset(new BinaryReader(ms));
-				ms.Close();
-			}
 
 			GC.Collect();
 			Console.WriteLine("TotalRamUsage: " + GC.GetTotalMemory(true).ToString("0 000 000 000"));
@@ -347,27 +366,15 @@ namespace CubeAD
 
 		public static void GenerateTreeFile(int depth)
 		{
-			SealedHashset shs = new SealedHashset(SolvedTree(depth).GetArray());
+			new SealedHashset(SolvedTree(depth).GetArray()).SaveToFile(Path.Combine(Directory.GetCurrentDirectory(), "solvedtree_" + depth + ".bin"));
 
-			MemoryStream ms = new MemoryStream(shs.DataSizeInBytes);
-			BinaryWriter bw = new BinaryWriter(ms);
-
-			shs.Write(bw);
-
-			File.WriteAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "solvedset_" + depth + ".bin"), ms.ToArray());
-
-			Console.WriteLine("Saved file: " + depth + " -> " + shs.Count);
+			Console.WriteLine("Saved file: solvedTree_" + depth + ".bin");
 		}
 		public static void GenerateEOTreeFile(int depth)
 		{
-			SealedHashset shs = new SealedHashset(SolvedTreeOrientedEdges(depth).GetArray());
+			new SealedHashset(SolvedTreeOrientedEdges(depth).GetArray()).SaveToFile(Path.Combine(Directory.GetCurrentDirectory(), "solvedEOTree_" + depth + ".bin"));
 
-			MemoryStream ms = new MemoryStream(shs.DataSizeInBytes);
-			BinaryWriter bw = new BinaryWriter(ms);
-
-			shs.Write(bw);
-
-			File.WriteAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "solvedEOset_" + depth + ".bin"), ms.ToArray());
+			Console.WriteLine("Saved file: solvedEOtree_" + depth + ".bin");
 		}
 
 		public static void GenerateSolvedEdgeSet(int depth)
@@ -1010,7 +1017,7 @@ namespace CubeAD
 				{
 					if (foundSolution) return false;
 
-					if (EOTree.Contains(cube))
+					if (GetEdgeOrientedMoveTree.Contains(cube))
 					{
 						if (!foundSolution)
 						{
@@ -1057,7 +1064,7 @@ namespace CubeAD
 
 			while (!cube.IsSovled)
 			{
-				if (EOTree.TryGetValue(cube, out cube))
+				if (GetEdgeOrientedMoveTree.TryGetValue(cube, out cube))
 				{
 					if (!cube.IsSovled)
 					{

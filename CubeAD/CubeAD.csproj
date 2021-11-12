@@ -27,28 +27,49 @@
     <None Update="PreCompFiles\solvedEOset.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\solvedEOset_1.bin">
+    <None Update="PreCompFiles\solvedEOtree_1.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\solvedEOset_2.bin">
+    <None Update="PreCompFiles\solvedEOtree_2.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\solvedEOset_3.bin">
+    <None Update="PreCompFiles\solvedEOtree_3.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\solvedEOset_4.bin">
+    <None Update="PreCompFiles\solvedEOtree_4.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\solvedEOset_5.bin">
+    <None Update="PreCompFiles\solvedEOtree_5.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\solvedEOset_6.bin">
+    <None Update="PreCompFiles\solvedEOtree_6.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\solvedEOset_7.bin">
+    <None Update="PreCompFiles\solvedEOtree_7.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\solvedEOset_8.bin">
+    <None Update="PreCompFiles\solvedEOtree_8.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="PreCompFiles\solvedtree_1.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="PreCompFiles\solvedtree_2.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="PreCompFiles\solvedtree_3.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="PreCompFiles\solvedtree_4.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="PreCompFiles\solvedtree_5.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="PreCompFiles\solvedtree_6.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="PreCompFiles\solvedtree_7.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="PreCompFiles\U.bin">

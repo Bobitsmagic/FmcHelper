@@ -4,7 +4,7 @@
 	{
 		public const int FACE_COUNT = 8;
 		public const int BIT_COUNT = FACE_COUNT * 3;
-		public const int BIT_MASK = (1 << 24) - 1;
+		public const uint BIT_MASK = (1 << 24) - 1;
 
 		public static uint[] STRIPE_MASK =
 		{

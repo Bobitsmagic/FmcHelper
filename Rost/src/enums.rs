@@ -1,3 +1,5 @@
+use std::string;
+
 #[repr(u8)]
 #[derive(Clone, Copy)]
 pub enum CubeColor {
@@ -7,12 +9,11 @@ pub enum CubeColor {
     None
 }
 
-pub unsafe fn CubeColor_to_u8(color: CubeColor) -> u8 {
-    std::mem::transmute::<CubeColor, u8>(color)
+pub fn u8_to_CubeColor(value: u8) -> CubeColor {{
 }
-
-pub unsafe fn u8_to_CubeColor(value: u8) -> CubeColor {
-    std::mem::transmute::<u8, CubeColor>(value)
+    unsafe{
+        std::mem::transmute::<u8, CubeColor>(value)
+    }   
 }
 
 #[repr(u8)]
@@ -27,10 +28,22 @@ pub enum CubeMove {
     None
 }
 
-pub unsafe fn CubeMove_to_u8(color: CubeMove) -> u8 {
-    std::mem::transmute::<CubeMove, u8>(color)
+pub fn u8_to_CubeMove(value: u8) -> CubeMove {
+    unsafe {
+        std::mem::transmute::<u8, CubeMove>(value)
+    }
 }
+impl CubeColor {
+    pub fn to_string(&self) -> char {
+        match self {
+            CubeColor::Orange =>    'O',
+            CubeColor::Red =>       'R',
+            CubeColor::Yellow =>    'Y',
+            CubeColor::White =>     'W',
+            CubeColor::Green =>     'G',
+            CubeColor::Blue =>      'B',
 
-pub unsafe fn u8_to_CubeMove(value: u8) -> CubeMove {
-    std::mem::transmute::<u8, CubeMove>(value)
+            _ => 'X',
+        }
+    }
 }

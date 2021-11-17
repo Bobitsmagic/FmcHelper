@@ -13,16 +13,16 @@
     <None Update="casesmap.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\B.bin">
+    <None Update="PreCompFiles\next_edge_perm_B.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\D.bin">
+    <None Update="PreCompFiles\next_edge_perm_D.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\F.bin">
+    <None Update="PreCompFiles\next_edge_perm_F.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\L.bin">
+    <None Update="PreCompFiles\next_edge_perm_L.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="PreCompFiles\oriented_corner_count.bin">
@@ -37,7 +37,7 @@
     <None Update="PreCompFiles\positioned_edge_count.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\R.bin">
+    <None Update="PreCompFiles\next_edge_perm_R.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="PreCompFiles\solvedEOset.bin">
@@ -88,7 +88,7 @@
     <None Update="PreCompFiles\solved_tree_7.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PreCompFiles\U.bin">
+    <None Update="PreCompFiles\next_edge_perm_U.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

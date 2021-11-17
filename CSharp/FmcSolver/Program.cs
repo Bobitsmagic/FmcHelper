@@ -13,10 +13,15 @@ namespace FmcSolver
 	{
 		static void Main(string[] args)
 		{
+			
 
 			CubeIndex.Factorial(1);
+
+			CubeIndex.GenerateTreeFile(6);
+			
+
 			Cube c = new Cube();
-			MoveSequenz ms = new MoveSequenz("R' U' F D2 L2 F R2 U2 R2 B D2 L B2 D' B2 L' R' B D2 B U2 L U2 R' U' F");
+			MoveSequenz ms = MoveSequenz.FmcWr;
 			c.ApplyMoveSequenz(ms);
 			c.PrintSideView();
 			c.MakeMove(CubeMove.D2);

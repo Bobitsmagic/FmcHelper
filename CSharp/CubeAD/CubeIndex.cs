@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace CubeAD
@@ -23,7 +24,8 @@ namespace CubeAD
 		public const ushort MAX_EDGE_ORIENTATION = 4096;    //2^12
 		public const ushort MAX_CORNER_ORIENTATION = 6561;  //3^8
 
-		public static string PRE_COMP_PATH = Directory.GetCurrentDirectory() + "\\PreCompFiles";
+		public static readonly string PRE_COMP_PATH = Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles");
+		public const string MOVE_TREE_PREFIX = "solved_tree_"; 
 
 		public static int[,] EdgeIndices = new int[6, 6];
 		public static int[,,] CornerIndices = new int[6, 6, 6];
@@ -58,13 +60,23 @@ namespace CubeAD
 			{ 1, 3, 5 }
 		};
 
-		public static uint[][] NextEdgePerm = new uint[6][];
 		public static int[] EdgeTrackSizes = new int[6] { 40320, 24, 2, 1, 1, 1 };
+		public static int[] NextEdgeSizes = new int[6] {1, 2, 3, 4, 5, 6 }; //[TODO] fill in right numbers
+		public static uint[][] NextEdgePerm = new uint[6][] 
+		{
+			new uint[NextEdgeSizes[0]],
+			new uint[NextEdgeSizes[1]],
+			new uint[NextEdgeSizes[2]],
+			new uint[NextEdgeSizes[3]],
+			new uint[NextEdgeSizes[4]],
+			new uint[NextEdgeSizes[5]]
+		};
+
 		public static ushort[,] NextCornerPerm = new ushort[MAX_CORNER_PERMUTATION, 18];
 		public static ushort[,] NextEdgeOrient = new ushort[MAX_EDGE_ORIENTATION, 18];
 		public static ushort[,] NextCornerOrient = new ushort[MAX_CORNER_ORIENTATION, 18];
 
-		public static byte[] OrientedEdgeCount;
+		public static byte[] OrientedEdgesCount;
 		public static byte[] OrientedCornersCount;
 		public static byte[] PositionedEdgesCount;
 		public static byte[] PositionedCornersCount;
@@ -73,7 +85,20 @@ namespace CubeAD
 		{ get
 			{
 				if (_EOMoveTree is null)
-					_EOMoveTree = new SealedHashset(Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solved_eo_tree_" + MAX_EO_MOVE_DEPTH + ".bin"));
+				{
+					string path = Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solved_eo_tree_" + MAX_EO_MOVE_DEPTH + ".bin");
+
+					if (File.Exists(path))
+					{
+						_EOMoveTree = new SealedHashset(path);
+					}
+					else
+					{
+						_EOMoveTree = new SealedHashset(SolvedTreeOrientedEdges(MAX_EO_MOVE_DEPTH).GetArray());
+						_EOMoveTree.SaveToFile(path);
+						Console.WriteLine("Created: " + path);
+					}
+				}
 
 				return _EOMoveTree;
 			} 
@@ -83,7 +108,20 @@ namespace CubeAD
 			get
 			{
 				if (_MoveTree is null)
-					_MoveTree = new SealedHashset(Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solved_tree_" + MAX_MOVE_DEPTH + ".bin"));
+				{
+					string path = Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solved_tree_" + MAX_MOVE_DEPTH + ".bin");
+
+					if (File.Exists(path))
+					{
+						_MoveTree = new SealedHashset(path);
+					}
+					else
+					{
+						_MoveTree = new SealedHashset(SolvedTree(MAX_MOVE_DEPTH).GetArray());
+						_MoveTree.SaveToFile(path);
+						Console.WriteLine("Created: " + path);
+					}
+				}
 
 				return _MoveTree;
 			}
@@ -127,363 +165,352 @@ namespace CubeAD
 				}
 			}
 
-			Cube c = new Cube();
-			Cube buffer = new Cube();
-			CubeIndex index = new CubeIndex();
-			int[] permBuffer = new int[8];
-
-			for (int i = 0; i < MAX_CORNER_PERMUTATION; i++)
+			if (!Directory.Exists(PRE_COMP_PATH))
 			{
-				index.CornerPermutation = (ushort)i;
-				index.ApplyToCube(c);
-
-				for (int j = 0; j < 18; j++)
-				{
-					buffer.CopyValuesFrom(c);
-					buffer.MakeMove((CubeMove)j);
-					NextCornerPerm[i, j] = FindCornerPermutationIndex(buffer, permBuffer);
-				}
+				Directory.CreateDirectory(PRE_COMP_PATH);
+				Console.WriteLine("Created directory: " + PRE_COMP_PATH);
 			}
 
-			index.CornerPermutation = 0;
 
-			for (int i = 0; i < MAX_CORNER_ORIENTATION; i++)
+			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "next_corner_perm.bin"), NextCornerPerm, (ret) =>
 			{
-				index.CornerOrientation = (ushort)i;
-				index.ApplyToCube(c);
+				Cube c = new Cube();
+				Cube buffer = new Cube();
+				CubeIndex index = new CubeIndex();
+				int[] permBuffer = new int[8];
 
-				for (int j = 0; j < 18; j++)
+				ushort[,] cast = (ushort[,])ret;
+				for (int i = 0; i < MAX_CORNER_PERMUTATION; i++)
 				{
+					index.CornerPermutation = (ushort)i;
+					index.ApplyToCube(c);
 
-					buffer.CopyValuesFrom(c);
-					buffer.MakeMove((CubeMove)j);
-
-					NextCornerOrient[i, j] = FindCornerOrientationIndex(buffer);
+					for (int j = 0; j < 18; j++)
+					{
+						buffer.CopyValuesFrom(c);
+						buffer.MakeMove((CubeMove)j);
+						cast[i, j] = FindCornerPermutationIndex(buffer, permBuffer);
+					}
 				}
-			}
+			});
 
-			index.CornerOrientation = 0;
-			for (int i = 0; i < MAX_EDGE_ORIENTATION; i++)
+			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "next_corner_orient.bin"), NextCornerOrient, (ret) =>
 			{
-				index.EdgeOrientation = (ushort)i;
-				index.ApplyToCube(c);
-
-				for (int j = 0; j < 18; j++)
+				Cube c = new Cube();
+				Cube buffer = new Cube();
+				CubeIndex index = new CubeIndex();
+				ushort[,] cast = (ushort[,])ret;
+				for (int i = 0; i < MAX_CORNER_ORIENTATION; i++)
 				{
-					buffer.CopyValuesFrom(c);
-					buffer.MakeMove((CubeMove)j);
-					NextEdgeOrient[i, j] = FindEdgeOrientationIndex(buffer);
+					index.CornerOrientation = (ushort)i;
+					index.ApplyToCube(c);
+
+					for (int j = 0; j < 18; j++)
+					{
+						buffer.CopyValuesFrom(c);
+						buffer.MakeMove((CubeMove)j);
+
+						cast[i, j] = FindCornerOrientationIndex(buffer);
+					}
 				}
-			}
-			Console.WriteLine("Cpu stuff in " + sw.ElapsedMilliseconds + " ms");
+			});
 
+			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "next_edge_orient.bin"), NextEdgeOrient, (ret) =>
+			{
 
+				Cube c = new Cube();
+				Cube buffer = new Cube();
+				CubeIndex index = new CubeIndex();
+				ushort[,] cast = (ushort[,])ret;
+				for (int i = 0; i < MAX_EDGE_ORIENTATION; i++)
+				{
+					index.EdgeOrientation = (ushort)i;
+					index.ApplyToCube(c);
+
+					for (int j = 0; j < 18; j++)
+					{
+						buffer.CopyValuesFrom(c);
+						buffer.MakeMove((CubeMove)j);
+						cast[i, j] = FindEdgeOrientationIndex(buffer);
+					}
+				}
+			});
+
+			//Egde permutation
 			for (int i = 0; i < 18; i += 3)
 			{
 				CubeMove m = (CubeMove)i;
-				byte[] byteArray = File.ReadAllBytes(PRE_COMP_PATH + "\\" + m + ".bin");
-				NextEdgePerm[i / 3] = new uint[byteArray.Length / 4];
+				string path = Path.Combine(PRE_COMP_PATH, "next_edge_perm_" + m.ToString() + ".bin");
 
-				Buffer.BlockCopy(byteArray, 0, NextEdgePerm[i / 3], 0, byteArray.Length);
+				ReadFromFileOrCreate(path, NextEdgePerm[i / 3], (ret) => {
+					Array gen = GenerateShortendEdgePermArrays(m);
+					Console.WriteLine("Gen: " + gen.Length + " ret: " + ret.Length);
+					Array.Copy(gen, ret, gen.Length);
+				});
 			}
 
-			OrientedEdgeCount = File.ReadAllBytes(PRE_COMP_PATH + "\\oriented_edge_count.bin");
-			OrientedCornersCount = File.ReadAllBytes(PRE_COMP_PATH + "\\oriented_corner_count.bin");
-			PositionedEdgesCount = File.ReadAllBytes(PRE_COMP_PATH + "\\positioned_edge_count.bin");
-			PositionedCornersCount = File.ReadAllBytes(PRE_COMP_PATH + "\\positioned_corner_count.bin");
+			//Oriented edges count
+			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "oriented_edges_count.bin"), OrientedEdgesCount, (ret) =>
+			{
+				byte[] cast = ret as byte[];
+				for (int i = 0; i < MAX_EDGE_ORIENTATION; i++)
+					cast[i] = (byte)NumberOfSetBits(i);
 
+				int NumberOfSetBits(int value)
+				{
+					value = value - ((value >> 1) & 0x55555555);
+					value = (value & 0x33333333) + ((value >> 2) & 0x33333333);
+					return (((value + (value >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+				}
+			});
+
+			//Oriented corners count
+			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "oriented_corners_count.bin"), OrientedCornersCount, (ret) =>
+			{
+				byte[] cast = ret as byte[];
+				int[] cornerDigits = new int[8];
+				for (int i = 0; i < MAX_CORNER_ORIENTATION; i++)
+				{
+					int count = 0;
+					for (int j = 0; j < 8; j++)
+					{
+						if (cornerDigits[j] == 0)
+							count++;
+					}
+
+
+					cast[i] = (byte)count;
+
+					//increment number in base 3
+					for (int j = 0; j < cornerDigits.Length; j++)
+					{
+						if (cornerDigits[j] < 2)
+						{
+							cornerDigits[j]++;
+
+							for (int k = j - 1; k >= 0; k--)
+							{
+								cornerDigits[k] = 0;
+							}
+
+							break;
+						}
+					}
+				}
+			});
+
+			//Positioned corners count
+			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "positioned_corners_count.bin"), PositionedCornersCount, (ret) =>
+			{
+				byte[] cast = ret as byte[];
+				int[] permBuffer = new int[8];
+				for (int i = 0; i < MAX_CORNER_PERMUTATION; i++)
+				{
+					GetIndexedPerm(permBuffer, i);
+
+					int count = 0;
+					for (int j = 0; j < 8; j++)
+					{
+						if (permBuffer[j] == j)
+							count++;
+					}
+
+					cast[i] = (byte)count;
+				}
+			});
+
+			//Positioned edges
+			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "positioned_edges_count.bin"), PositionedEdgesCount, (ret) =>
+			{
+				byte[] cast = ret as byte[];
+				int[] permBuffer = new int[12];
+				for (int i = 0; i < MAX_EDGE_PERMUTATION; i++)
+				{
+					GetIndexedPerm(permBuffer, i);
+
+					int count = 0;
+					for (int j = 0; j < 12; j++)
+					{
+						if (permBuffer[j] == j)
+							count++;
+
+					}
+					if (i % 10_000_000 == 0)
+						Console.WriteLine(i.ToString("000 000 000"));
+
+					PositionedEdgesCount[i] = (byte)count;
+				}
+			});
 
 			GC.Collect();
 			Console.WriteLine("TotalRamUsage: " + GC.GetTotalMemory(true).ToString("0 000 000 000"));
 
 			Console.WriteLine("Initialized CubeIndex class in " + sw.ElapsedMilliseconds + " ms");
+
+			void ReadFromFileOrCreate(string path, Array dest, Action<Array> fillAction)
+			{
+				if (File.Exists(path))
+				{
+					//[TODO] without casts?
+					//if(typeof(T) == typeof(byte))
+					//	dest = File.ReadAllBytes(path).Cast<T>().ToArray();
+					
+					
+					byte[] byteBuffer = File.ReadAllBytes(path);
+					Buffer.BlockCopy(byteBuffer, 0, dest, 0, byteBuffer.Length);
+				}
+				else
+				{
+					fillAction(dest);
+					
+					byte[] byteBuffer = new byte[dest.Length * Marshal.SizeOf(dest.GetType().GetElementType())];
+
+					Buffer.BlockCopy(dest, 0, byteBuffer, 0, byteBuffer.Length);
+
+					File.WriteAllBytes(path, byteBuffer);
+					Console.WriteLine("Created " + path);
+				}
+			}
 		}
 
-		public static void GenerateShortendEdgePermArrays()
+		private static uint[] GenerateShortendEdgePermArrays(CubeMove m)
 		{
-			long sum = 0;
+			//Generate full array
 			int[] data = new int[MAX_EDGE_PERMUTATION];
-			for (int i = 0; i < 18; i += 3)
-			{
-				CubeMove m = (CubeMove)i;
-
-				byte[] byteArray = File.ReadAllBytes(@"D:\BigFiles\" + m + ".bin");
-				Buffer.BlockCopy(byteArray, 0, data, 0, byteArray.Length);
-
-
-				for (int j = 0; j < data.Length; j++)
-				{
-					data[j] -= j;
-
-					if (data[j] < 0)
-						data[j] += data.Length;
-				}
-
-				int minCycle = MinCycle(data);
-				int trackLength = MaxTrack(data);
-				Console.WriteLine(m + " -> Cycle: " + minCycle.ToString("000 000 000") + " TrackLength: " + trackLength);
-
-				bool corret = true;
-				for (int j = 0; j < data.Length; j += trackLength)
-				{
-					for (int k = 0; k < trackLength; k++)
-					{
-						corret &= data[j] == data[j + k];
-					}
-				}
-				Console.WriteLine("Has blocksize: " + corret);
-
-				corret = true;
-				for (int j = 0; j < data.Length; j++)
-				{
-					corret &= data[j] + data[data.Length - j - 1] == data.Length;
-				}
-				Console.WriteLine("Has mirror: " + corret);
-
-
-				NextEdgePerm[i / 3] = new uint[minCycle / trackLength / 2];
-
-				int[] array = new int[minCycle / trackLength / 2];
-				sum += array.Length;
-
-				for (int j = 0; j < array.Length; j++)
-				{
-					array[j] = data[j * trackLength];
-				}
-
-				for (int j = 0; j < data.Length; j++)
-				{
-					int value = (j / trackLength) % array.Length;
-					int result = array[value];
-
-					if ((j / trackLength / array.Length) % 2 == 1)
-					{
-						value = array.Length - value - 1;
-						result = (int)MAX_EDGE_PERMUTATION - array[value];
-					}
-
-					if (data[j] != result)
-					{
-						Console.WriteLine("Index was: " + value + " but should have been: " + Array.IndexOf(array, data[j]));
-						Console.WriteLine("Alarm");
-					}
-				}
-
-				byte[] kek = new byte[array.Length * 4];
-				Buffer.BlockCopy(array, 0, kek, 0, kek.Length);
-
-				File.WriteAllBytes(Directory.GetCurrentDirectory() + "\\" + m + ".bin", kek);
-
-
-				GC.Collect();
-
-				int MinCycle(int[] data)
-				{
-					for (int cycleLength = 1; cycleLength < data.Length; cycleLength++)
-					{
-						if (data.Length % cycleLength != 0)
-							continue;
-
-						bool foundMissmatch = false;
-						for (int i = 0; i + cycleLength < data.Length; i++)
-						{
-							if (data[i] != data[i + cycleLength])
-							{
-								foundMissmatch = true;
-								break;
-							}
-						}
-
-						if (!foundMissmatch)
-						{
-							return cycleLength;
-						}
-					}
-
-					return data.Length;
-				}
-
-				int MaxTrack(int[] data)
-				{
-					for (int trackLength = 2; trackLength < data.Length; trackLength++)
-					{
-						if (data.Length % trackLength != 0)
-							continue;
-
-						if (data[0] != data[0 + trackLength])
-						{
-							for (int i = 0; i < data.Length; i += trackLength)
-							{
-								for (int j = 1; j < trackLength; j++)
-								{
-									if (data[i] != data[i + j])
-										return 1;
-								}
-							}
-
-							return trackLength;
-						}
-					}
-
-					return 1;
-				}
-			}
-
-			Console.WriteLine("Sum: " + sum);
-		}
-
-		public static void GenerateFullEdgePermArray()
-		{
-			int N = Factorial(12);
 			Cube c = new Cube();
-			int[] data = new int[N];
-			byte[] byteArray = new byte[data.Length * 4];
+			c.MakeMove(m);
+			uint singleIndex = FindEdgePermutationIndex(c);
 
-			for (int k = 0; k < 18; k++)
+			Console.WriteLine("Generating: " + m);
+			Console.WriteLine(singleIndex);
+			int[] move = GetIndexedPerm(12, (int)singleIndex);
+			int[] currentPerm = new int[12];
+			int[] result = new int[12];
+			Console.WriteLine(string.Join(" ", move));
+
+			for (int i = 0; i < data.Length; i++)
 			{
-				CubeMove m = (CubeMove)k;
-				c.MakeMove(m);
-				uint singleIndex = FindEdgePermutationIndex(c);
+				GetIndexedPerm(currentPerm, i);
 
-				Console.WriteLine(m);
-				Console.WriteLine(singleIndex);
-				int[] move = GetIndexedPerm(12, (int)singleIndex);
-				int[] currentPerm = new int[12];
-				int[] result = new int[12];
-				Console.WriteLine(string.Join(" ", move));
+				for (int j = 0; j < 12; j++)
+					result[j] = currentPerm[move[j]];
 
+				data[i] = GetIndex(result);
+			}
 
-				for (int i = 0; i < data.Length; i++)
+			//shortened array
+			for (int j = 0; j < data.Length; j++)
+			{
+				data[j] -= j;
+
+				if (data[j] < 0)
+					data[j] += data.Length;
+			}
+
+			int minCycle = MinCycle(data);
+			int trackLength = MaxTrack(data);
+			Console.WriteLine(m + " -> Cycle: " + minCycle.ToString("000 000 000") + " TrackLength: " + trackLength);
+
+			bool corret = true;
+			for (int j = 0; j < data.Length; j += trackLength)
+			{
+				for (int k = 0; k < trackLength; k++)
 				{
-					GetIndexedPerm(currentPerm, i);
+					corret &= data[j] == data[j + k];
+				}
+			}
+			Console.WriteLine("Has blocksize: " + corret);
 
-					for (int j = 0; j < 12; j++)
+			corret = true;
+			for (int j = 0; j < data.Length; j++)
+			{
+				corret &= data[j] + data[data.Length - j - 1] == data.Length;
+			}
+			Console.WriteLine("Has mirror: " + corret);
+
+
+			NextEdgePerm[(int)m / 3] = new uint[minCycle / trackLength / 2];
+
+			uint[] array = new uint[minCycle / trackLength / 2];
+
+			for (int j = 0; j < array.Length; j++)
+			{
+				array[j] = (uint)data[j * trackLength];
+			}
+
+			//Check values
+			for (int j = 0; j < data.Length; j++)
+			{
+				int value = (j / trackLength) % array.Length;
+				uint res = array[value];
+
+				if ((j / trackLength / array.Length) % 2 == 1)
+				{
+					value = array.Length - value - 1;
+					res = (int)MAX_EDGE_PERMUTATION - array[value];
+				}
+
+				if (data[j] != res)
+				{
+					Console.WriteLine("Index was: " + value + " but should have been: " + Array.IndexOf(array, data[j]));
+					Console.WriteLine("Alarm");
+				}
+			}
+
+			return array;
+
+			int MinCycle(int[] data)
+			{
+				for (int cycleLength = 1; cycleLength < data.Length; cycleLength++)
+				{
+					if (data.Length % cycleLength != 0)
+						continue;
+
+					bool foundMissmatch = false;
+					for (int i = 0; i + cycleLength < data.Length; i++)
 					{
-						result[j] = currentPerm[move[j]];
+						if (data[i] != data[i + cycleLength])
+						{
+							foundMissmatch = true;
+							break;
+						}
 					}
 
-					data[i] = GetIndex(result);
-				}
-
-				Buffer.BlockCopy(data, 0, byteArray, 0, byteArray.Length);
-				File.WriteAllBytes(Directory.GetCurrentDirectory() + "\\" + m + ".bin", byteArray);
-			}
-		}
-
-		public static void GenerateTreeFile(int depth)
-		{
-			new SealedHashset(SolvedTree(depth).GetArray()).SaveToFile(Path.Combine(Directory.GetCurrentDirectory(), "solved_tree_" + depth + ".bin"));
-
-			Console.WriteLine("Saved file: solvedTree_" + depth + ".bin");
-		}
-		public static void GenerateEOTreeFile(int depth)
-		{
-			new SealedHashset(SolvedTreeOrientedEdges(depth).GetArray()).SaveToFile(Path.Combine(Directory.GetCurrentDirectory(), "solved_eo_Tree_" + depth + ".bin"));
-
-			Console.WriteLine("Saved file: solvedEOtree_" + depth + ".bin");
-		}
-
-		public static void GenerateSolvedEdgeSet(int depth)
-		{
-			var set = SolvedTreeOrientedEdges(depth);
-
-			set.SaveData(Directory.GetCurrentDirectory() + "\\solvedEOset_" + depth + ".bin");
-
-			Console.WriteLine("Created set");
-		}
-
-		public static void GenerateSolvedCounts()
-		{
-			OrientedEdgeCount = new byte[MAX_EDGE_ORIENTATION];
-			OrientedCornersCount = new byte[MAX_CORNER_ORIENTATION];
-			PositionedEdgesCount = new byte[MAX_EDGE_PERMUTATION];
-			PositionedCornersCount = new byte[MAX_CORNER_PERMUTATION];
-
-
-			for (int i = 0; i < MAX_EDGE_ORIENTATION; i++)
-				OrientedEdgeCount[i] = (byte)NumberOfSetBits(i);
-
-			File.WriteAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "oriented_edge_count.bin"), OrientedEdgeCount);
-			Console.WriteLine("Created oriented edge count file");
-
-			int[] cornerDigits = new int[8];
-			for (int i = 0; i < MAX_CORNER_ORIENTATION; i++)
-			{
-				int count = 0;
-				for (int j = 0; j < 8; j++)
-				{
-					if (cornerDigits[j] == 0)
-						count++;
-				}
-
-
-				OrientedCornersCount[i] = (byte)count;
-
-				//increment number in base 3
-				for (int j = 0; j < cornerDigits.Length; j++)
-				{
-					if (cornerDigits[j] < 2)
+					if (!foundMissmatch)
 					{
-						cornerDigits[j]++;
+						return cycleLength;
+					}
+				}
 
-						for (int k = j - 1; k >= 0; k--)
+				return data.Length;
+			}
+
+			int MaxTrack(int[] data)
+			{
+				for (int trackLength = 2; trackLength < data.Length; trackLength++)
+				{
+					if (data.Length % trackLength != 0)
+						continue;
+
+					if (data[0] != data[0 + trackLength])
+					{
+						for (int i = 0; i < data.Length; i += trackLength)
 						{
-							cornerDigits[k] = 0;
+							for (int j = 1; j < trackLength; j++)
+							{
+								if (data[i] != data[i + j])
+									return 1;
+							}
 						}
 
-						break;
+						return trackLength;
 					}
 				}
+
+				return 1;
 			}
 
-			File.WriteAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "oriented_corner_count.bin"), OrientedCornersCount);
-			Console.WriteLine("Created oriented corner count file");
-
-			int[] permBuffer = new int[8];
-			for (int i = 0; i < MAX_CORNER_PERMUTATION; i++)
-			{
-				GetIndexedPerm(permBuffer, i);
-
-				int count = 0;
-				for (int j = 0; j < 8; j++)
-				{
-					if (permBuffer[j] == j)
-						count++;
-				}
-
-				PositionedEdgesCount[i] = (byte)count;
-			}
-
-			File.WriteAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "positioned_corner_count.bin"), PositionedCornersCount);
-			Console.WriteLine("Created positioned corner count file");
-
-			permBuffer = new int[12];
-			for (int i = 0; i < MAX_EDGE_PERMUTATION; i++)
-			{
-				GetIndexedPerm(permBuffer, i);
-
-				int count = 0;
-				for (int j = 0; j < 12; j++)
-				{
-					if (permBuffer[j] == j)
-						count++;
-
-				}
-					if(i % 10_000_000 == 0)
-						Console.WriteLine(i.ToString("000 000 000"));
-
-				PositionedEdgesCount[i] = (byte)count;
-			}
-
-			File.WriteAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "positioned_edge_count.bin"), PositionedEdgesCount);
-			Console.WriteLine("positoned oriented edge count file");
-
-			int NumberOfSetBits(int value)
-			{
-				value = value - ((value >> 1) & 0x55555555);
-				value = (value & 0x33333333) + ((value >> 2) & 0x33333333);
-				return (((value + (value >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
-			}
+			
 		}
 
 		public bool IsSovled => EdgeOrientation == 0 && EdgePermutation == 0 && CornerOrientation == 0 && CornerPermutation == 0;
@@ -529,6 +556,7 @@ namespace CubeAD
 		public CubeMove LastMove;
 
 
+		//Constructor
 		public CubeIndex(uint edgePermutation, ushort cornerPermutation, ushort edgeOrientation, ushort cornerOrientation, CubeMove move = CubeMove.None)
 		{
 			if (edgePermutation >= MAX_EDGE_PERMUTATION ||
@@ -583,15 +611,6 @@ namespace CubeAD
 
 			ApplyMoveSequenz(ms);
 		}
-
-		public void CopyValuesFrom(CubeIndex index)
-		{
-			EdgePermutation = index.EdgePermutation;
-			CornerPermutation = index.CornerPermutation;
-			EdgeOrientation = index.EdgeOrientation;
-			CornerOrientation = index.CornerOrientation;
-		}
-
 		public CubeIndex(BinaryReader br)
 		{
 			EdgePermutation = br.ReadUInt32();
@@ -600,6 +619,8 @@ namespace CubeAD
 			CornerOrientation = br.ReadUInt16();
 			LastMove = (CubeMove)br.ReadByte();
 		}
+
+		//Functions
 		public void Write(BinaryWriter bw)
 		{
 			bw.Write(EdgePermutation);
@@ -609,6 +630,13 @@ namespace CubeAD
 			bw.Write((byte)LastMove);
 		}
 
+		public void CopyValuesFrom(CubeIndex index)
+		{
+			EdgePermutation = index.EdgePermutation;
+			CornerPermutation = index.CornerPermutation;
+			EdgeOrientation = index.EdgeOrientation;
+			CornerOrientation = index.CornerOrientation;
+		}
 		public int[] GetEdgePerm()
 		{
 			return GetIndexedPerm(12, (int)EdgePermutation);
@@ -624,12 +652,10 @@ namespace CubeAD
 
 			return buffer;
 		}
-
 		public int[] GetCornerPerm()
 		{
 			return GetIndexedPerm(8, CornerPermutation);
 		}
-
 		public int[] GetCornerOrient()
 		{
 			int buffer = CornerOrientation;
@@ -778,6 +804,7 @@ namespace CubeAD
 			ms.Close();
 		}
 
+		//CubeIndex generation
 		public static uint FindEdgePermutationIndex(Cube c, int[] permBuffer)
 		{
 			if (permBuffer.Length != 12)
@@ -854,6 +881,8 @@ namespace CubeAD
 
 			return (ushort)ret;
 		}
+		
+		//Sorting
 		public static void RadixSortCubeIndices(CubeIndex[] data, CubeIndex[] CubeBuffer)
 		{
 			const int BIT_COUNT = 8;
@@ -917,6 +946,7 @@ namespace CubeAD
 			}
 		}
 
+		//Solving
 		public static List<MoveSequenz> FindEdgeOrientationMoves(ushort edgeOrientation)
 		{
 			const int MAX_SEARCH_DEPTH = 7;
@@ -1072,7 +1102,6 @@ namespace CubeAD
 				}
 			}
 		}
-
 		public static MoveSequenz FindSolutionWithEO(CubeIndex cube)
 		{
 			const int MAX_DEPTH = 10;
@@ -1170,7 +1199,6 @@ namespace CubeAD
 
 			}
 		}
-
 		public static List<CubeMove> FindSolutionInEOTree(CubeIndex cube)
 		{
 			List<CubeMove> list = new List<CubeMove>();
@@ -1196,7 +1224,6 @@ namespace CubeAD
 
 			return list;
 		}
-
 		public static MoveSequenz FindSolutionBruteForce(CubeIndex cube)
 		{			
 			List<CubeMove> solution = new List<CubeMove>();
@@ -1256,7 +1283,6 @@ namespace CubeAD
 
 			
 		}
-
 		public static List<CubeMove> FindSolutionInTree(CubeIndex cube)
 		{
 			List<CubeMove> list = new List<CubeMove>();
@@ -1282,7 +1308,6 @@ namespace CubeAD
 
 			return list;
 		}
-
 		public static MoveSequenz FindCommutator(CubeIndex cube, int maxDepth)
 		{
 			CubeIndex copy = new CubeIndex();
@@ -1389,6 +1414,7 @@ namespace CubeAD
 			}
 		}
 
+		//Permutation functions
 		public static int Factorial(int n)
 		{
 			int ret = 1;
@@ -1399,7 +1425,6 @@ namespace CubeAD
 
 			return ret;
 		}
-
 		public static int[] GetIndexedPerm(int n, int index)
 		{
 			List<int> list = new List<int>(n);
@@ -1422,8 +1447,8 @@ namespace CubeAD
 
 			return ret;
 		}
-		private static readonly List<int> bufferList = new List<int>();
 
+		private static readonly List<int> bufferList = new List<int>();
 		public static int[] GetIndexedPerm(int[] ret, int index)
 		{
 			int n = ret.Length;
@@ -1462,7 +1487,6 @@ namespace CubeAD
 			}
 			return ret;
 		}
-
 		public static int GetInversIndex(int[] perm)
 		{
 			int ret = 0;
@@ -1479,7 +1503,6 @@ namespace CubeAD
 			}
 			return ret;
 		}
-
 		public static int TransfromToFacNumber(int N, int value)
 		{
 			int ret = 0;
@@ -1503,12 +1526,10 @@ namespace CubeAD
 				a.CornerPermutation == b.CornerPermutation &&
 				a.CornerOrientation == b.CornerOrientation;
 		}
-
 		public static bool operator !=(CubeIndex a, CubeIndex b)
 		{
 			return !(a == b);
 		}
-
 		public static bool operator <(CubeIndex a, CubeIndex b)
 		{
 			if (a.EdgePermutation != b.EdgePermutation) return a.EdgePermutation < b.EdgePermutation;
@@ -1526,12 +1547,11 @@ namespace CubeAD
 			return a.CornerOrientation > b.CornerOrientation;
 		}
 
-		//overrides
+		//Overrides
 		public override string ToString()
 		{
 			return Index.ToString("000 000 000 000 000 000 000");
 		}
-
 		public override bool Equals(object obj)
 		{
 			return obj is CubeIndex other &&
@@ -1540,12 +1560,10 @@ namespace CubeAD
 				   EdgeOrientation == other.EdgeOrientation &&
 				   CornerOrientation == other.CornerOrientation;
 		}
-
 		public override int GetHashCode()
 		{
 			return HashCode.Combine(EdgePermutation, CornerPermutation, EdgeOrientation, CornerOrientation);
 		}
-
 		public int CompareTo(CubeIndex other)
 		{
 			if (EdgePermutation != other.EdgePermutation) return EdgePermutation.CompareTo(other.EdgePermutation);

@@ -10,6 +10,8 @@ namespace CubeAD
 
 		public static readonly MoveSequenz SuperFlip = new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2");
 		public static readonly MoveSequenz CheckerBoard = new MoveSequenz("L2 R2 D2 U2 F2 B2");
+		public static readonly MoveSequenz FmcWr = new MoveSequenz("R' U' F D2 L2 F R2 U2 R2 B D2 L B2 D' B2 L' R' B D2 B U2 L U2 R' U' F");
+
 		public static readonly MoveSequenz APerm = new MoveSequenz("R B' R F2 R' B R F2 R2");
 		public static readonly MoveSequenz GPerm = new MoveSequenz("R U R' U' D R2 U' R U' R' U R' U R2 D'");
 		public static readonly MoveSequenz UPerm = new MoveSequenz("R' U R' U' R' U' R' U R U R2");

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 
 namespace CubeAD
@@ -552,19 +553,23 @@ namespace CubeAD
 			string s = GetSideView();
 			for (int i = 0; i < s.Length; i++)
 			{
+				Color color;
 				switch (s[i])
 				{
-					case 'W': Console.ForegroundColor = ConsoleColor.White; break;
-					case 'R': Console.ForegroundColor = ConsoleColor.Red; break;
-					case 'O': Console.ForegroundColor = ConsoleColor.DarkMagenta; break;
-					case 'B': Console.ForegroundColor = ConsoleColor.Blue; break;
-					case 'G': Console.ForegroundColor = ConsoleColor.Green; break;
-					case 'Y': Console.ForegroundColor = ConsoleColor.Yellow; break;
-					default: Console.ForegroundColor = ConsoleColor.Gray; break;
+					case 'W': color = Color.White; break;
+					case 'R': color = Color.Red; break;
+					case 'O': color = Color.Orange; break;
+					case 'B': color = Color.Blue; break;
+					case 'G': color = Color.Green; break;
+					case 'Y': color = Color.Yellow; break;
+					default: color = Color.Gray; break;
 				}
 
-				Console.Write(s[i]);
+				Colorful.Console.Write(s[i], color);
 			}
+
+			Console.ForegroundColor = ConsoleColor.White;
+			Colorful.Console.Write("\n", Color.White);
 		}
 
 		public int GetValue()

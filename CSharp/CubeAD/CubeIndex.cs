@@ -10,11 +10,10 @@ using System.Threading.Tasks;
 namespace CubeAD
 {
 	//Compressed representation of a cube
-	[Serializable]
 	public struct CubeIndex : IComparable<CubeIndex>
 	{
-		public const int MAX_EO_MOVE_DEPTH = 8;
-		public const int MAX_MOVE_DEPTH = 7;
+		const int MAX_EO_MOVE_DEPTH = 8;
+		const int MAX_MOVE_DEPTH = 6;
 
 		public const int SIZE_IN_BYTES = 11;
 		public const int PADDED_SIZE_IN_BYTES = 12;
@@ -23,6 +22,8 @@ namespace CubeAD
 		public const ushort MAX_CORNER_PERMUTATION = 40320; //8!
 		public const ushort MAX_EDGE_ORIENTATION = 4096;    //2^12
 		public const ushort MAX_CORNER_ORIENTATION = 6561;  //3^8
+
+		public static string PRE_COMP_PATH = Directory.GetCurrentDirectory() + "\\PreCompFiles";
 
 		public static int[,] EdgeIndices = new int[6, 6];
 		public static int[,,] CornerIndices = new int[6, 6, 6];
@@ -63,16 +64,16 @@ namespace CubeAD
 		public static ushort[,] NextEdgeOrient = new ushort[MAX_EDGE_ORIENTATION, 18];
 		public static ushort[,] NextCornerOrient = new ushort[MAX_CORNER_ORIENTATION, 18];
 
-		public static byte[] OrientedEdgeCount = new byte[MAX_EDGE_ORIENTATION];
-		public static byte[] OrientedCornersCount = new byte[MAX_CORNER_ORIENTATION];
-		public static byte[] PositionedEdgesCount = new byte[MAX_EDGE_PERMUTATION];
-		public static byte[] PositionedCornersCount = new byte[MAX_CORNER_PERMUTATION];
+		public static byte[] OrientedEdgeCount;
+		public static byte[] OrientedCornersCount;
+		public static byte[] PositionedEdgesCount;
+		public static byte[] PositionedCornersCount;
 
 		public static SealedHashset GetEdgeOrientedMoveTree 
 		{ get
 			{
 				if (_EOMoveTree is null)
-					_EOMoveTree = new SealedHashset(Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solvedEOtree_" + MAX_EO_MOVE_DEPTH + ".bin"));
+					_EOMoveTree = new SealedHashset(Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solved_eo_tree_" + MAX_EO_MOVE_DEPTH + ".bin"));
 
 				return _EOMoveTree;
 			} 
@@ -82,7 +83,7 @@ namespace CubeAD
 			get
 			{
 				if (_MoveTree is null)
-					_MoveTree = new SealedHashset(Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solvedtree_" + MAX_MOVE_DEPTH + ".bin"));
+					_MoveTree = new SealedHashset(Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solved_tree_" + MAX_MOVE_DEPTH + ".bin"));
 
 				return _MoveTree;
 			}
@@ -180,11 +181,16 @@ namespace CubeAD
 			for (int i = 0; i < 18; i += 3)
 			{
 				CubeMove m = (CubeMove)i;
-				byte[] byteArray = File.ReadAllBytes(Directory.GetCurrentDirectory() + "\\PreCompFiles\\" + m + ".bin");
+				byte[] byteArray = File.ReadAllBytes(PRE_COMP_PATH + "\\" + m + ".bin");
 				NextEdgePerm[i / 3] = new uint[byteArray.Length / 4];
 
 				Buffer.BlockCopy(byteArray, 0, NextEdgePerm[i / 3], 0, byteArray.Length);
 			}
+
+			OrientedEdgeCount = File.ReadAllBytes(PRE_COMP_PATH + "\\oriented_edge_count.bin");
+			OrientedCornersCount = File.ReadAllBytes(PRE_COMP_PATH + "\\oriented_corner_count.bin");
+			PositionedEdgesCount = File.ReadAllBytes(PRE_COMP_PATH + "\\positioned_edge_count.bin");
+			PositionedCornersCount = File.ReadAllBytes(PRE_COMP_PATH + "\\positioned_corner_count.bin");
 
 
 			GC.Collect();
@@ -366,13 +372,13 @@ namespace CubeAD
 
 		public static void GenerateTreeFile(int depth)
 		{
-			new SealedHashset(SolvedTree(depth).GetArray()).SaveToFile(Path.Combine(Directory.GetCurrentDirectory(), "solvedtree_" + depth + ".bin"));
+			new SealedHashset(SolvedTree(depth).GetArray()).SaveToFile(Path.Combine(Directory.GetCurrentDirectory(), "solved_tree_" + depth + ".bin"));
 
 			Console.WriteLine("Saved file: solvedTree_" + depth + ".bin");
 		}
 		public static void GenerateEOTreeFile(int depth)
 		{
-			new SealedHashset(SolvedTreeOrientedEdges(depth).GetArray()).SaveToFile(Path.Combine(Directory.GetCurrentDirectory(), "solvedEOTree_" + depth + ".bin"));
+			new SealedHashset(SolvedTreeOrientedEdges(depth).GetArray()).SaveToFile(Path.Combine(Directory.GetCurrentDirectory(), "solved_eo_Tree_" + depth + ".bin"));
 
 			Console.WriteLine("Saved file: solvedEOtree_" + depth + ".bin");
 		}
@@ -386,6 +392,99 @@ namespace CubeAD
 			Console.WriteLine("Created set");
 		}
 
+		public static void GenerateSolvedCounts()
+		{
+			OrientedEdgeCount = new byte[MAX_EDGE_ORIENTATION];
+			OrientedCornersCount = new byte[MAX_CORNER_ORIENTATION];
+			PositionedEdgesCount = new byte[MAX_EDGE_PERMUTATION];
+			PositionedCornersCount = new byte[MAX_CORNER_PERMUTATION];
+
+
+			for (int i = 0; i < MAX_EDGE_ORIENTATION; i++)
+				OrientedEdgeCount[i] = (byte)NumberOfSetBits(i);
+
+			File.WriteAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "oriented_edge_count.bin"), OrientedEdgeCount);
+			Console.WriteLine("Created oriented edge count file");
+
+			int[] cornerDigits = new int[8];
+			for (int i = 0; i < MAX_CORNER_ORIENTATION; i++)
+			{
+				int count = 0;
+				for (int j = 0; j < 8; j++)
+				{
+					if (cornerDigits[j] == 0)
+						count++;
+				}
+
+
+				OrientedCornersCount[i] = (byte)count;
+
+				//increment number in base 3
+				for (int j = 0; j < cornerDigits.Length; j++)
+				{
+					if (cornerDigits[j] < 2)
+					{
+						cornerDigits[j]++;
+
+						for (int k = j - 1; k >= 0; k--)
+						{
+							cornerDigits[k] = 0;
+						}
+
+						break;
+					}
+				}
+			}
+
+			File.WriteAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "oriented_corner_count.bin"), OrientedCornersCount);
+			Console.WriteLine("Created oriented corner count file");
+
+			int[] permBuffer = new int[8];
+			for (int i = 0; i < MAX_CORNER_PERMUTATION; i++)
+			{
+				GetIndexedPerm(permBuffer, i);
+
+				int count = 0;
+				for (int j = 0; j < 8; j++)
+				{
+					if (permBuffer[j] == j)
+						count++;
+				}
+
+				PositionedEdgesCount[i] = (byte)count;
+			}
+
+			File.WriteAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "positioned_corner_count.bin"), PositionedCornersCount);
+			Console.WriteLine("Created positioned corner count file");
+
+			permBuffer = new int[12];
+			for (int i = 0; i < MAX_EDGE_PERMUTATION; i++)
+			{
+				GetIndexedPerm(permBuffer, i);
+
+				int count = 0;
+				for (int j = 0; j < 12; j++)
+				{
+					if (permBuffer[j] == j)
+						count++;
+
+				}
+					if(i % 10_000_000 == 0)
+						Console.WriteLine(i.ToString("000 000 000"));
+
+				PositionedEdgesCount[i] = (byte)count;
+			}
+
+			File.WriteAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "positioned_edge_count.bin"), PositionedEdgesCount);
+			Console.WriteLine("positoned oriented edge count file");
+
+			int NumberOfSetBits(int value)
+			{
+				value = value - ((value >> 1) & 0x55555555);
+				value = (value & 0x33333333) + ((value >> 2) & 0x33333333);
+				return (((value + (value >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+			}
+		}
 
 		public bool IsSovled => EdgeOrientation == 0 && EdgePermutation == 0 && CornerOrientation == 0 && CornerPermutation == 0;
 
@@ -638,6 +737,13 @@ namespace CubeAD
 				MakeMove(ms.Moves[i]);
 			}
 		}
+		public void ApplyMoveSequenz(List<CubeMove> ms)
+		{
+			for (int i = 0; i < ms.Count; i++)
+			{
+				MakeMove(ms[i]);
+			}
+		}
 
 		//Statics
 		public static CubeIndex[] ReadCubeIndicesFromFile(string path)
@@ -851,13 +957,19 @@ namespace CubeAD
 
 		public static SortedBuckets SolvedTree(int maxDepth)
 		{
-			//Stack<CubeMove> currentMoves = new Stack<CubeMove>(maxDepth);
-			SortedBuckets set = new SortedBuckets(20_000);
+			Stack<CubeMove> currentMoves = new Stack<CubeMove>(maxDepth);
+			SortedBuckets set = new SortedBuckets(2_000);
 
 			//HashSet<CubeIndex> set = new HashSet<CubeIndex>();
 
 			ulong counter = 0;
-			DFS(0, new CubeIndex(), new MoveBlocker());
+
+			int currentMaxDepth = 0;
+			for (currentMaxDepth = 0; currentMaxDepth <= maxDepth; currentMaxDepth++)
+			{
+				DFS(0, new CubeIndex(), new MoveBlocker());
+				set.RemoveDuplicates();
+			}
 
 			set.RemoveDuplicates();
 			return set;
@@ -871,15 +983,16 @@ namespace CubeAD
 					//Console.WriteLine("Sorted: " + set.Count.ToString("000 000 000 000"));
 				}
 
-				if (depth < maxDepth)
+				if (depth < currentMaxDepth)
 				{
 					for (int i = 0; i < 18; i++)
 					{
 						if (blocker[i / 3]) continue;
+						if (i / 3 > 3 && i % 3 != 1) continue;
 
-
+						currentMoves.Push((CubeMove)i);
 						DFS(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3));
-
+						currentMoves.Pop();
 					}
 				}
 			}
@@ -960,7 +1073,7 @@ namespace CubeAD
 			}
 		}
 
-		public static MoveSequenz FindSolution(CubeIndex cube)
+		public static MoveSequenz FindSolutionWithEO(CubeIndex cube)
 		{
 			const int MAX_DEPTH = 10;
 
@@ -1029,7 +1142,7 @@ namespace CubeAD
 							//Console.WriteLine("DFS moves: " + string.Join(" ", currentMoves.Reverse()));
 
 							solution.AddRange(currentMoves.Reverse());
-							solution.AddRange(FindSolutionInTree(cube));
+							solution.AddRange(FindSolutionInEOTree(cube));
 
 							return true;
 						}
@@ -1058,13 +1171,99 @@ namespace CubeAD
 			}
 		}
 
-		public static List<CubeMove> FindSolutionInTree(CubeIndex cube)
+		public static List<CubeMove> FindSolutionInEOTree(CubeIndex cube)
 		{
 			List<CubeMove> list = new List<CubeMove>();
 
 			while (!cube.IsSovled)
 			{
 				if (GetEdgeOrientedMoveTree.TryGetValue(cube, out cube))
+				{
+					if (!cube.IsSovled)
+					{
+						list.Add(MoveSequenz.ReverseMove(cube.LastMove));
+						cube.MakeMove(MoveSequenz.ReverseMove(cube.LastMove));
+					}
+				}
+				else
+				{
+					Console.WriteLine("Cube not in EO set");
+					return null;
+				}
+			}
+
+			//Console.WriteLine("Tree solution: " + string.Join(" " , list));
+
+			return list;
+		}
+
+		public static MoveSequenz FindSolutionBruteForce(CubeIndex cube)
+		{			
+			List<CubeMove> solution = new List<CubeMove>();
+			Stack<CubeMove> currentMoves = new Stack<CubeMove>(20);
+
+			int currentMaxDepth;
+			for (int i = 0; i <= 20; i++)
+			{
+				currentMaxDepth = i;
+				Console.WriteLine(currentMaxDepth);
+				if(DFS(0, cube, new MoveBlocker()))
+				{
+					break;
+				}
+			}
+
+
+			Console.WriteLine("Solution length: " + solution.Count);
+			return new MoveSequenz(solution);
+
+
+			bool DFS(int depth, CubeIndex cube, MoveBlocker blocker)
+			{
+				if (GetMoveTree.Contains(cube))
+				{
+					//Console.WriteLine("Found solution!");
+					solution.Clear();
+
+					//Console.WriteLine("DFS moves: " + string.Join(" ", currentMoves.Reverse()));
+
+					solution.AddRange(currentMoves.Reverse());
+					solution.AddRange(FindSolutionInTree(cube));
+
+					Console.WriteLine(string.Join(" ", solution));
+
+					Console.WriteLine("Kek");
+
+					return true;
+				}
+
+				if (depth < currentMaxDepth)
+				{
+					for (int i = 0; i < 18; i++)
+					{
+						if (blocker[i / 3]) continue;
+
+						currentMoves.Push((CubeMove)i);
+						if (DFS(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3)))
+							return true;
+						currentMoves.Pop();
+					}
+				}
+
+				return false;
+			}
+
+
+			
+		}
+
+		public static List<CubeMove> FindSolutionInTree(CubeIndex cube)
+		{
+			List<CubeMove> list = new List<CubeMove>();
+
+			while (!cube.IsSovled)
+			{
+				if (GetMoveTree.TryGetValue(cube, out cube))
 				{
 					if (!cube.IsSovled)
 					{
@@ -1082,6 +1281,112 @@ namespace CubeAD
 			//Console.WriteLine("Tree solution: " + string.Join(" " , list));
 
 			return list;
+		}
+
+		public static MoveSequenz FindCommutator(CubeIndex cube, int maxDepth)
+		{
+			CubeIndex copy = new CubeIndex();
+
+			Stack<CubeMove> currentMoves = new Stack<CubeMove>();
+			List<CubeMove> ret = new List<CubeMove>();
+			MoveSequenz ms = new MoveSequenz();
+			int bestSolution = int.MaxValue;
+			int currentMaxLength;
+			for(currentMaxLength = 2; currentMaxLength < maxDepth; currentMaxLength++)
+			{
+
+				Console.WriteLine("MaxSearchDepth: " + currentMaxLength);
+				GenerateMoveSeq(0, cube, new MoveBlocker());
+			}
+
+			if(bestSolution < int.MaxValue)
+			{
+				return new MoveSequenz(ret);
+			}
+
+			return null;
+
+			void GenerateMoveSeq(int depth, CubeIndex cube, MoveBlocker blocker)
+			{
+				if(depth == currentMaxLength)
+				{
+					CubeMove[] moves = currentMoves.Reverse().ToArray();
+					List<CubeMove> list = new List<CubeMove>(moves.Length * 2);
+
+					for (int setupLength = 0; setupLength < 2; setupLength++)
+					{
+						for (int firstLength = 1; firstLength < moves.Length; firstLength++)
+						{
+							int secondLength = moves.Length - setupLength - firstLength;
+
+							if (setupLength + firstLength + secondLength != moves.Length) 
+								Console.WriteLine("Alarm");
+
+							for (int i = firstLength - 1; i >= 0; i--)
+								cube.MakeMove(MoveSequenz.ReverseMove(moves[setupLength + i]));
+
+							for (int i = secondLength - 1; i >= 0; i--)
+								cube.MakeMove(MoveSequenz.ReverseMove(moves[setupLength + firstLength + i]));
+
+							for (int i = 0; i < setupLength; i++)
+								cube.MakeMove(moves[i]);
+
+							if (cube.IsSovled)
+							{
+								list.Clear();
+								list.AddRange(moves);
+
+								for (int i = firstLength - 1; i >= 0; i--)
+									list.Add(MoveSequenz.ReverseMove(moves[setupLength + i]));
+
+								for (int i = secondLength - 1; i >= 0; i--)
+									list.Add(MoveSequenz.ReverseMove(moves[setupLength + firstLength + i]));
+
+								for (int i = 0; i < setupLength; i++)
+									list.Add(MoveSequenz.ReverseMove(moves[i]));
+
+								ms.Moves.Clear();
+								ms.Moves.AddRange(list);
+
+								ms.Reduce();
+
+								if(ms.Length < bestSolution)
+								{
+									bestSolution = ms.Length;
+
+									string s = "Setup: ";
+									for (int i = 0; i < setupLength; i++)
+										s += moves[i].ToString() + " ";
+
+									s += "\nFirst: ";
+									for (int i = 0; i < firstLength; i++)
+										s += moves[i + setupLength].ToString() + " ";
+
+									s += "\nSecond: ";
+									for (int i = 0; i < secondLength; i++)
+										s += moves[i + setupLength + firstLength].ToString() + " ";
+
+									Console.WriteLine(s);
+
+									Console.WriteLine("Full: " + ms + " [" + ms.Moves.Count + "]");
+								}
+							}
+						}
+					}
+				}
+				else 
+				{
+					for (int i = 0; i < 18; i++)
+					{
+						if (blocker[i / 3]) continue;
+
+						currentMoves.Push((CubeMove)i);
+						GenerateMoveSeq(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3, true));
+
+						currentMoves.Pop();
+					}
+				}
+			}
 		}
 
 		public static int Factorial(int n)

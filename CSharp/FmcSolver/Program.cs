@@ -15,10 +15,19 @@ namespace FmcSolver
 		{
 
 			CubeIndex.Factorial(1);
-			Stopwatch sw = Stopwatch.StartNew();
-			Console.WriteLine(CubeIndex.GetEdgeOrientedMoveTree);
-			Console.WriteLine(CubeIndex.GetMoveTree);
-			Console.WriteLine(sw.ElapsedMilliseconds);
+			Cube c = new Cube();
+			MoveSequenz ms = new MoveSequenz("R' U' F D2 L2 F R2 U2 R2 B D2 L B2 D' B2 L' R' B D2 B U2 L U2 R' U' F");
+			c.ApplyMoveSequenz(ms);
+			c.PrintSideView();
+			c.MakeMove(CubeMove.D2);
+			c.MakeMove(CubeMove.FP);
+
+			CubeIndex kek = new CubeIndex(c);
+
+			CubeIndex.FindSolutionBruteForce(kek);
+			CubeIndex.FindCommutator(kek, 10); 
+
+			//CubeIndex.GenerateSolvedCounts();
 
 			//for(int i = 1; i < 9; i++)
 			//{
@@ -32,7 +41,6 @@ namespace FmcSolver
 			//CubeIndex.GenerateSolvedEdgeSet(8);
 
 
-			//MoveSequenz ms = new MoveSequenz("R' U' F D2 L2 F R2 U2 R2 B D2 L B2 D' B2 L' R' B D2 B U2 L U2 R' U' F");
 
 			//while (true)
 			//{

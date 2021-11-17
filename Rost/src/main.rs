@@ -2,9 +2,10 @@ mod bitarray;
 mod side;
 mod enums;
 mod cube;
+mod cubeindex;
 use colored::*;
 
-use crate::{cube::Cube, enums::CubeMove};
+use crate::{cube::Cube, cubeindex::EDGE_INDICES, enums::CubeMove};
 
 fn main() {
     println!("Hello, world!");
@@ -21,4 +22,9 @@ fn main() {
     kek.print_side_view();
 
     kek.print_raw();
+
+    
+    unsafe {
+        (*EDGE_INDICES)[0][0] = 3;
+    }
 }

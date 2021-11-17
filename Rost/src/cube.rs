@@ -1,9 +1,7 @@
 #![allow(dead_code)]
 
-use std::{cmp, string};
-
+use std::cmp;
 use colored::Colorize;
-
 use crate::{enums::{CubeColor, CubeMove, u8_to_CubeColor}, side::{SOLVED_SIDES, Side}, side};
 
 const SIDE_COUNT: i32 = 6;

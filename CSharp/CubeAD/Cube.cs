@@ -1007,16 +1007,6 @@ namespace CubeAD
 			//Console.WriteLine("MakeMoveCount: " + cubeCount);
 
 			return ret;
-
-			int Power(int x, int y)
-			{
-				int ret = 1;
-				for (int i = 0; i < y; i++)
-				{
-					ret *= x;
-				}
-				return ret;
-			}
 		}
 
 		public static HashSet<Cube> GetSolvedCubesBFSNaive(int maxDepth)
@@ -1054,16 +1044,6 @@ namespace CubeAD
 			//Console.WriteLine("MakeMoveCount: " + cubeCount);
 
 			return ret;
-
-			int Power(int x, int y)
-			{
-				int ret = 1;
-				for (int i = 0; i < y; i++)
-				{
-					ret *= x;
-				}
-				return ret;
-			}
 		}
 
 		public static bool operator ==(Cube a, Cube b)

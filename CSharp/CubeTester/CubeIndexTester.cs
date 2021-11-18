@@ -15,13 +15,13 @@ namespace CubeTester
 			{
 				int[] array = new int[n];
 
-				int fac = CubeIndex.Factorial(n);
+				int fac = Permutation.Factorial(n);
 
 				for (int f = 0; f < fac; f++)
 				{
-					CubeIndex.GetIndexedPerm(array, f);
+					Permutation.GetIndexedPerm(array, f);
 
-					Assert.AreEqual(f, CubeIndex.GetIndex(array));
+					Assert.AreEqual(f, Permutation.GetIndex(array));
 				}
 			}
 		}
@@ -149,8 +149,8 @@ namespace CubeTester
 					if (x / 2 == y / 2) continue;
 
 					System.Diagnostics.Debug.WriteLine(counter + " x " + x + " y " + y);
-					Assert.AreEqual(CubeIndex.CubeEdgeColors[counter, 0], x);
-					Assert.AreEqual(CubeIndex.CubeEdgeColors[counter++, 1], y);
+					Assert.AreEqual(PreCompTables.CubeEdgeColors[counter, 0], x);
+					Assert.AreEqual(PreCompTables.CubeEdgeColors[counter++, 1], y);
 				}
 			}
 		}

@@ -1,123 +1,113 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CubeAD
 {
 	//A class that compresses a sequenz of moves into a single data permutation
 	//[TODO] unit tests
-	class Permutation
+	public static class Permutation
 	{
-		static byte[][] SideSwaps =
+		public static int Factorial(int n)
 		{
-			new byte[] { 2, 3, 4, 5, 6, 7, 0, 1 },
-			new byte[] { 4, 5, 6, 7, 0, 1, 2, 3 },
-			new byte[] { 6, 7, 0, 1, 2, 3, 4, 5 }
-		};
+			int ret = 1;
+			for (int i = 2; i <= n; i++)
+			{
+				ret *= i;
+			}
 
-		static (byte Side, byte Stripe)[] StripeIndices =
+			return ret;
+		}
+		public static int[] GetIndexedPerm(int n, int index)
 		{
-			(4, 3),
-			(3, 3),
-			(5, 3),
-			(2, 1),
+			List<int> list = new List<int>(n);
+			for (int i = 0; i < n; i++) list.Add(i);
 
-			(4, 1),
-			(2, 3),
-			(5, 1),
-			(3, 1),
+			int[] indices = new int[n];
+			for (int i = n - 1; i >= 0; i--)
+			{
+				indices[i] = index / Factorial(i);
+				index -= indices[i] * Factorial(i);
+			}
 
-			(4, 0),
-			(0, 3),
-			(5, 2),
-			(1, 1),
+			int[] ret = new int[n];
 
-			(4, 2),
-			(1, 3),
-			(5, 0),
-			(0, 1),
+			for (int i = ret.Length - 1; i >= 0; i--)
+			{
+				ret[n - i - 1] = list[indices[i]];
+				list.RemoveAt(indices[i]);
+			}
 
-			(2, 0),
-			(1, 0),
-			(3, 0),
-			(0, 0),
-
-			(3, 2),
-			(1, 2),
-			(2, 2),
-			(0, 2)
-		};
-
-		public byte[] Perm = new byte[48];
-		public MoveSequenz Sequenz;
-
-		public Permutation()
-		{
-			Sequenz = new MoveSequenz(0);
+			return ret;
 		}
 
-		public void DoMove(CubeMove m)
+		private static readonly List<int> bufferList = new List<int>();
+		public static int[] GetIndexedPerm(int[] ret, int index)
 		{
-			byte[] sideBuffer = new byte[8];
-			byte valueBuffer;
-			int side = (int)m / 3;
-			int count = (int)m % 3;
+			int n = ret.Length;
 
-			for (int i = 0; i < 3; i++)
+			bufferList.Clear();
+			for (int i = 0; i < n; i++) bufferList.Add(i);
+
+			int[] indices = new int[n];
+			for (int i = n - 1; i >= 0; i--)
 			{
-				switch (count)
+				indices[i] = index / Factorial(i);
+				index -= indices[i] * Factorial(i);
+			}
+
+			for (int i = ret.Length - 1; i >= 0; i--)
+			{
+				ret[n - i - 1] = bufferList[indices[i]];
+				bufferList.RemoveAt(indices[i]);
+			}
+
+			return ret;
+		}
+		public static int GetIndex(int[] perm)
+		{
+			int ret = 0;
+			for (int i = 0; i < perm.Length; i++)
+			{
+				int counter = 0;
+				for (int j = i + 1; j < perm.Length; j++)
 				{
-					case 0:
-						valueBuffer =
-							Perm[GetIndex(StripeIndices[4 * side + 0], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 0], i)] =
-							Perm[GetIndex(StripeIndices[4 * side + 3], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 3], i)] =
-							Perm[GetIndex(StripeIndices[4 * side + 2], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 2], i)] =
-							Perm[GetIndex(StripeIndices[4 * side + 1], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 1], i)] =
-							valueBuffer;
-						break;
-
-					case 1:
-						valueBuffer = Perm[GetIndex(StripeIndices[4 * side + 0], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 0], i)] =
-							Perm[GetIndex(StripeIndices[4 * side + 2], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 2], i)] = valueBuffer;
-
-						valueBuffer = Perm[GetIndex(StripeIndices[4 * side + 1], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 1], i)] =
-							Perm[GetIndex(StripeIndices[4 * side + 3], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 3], i)] = valueBuffer;
-						break;
-
-					case 2:
-						valueBuffer =
-							Perm[GetIndex(StripeIndices[4 * side + 0], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 0], i)] =
-							Perm[GetIndex(StripeIndices[4 * side + 1], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 1], i)] =
-							Perm[GetIndex(StripeIndices[4 * side + 2], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 2], i)] =
-							Perm[GetIndex(StripeIndices[4 * side + 3], i)];
-						Perm[GetIndex(StripeIndices[4 * side + 3], i)] =
-							valueBuffer;
-						break;
+					if (perm[i] > perm[j])
+						counter++;
 				}
+
+				ret += Factorial(perm.Length - 1 - i) * counter;
 			}
-
-			int offset = side * 8;
-			byte[] permBuffer = SideSwaps[count];
-			Buffer.BlockCopy(Perm, offset, sideBuffer, 0, 8);
-
-			for (int i = 0; i < 8; i++)
+			return ret;
+		}
+		public static int GetInversIndex(int[] perm)
+		{
+			int ret = 0;
+			for (int i = 0; i < perm.Length; i++)
 			{
-				Perm[offset + i] = sideBuffer[permBuffer[i]];
-			}
+				int counter = 0;
+				for (int j = i - 1; j >= 0; j--)
+				{
+					if (perm[i] > perm[j])
+						counter++;
+				}
 
-			int GetIndex((int Side, int Stripe) tuple, int index)
-			{
-				return tuple.Side * 8 + ((tuple.Stripe * 2 + index) % 8);
+				ret += Factorial(i) * counter;
 			}
+			return ret;
+		}
+		public static int TransfromToFacNumber(int N, int value)
+		{
+			int ret = 0;
+			int factor = 1;
+			for (int i = 2; i < N; i++)
+			{
+				int dec = value % i;
+				ret += dec * factor;
+
+				value /= i;
+				factor *= 10;
+			}
+			return ret;
 		}
 	}
 }

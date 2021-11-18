@@ -18,7 +18,7 @@ namespace CubeBenchmarks
 
 		static SolvedSetContainsBenchmark()
 		{
-			CubeIndex[] array = CubeIndex.SolvedTree(DEPTH).GetArray();
+			CubeIndex[] array = SearchingAlgorithms.GenerateSolvedTree(DEPTH).GetArray();
 
 			Console.WriteLine("Created Array");
 

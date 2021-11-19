@@ -17,7 +17,7 @@ namespace CubeAD
 		public const int MAX_EO_MOVE_DEPTH = 8;
 		public const int MAX_MOVE_DEPTH = 7;
 
-		public static readonly string PRE_COMP_PATH = Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles");
+		public static readonly string PRE_COMP_PATH = @"C:\Users\Martin\source\repos\FmcHelper\Files";
 		public const string MOVE_TREE_PREFIX = "solved_tree_";
 
 		public static int[,] EdgeIndices = new int[6, 6];
@@ -82,7 +82,7 @@ namespace CubeAD
 			{
 				if (_EOMoveTree is null)
 				{
-					string path = Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solved_eo_tree_" + MAX_EO_MOVE_DEPTH + ".bin");
+					string path = Path.Combine(PRE_COMP_PATH, "solved_eo_tree_" + MAX_EO_MOVE_DEPTH + ".bin");
 
 					if (File.Exists(path))
 					{
@@ -90,7 +90,7 @@ namespace CubeAD
 					}
 					else
 					{
-						_EOMoveTree = new SealedHashset(SolvedTreeOrientedEdges(MAX_EO_MOVE_DEPTH).GetArray());
+						_EOMoveTree = new SealedHashset(GenerateSolvedTreeOrientedEdges(MAX_EO_MOVE_DEPTH).GetArray());
 						_EOMoveTree.SaveToFile(path);
 						Console.WriteLine("Created: " + path);
 					}
@@ -105,7 +105,7 @@ namespace CubeAD
 			{
 				if (_MoveTree is null)
 				{
-					string path = Path.Combine(Directory.GetCurrentDirectory(), "PreCompFiles", "solved_tree_" + MAX_MOVE_DEPTH + ".bin");
+					string path = Path.Combine(PRE_COMP_PATH, "solved_tree_" + MAX_MOVE_DEPTH + ".bin");
 
 					if (File.Exists(path))
 					{
@@ -156,12 +156,6 @@ namespace CubeAD
 						CornerIndices[z, y, x] = counter++;
 					}
 				}
-			}
-
-			if (!Directory.Exists(PRE_COMP_PATH))
-			{
-				Directory.CreateDirectory(PRE_COMP_PATH);
-				Console.WriteLine("Created directory: " + PRE_COMP_PATH);
 			}
 
 			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "next_corner_perm.bin"), NextCornerPerm, (ret) =>

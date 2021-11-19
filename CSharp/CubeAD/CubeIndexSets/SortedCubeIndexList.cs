@@ -54,6 +54,7 @@ namespace CubeAD.CubeIndexSets
 					}
 					else
 					{
+						
 						deleteCount++;
 					}
 				}

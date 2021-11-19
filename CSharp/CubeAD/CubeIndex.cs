@@ -80,7 +80,6 @@ namespace CubeAD
 			EdgeOrientation = edgeOrientation;
 			CornerOrientation = cornerOrientation;
 			LastMove = move;
-
 		}
 		public CubeIndex(Random rnd)
 		{
@@ -98,6 +97,7 @@ namespace CubeAD
 			EdgeOrientation = old.EdgeOrientation;
 			CornerOrientation = old.CornerOrientation;
 			LastMove = CubeMove.None;
+
 			MakeMove(m);
 		}
 
@@ -225,6 +225,41 @@ namespace CubeAD
 			}
 
 			//U -> XZ
+		}
+
+		public void Transform(CubeIndex cube)
+		{
+			int[] edgePerm = GetEdgePerm();
+			int[] edgeOrient = GetEdgeOrient();
+
+			int[] transformEdgePerm = cube.GetEdgePerm();
+			int[] transformEdgeOrient = cube.GetEdgeOrient();
+
+
+			int[] resultEdgePerm = new int[edgePerm.Length];
+			int[] resultEdgeOrient = new int[edgePerm.Length];
+
+			for (int i = 0; i < edgePerm.Length; i++)
+			{
+				resultEdgePerm[i] = edgePerm[transformEdgePerm[i]];
+				resultEdgeOrient[resultEdgePerm[i]] = (edgeOrient[edgePerm[i]] + transformEdgeOrient[transformEdgePerm[i]]) % 2;
+			}
+
+			int[] cornerPerm = GetCornerPerm();
+			int[] cornerOrient = GetCornerOrient();
+
+			int[] transformCornerPerm = cube.GetCornerPerm();
+			int[] transformCornerOrient = cube.GetCornerOrient();
+
+
+			int[] resultCornerPerm = new int[cornerPerm.Length];
+			int[] resultCornerOrient = new int[cornerPerm.Length];
+
+			for (int i = 0; i < cornerPerm.Length; i++)
+			{
+				resultCornerPerm[i] = cornerPerm[transformCornerPerm[i]];
+				resultCornerOrient[resultCornerPerm[i]] = (cornerOrient[cornerPerm[i]] + transformCornerOrient[transformCornerPerm[i]]) % 3;
+			}
 		}
 
 		public Cube GetCube()
@@ -483,6 +518,12 @@ namespace CubeAD
 			if (a.EdgeOrientation != b.EdgeOrientation) return a.EdgeOrientation > b.EdgeOrientation;
 
 			return a.CornerOrientation > b.CornerOrientation;
+		}
+		public static CubeIndex operator *(CubeIndex a, CubeIndex b)
+		{
+			CubeIndex result = new CubeIndex();
+
+
 		}
 
 		//Overrides

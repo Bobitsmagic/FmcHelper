@@ -14,27 +14,14 @@ namespace FmcSolver
 	{
 		static void Main(string[] args)
 		{
-			for(int i = 0; i < 18; i++)
-			{
-				CubeMove m = (CubeMove)i;
+			Cube c = new Cube();
+			MoveSequenz ms = MoveSequenz.FmcWr;
+			c.ApplyMoveSequenz(ms);
+			c.PrintSideView();
 
-				Console.WriteLine(m + " -> " + MoveSequenz.ReverseMove(m));
-			}
+			CubeIndex kek = new CubeIndex(c);
 
-
-			SearchingAlgorithms.CheckTree();
-
-			//Cube c = new Cube();
-			//MoveSequenz ms = MoveSequenz.FmcWr;
-			//c.ApplyMoveSequenz(ms);
-			//c.PrintSideView();
-			//c.MakeMove(CubeMove.D2);
-			//c.MakeMove(CubeMove.FP);
-
-			//CubeIndex kek = new CubeIndex(c);
-
-			//CubeIndex.FindSolutionBruteForce(kek);
-			//CubeIndex.FindCommutator(kek, 10); 
+			SearchingAlgorithms.FindSolutionBruteForceMultithreaded(kek);
 
 			Console.WriteLine("\nDone");
 			Console.ReadLine();

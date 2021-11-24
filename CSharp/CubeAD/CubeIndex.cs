@@ -316,6 +316,44 @@ namespace CubeAD
 			}
 		}
 
+		public bool HasSymmetry(SymmetryElement se)
+		{
+			return CornersHaveSymmetry(se) && EdgesHaveSymmetry(se);
+		}
+		public bool CornersHaveSymmetry(SymmetryElement se)
+		{
+			int[] perm = GetInverse(GetCornerPerm());
+			int[] orient = GetCornerOrient();
+			byte[] symTransfrom = SymmetryCornerPermutation[se.Index];
+
+			for (int i = 0; i < 8; i++)
+			{
+				if (perm[symTransfrom[i]] != symTransfrom[perm[i]] || orient[i] != orient[symTransfrom[i]])
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+		public bool EdgesHaveSymmetry(SymmetryElement se)
+		{
+			int[] perm = GetInverse(GetEdgePerm());
+			byte[] symTransfrom = SymmetryEdgePermutation[se.Index];
+			int[] orient = GetEdgeOrient();
+
+			for (int i = 0; i < 12; i++)
+			{
+				if (perm[symTransfrom[i]] != symTransfrom[perm[i]] || orient[i] != orient[symTransfrom[i]])
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+		
+
 		//Statics
 		public static CubeIndex[] ReadCubeIndicesFromFile(string path)
 		{
@@ -426,7 +464,12 @@ namespace CubeAD
 
 			return (ushort)ret;
 		}
-		
+	
+		public int GetSingleCornerOrientation(int index)
+		{
+			return GetCornerOrient()[index];
+		}
+
 		//Sorting
 		public static void RadixSortCubeIndices(CubeIndex[] data, CubeIndex[] CubeBuffer)
 		{
@@ -523,7 +566,7 @@ namespace CubeAD
 		{
 			CubeIndex result = new CubeIndex();
 
-
+			return result;
 		}
 
 		//Overrides

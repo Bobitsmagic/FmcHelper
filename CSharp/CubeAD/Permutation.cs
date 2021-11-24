@@ -79,6 +79,18 @@ namespace CubeAD
 			}
 			return ret;
 		}
+
+		public static int[] GetInverse(int[] perm)
+		{
+			int[] ret = new int[perm.Length];
+
+			for (int i = 0; i < perm.Length; i++)
+			{
+				ret[perm[i]] = i;
+			}
+
+			return ret;
+		}
 		public static int GetInversIndex(int[] perm)
 		{
 			int ret = 0;

@@ -216,5 +216,45 @@ namespace CubeTester
 				Assert.AreEqual(buffer, index);
 			}
 		}
+
+		[Test]
+		public void HasSymmetry()
+		{
+			CubeIndex c = new CubeIndex();
+
+			foreach (SymmetryElement se in SymmetryElement.Elements)
+			{
+				Assert.True(c.HasSymmetry(se));
+			}
+
+			//Super flip
+			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
+			foreach (SymmetryElement se in SymmetryElement.Elements)
+			{
+				Assert.True(c.HasSymmetry(se));
+			}
+
+			c = new CubeIndex();
+
+			SymmetryElement mirrorX = new SymmetryElement(CubeColor.Red, CubeColor.Yellow, CubeColor.Green);
+
+			c.MakeMove(CubeMove.R);
+
+			Assert.False(c.HasSymmetry(mirrorX));
+
+			c.MakeMove(CubeMove.LP);
+
+			Assert.True(c.HasSymmetry(mirrorX));
+
+			c.MakeMove(CubeMove.D2);
+
+			//Skip idendity
+			for (int i = 1; i < SymmetryElement.Elements.Length; i++)
+			{
+				SymmetryElement se = SymmetryElement.Elements[i];
+
+				Assert.AreEqual(se == mirrorX, c.HasSymmetry(se));
+			}
+		}
 	}
 }

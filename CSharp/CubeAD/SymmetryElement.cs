@@ -260,6 +260,15 @@ namespace CubeAD
 			return new SymmetryElement(b.TransformColor(a.Orange), b.TransformColor(a.Yellow), b.TransformColor(a.Green));
 		}
 
+		public static bool operator ==(SymmetryElement a, SymmetryElement b)
+		{
+			return a.Index == b.Index;
+		}
+		public static bool operator !=(SymmetryElement a, SymmetryElement b)
+		{
+			return a.Index != b.Index;
+		}
+
 		public override bool Equals(object obj)
 		{
 			return obj is SymmetryElement element &&

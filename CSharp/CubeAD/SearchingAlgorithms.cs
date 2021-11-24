@@ -362,6 +362,55 @@ namespace CubeAD
 			
 		}
 
+
+		public static void PrintCornerOrientdist()
+		{
+			int checkedCorner = 0;
+
+			Dictionary<int, int> dic = new Dictionary<int, int>();
+			
+			for(int i = 0; i < 18; i++)
+			{
+				CubeIndex first = new CubeIndex();
+				first.MakeMove((CubeMove)i);
+				for(int j = 0; j < 18; j++)
+				{
+					CubeIndex second = new CubeIndex();
+					second.MakeMove((CubeMove)j);
+
+					CubeIndex third =	new CubeIndex();
+					third.MakeMove((CubeMove)i);
+					third.MakeMove((CubeMove)j);
+
+
+					int[] firstPerm = Permutation.GetInverse(first.GetCornerPerm());
+					int[] secondPerm = Permutation.GetInverse(second.GetCornerPerm());
+					int[] thirdPerm = Permutation.GetInverse(third.GetCornerPerm());
+
+					int v1 = first.GetSingleCornerOrientation(firstPerm[checkedCorner]);
+					int v2 = second.GetSingleCornerOrientation(thirdPerm[checkedCorner]);
+					int v3 = third.GetSingleCornerOrientation(thirdPerm[checkedCorner]);
+
+					int mesh = v1 + v2 * 3;
+
+
+					Console.WriteLine((CubeMove)i + " " + (CubeMove)j + ": " + v1 + " "  + v2 + " -> " + v3);
+
+					if (dic.ContainsKey(mesh))
+					{
+						if(dic[mesh] != v3)
+						{
+							Console.WriteLine("Mistkae");
+						}
+					}
+					else
+					{
+						dic.Add(mesh, v3);	
+					}
+					
+				}
+			}
+		}
 		public static MoveSequenz FindSolutionBruteForce(CubeIndex cube)
 		{
 			List<CubeMove> solution = new List<CubeMove>();

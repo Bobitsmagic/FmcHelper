@@ -14,14 +14,7 @@ namespace FmcSolver
 	{
 		static void Main(string[] args)
 		{
-			Cube c = new Cube();
-			MoveSequenz ms = MoveSequenz.FmcWr;
-			c.ApplyMoveSequenz(ms);
-			c.PrintSideView();
-
-			CubeIndex kek = new CubeIndex(c);
-
-			SearchingAlgorithms.FindSolutionBruteForceMultithreaded(kek);
+			SearchingAlgorithms.PrintCornerOrientdist();
 
 			Console.WriteLine("\nDone");
 			Console.ReadLine();

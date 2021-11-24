@@ -5,6 +5,8 @@ namespace CubeAD
 	//Bool array of size 64
 	public struct BitArray
 	{
+		public const int SIZE_IN_BYTES = 8;
+
 		public bool this[int i]
 		{
 			get

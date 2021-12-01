@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace CubeAD
@@ -16,6 +17,8 @@ namespace CubeAD
 		public static readonly MoveSequenz GPerm = new MoveSequenz("R U R' U' D R2 U' R U' R' U R' U R2 D'");
 		public static readonly MoveSequenz UPerm = new MoveSequenz("R' U R' U' R' U' R' U R U R2");
 		public static readonly MoveSequenz TPerm = new MoveSequenz("R U R' U' R' F R2 U' R' U' R U R' F'");
+		public static readonly MoveSequenz HPerm = new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2");
+
 		public int Length { get { return Moves.Count; } }
 		public readonly List<CubeMove> Moves;
 

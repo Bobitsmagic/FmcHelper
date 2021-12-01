@@ -23,7 +23,7 @@ namespace CubeAD.CubeIndexSets
 
 			//count cubes
 			for (int i = 0; i < cubes.Length; i++)
-				StartIndex[cubes[i].EdgePermutation]++;
+				StartIndex[cubes[i].EdgePermutationIndex]++;
 
 			double Mean = (double)cubes.Length / LENGTH;
 			double Std = 0;
@@ -67,7 +67,7 @@ namespace CubeAD.CubeIndexSets
 
 			//count cubes
 			for (int i = 0; i < Data.Length; i++)
-				StartIndex[Data[i].EdgePermutation]++;
+				StartIndex[Data[i].EdgePermutationIndex]++;
 
 			//Sum up the first i cubes
 			for (int i = 1; i < StartIndex.Length; i++)
@@ -131,8 +131,8 @@ namespace CubeAD.CubeIndexSets
 
 		public bool Contains(CubeIndex index)
 		{
-			int start = StartIndex[index.EdgePermutation];
-			int end = StartIndex[index.EdgePermutation + 1];
+			int start = StartIndex[index.EdgePermutationIndex];
+			int end = StartIndex[index.EdgePermutationIndex + 1];
 
 			for (int i = start; i < end; i++)
 			{
@@ -145,8 +145,8 @@ namespace CubeAD.CubeIndexSets
 
 		public bool TryGetValue(CubeIndex index, out CubeIndex actual)
 		{
-			int start = StartIndex[index.EdgePermutation];
-			int end = StartIndex[index.EdgePermutation + 1];
+			int start = StartIndex[index.EdgePermutationIndex];
+			int end = StartIndex[index.EdgePermutationIndex + 1];
 
 			for (int i = start; i < end; i++)
 			{

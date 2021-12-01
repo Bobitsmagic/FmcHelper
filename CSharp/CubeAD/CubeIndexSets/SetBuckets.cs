@@ -28,7 +28,7 @@ namespace CubeAD.CubeIndexSets
 
 		public bool Add(CubeIndex item)
 		{
-			return Data[item.CornerPermutation].Add(item);
+			return Data[item.CornerPermutationIndex].Add(item);
 		}
 
 		public void Clear()
@@ -39,12 +39,12 @@ namespace CubeAD.CubeIndexSets
 
 		public bool Contains(CubeIndex item)
 		{
-			return Data[item.CornerPermutation].Contains(item);
+			return Data[item.CornerPermutationIndex].Contains(item);
 		}
 
 		public bool TryGetValue(CubeIndex item, out CubeIndex find)
 		{
-			return Data[item.CornerPermutation].TryGetValue(item, out find);
+			return Data[item.CornerPermutationIndex].TryGetValue(item, out find);
 		}
 	}
 }

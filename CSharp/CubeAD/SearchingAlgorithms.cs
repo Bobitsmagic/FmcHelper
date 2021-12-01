@@ -173,7 +173,7 @@ namespace CubeAD
 		{
 			const int MAX_DEPTH = 10;
 
-			List<MoveSequenz> eoMoves = FindEdgeOrientationMoves(cube.EdgeOrientation);
+			List<MoveSequenz> eoMoves = FindEdgeOrientationMoves(cube.EdgeOrientationIndex);
 			Console.WriteLine("Eo Length: " + eoMoves[0].Length + " count: " + eoMoves.Count);
 			List<CubeMove> solution = new List<CubeMove>();
 

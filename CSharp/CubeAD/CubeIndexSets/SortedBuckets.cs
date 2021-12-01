@@ -48,7 +48,7 @@ namespace CubeAD.CubeIndexSets
 
 		public void Add(CubeIndex element)
 		{
-			Data[element.CornerPermutation].Add(element);
+			Data[element.CornerPermutationIndex].Add(element);
 			IsDirty = true;
 		}
 
@@ -187,7 +187,7 @@ namespace CubeAD.CubeIndexSets
 			if (IsDirty)
 				Console.WriteLine("Possible dirty call of contains");
 
-			return Data[cube.CornerPermutation].Contains(cube);
+			return Data[cube.CornerPermutationIndex].Contains(cube);
 		}
 
 		public override string ToString()

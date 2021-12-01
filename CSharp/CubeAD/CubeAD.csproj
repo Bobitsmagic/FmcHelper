@@ -10,9 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="casesmap.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="PreCompFiles\next_corner_orient.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

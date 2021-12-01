@@ -2,7 +2,7 @@
 
 namespace CubeAD
 {
-	struct MoveBlocker
+	public struct MoveBlocker
 	{
 		public bool this[int i] => ((Blocked >> i) & 1) != 0;
 

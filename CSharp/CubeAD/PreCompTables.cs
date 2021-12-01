@@ -76,11 +76,16 @@ namespace CubeAD
 
 		public static byte[][] SymmetryCornerPermutation = new byte[SymmetryElement.ORDER][];
 		public static byte[][] SymmetryEdgePermutation = new byte[SymmetryElement.ORDER][];
+		public static byte[][,,] SymmetryCornerOrientation = new byte[SymmetryElement.ORDER][,,]; //color index, position, orient
+		public static byte[][] SymmetryEdgeOrientation = new byte[SymmetryElement.ORDER][];
 
 		public static Dictionary<uint, BitArray> SymmetryEdgePermMask = new Dictionary<uint, BitArray>();
 		public static BitArray[] SymmetryCornerPermMask = new BitArray[MAX_CORNER_PERMUTATION];
 		public static BitArray[] SymmetryCornerOrientMask = new BitArray[MAX_CORNER_ORIENTATION];
 		public static BitArray[] SymmetryEdgeOrientMask = new BitArray[MAX_EDGE_ORIENTATION];
+
+		//The hamilton path through all states of corners (ignoering orientation and impossible cases), LDB corner always stays
+		public static CubeMove[] CornerHamilton = new CubeMove[3_674_160]; //3^8 * 8! / 3 / 24
 
 		private static SealedHashset _EOMoveTree = null;
 		private static SealedHashset _MoveTree = null;
@@ -168,11 +173,14 @@ namespace CubeAD
 				}
 			}
 
+			//Symmetry
+			int[] orderTransfrom = new int[6] { 0, 1, 4, 5, 2, 3 };
 			for (int i = 0; i < SymmetryElement.Elements.Length; i++)
 			{
 				SymmetryElement se = SymmetryElement.Elements[i];
 				SymmetryEdgePermutation[i] = new byte[12];
 				SymmetryCornerPermutation[i] = new byte[8];
+				SymmetryEdgeOrientation[i] = new byte[12];
 
 				counter = 0;
 				for (int x = 0; x < 6; x++)
@@ -181,6 +189,8 @@ namespace CubeAD
 					{
 						if (x / 2 == y / 2) continue;
 
+						SymmetryEdgeOrientation[i][counter] = (byte)((orderTransfrom[x] < orderTransfrom[y] != 
+							orderTransfrom[se.TransformColor(x)] < orderTransfrom[se.TransformColor(y)]) ? 1 : 0);
 						SymmetryEdgePermutation[i][counter++] = (byte)EdgeIndices[se.TransformColor(x), se.TransformColor(y)];
 					}
 				}
@@ -197,8 +207,36 @@ namespace CubeAD
 					}
 				}
 			}
+		
+			//Hamilton
+			ReadFromFileOrCreateUnsafeCubeMove(Path.Combine(PRE_COMP_PATH, "hamilton.bin"), CornerHamilton , (ret) =>
+			{
+				//File from https://bruce.cubing.net/index.html
+				string s = File.ReadAllText(Path.Combine(PRE_COMP_PATH, "Hamilton222.txt")).Replace("\r", "").Replace("\n", "");
+				Console.WriteLine("Loaded 222Hamilton.txt");
 
-			uint[] permsWithSymmetry = new uint[304224]; //[TODO] fill in right number
+				if(s.Length != ret.Length)
+					Console.WriteLine("Lengths dont match");
+
+				CubeMove[] cast = (CubeMove[])ret;
+
+				for (int i = 0; i < s.Length; i++)
+				{
+					switch (s[i])
+					{
+						case 'R': cast[i] = CubeMove.R; break;
+						case 'S': cast[i] = CubeMove.RP; break;
+						case 'U': cast[i] = CubeMove.U; break;
+						case 'V': cast[i] = CubeMove.UP; break;
+						case 'F': cast[i] = CubeMove.F; break;
+						case 'G': cast[i] = CubeMove.FP; break;
+						default: Console.WriteLine("Found unknon charachter: (" + s[i] + ")"); break;
+					}
+				}
+
+			});
+
+			uint[] permsWithSymmetry = new uint[304224];
 			//Symmetry edge permuation mask
 			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "symmetry_edgde_perm_mask.bin"), permsWithSymmetry, (ret) =>
 			{
@@ -286,7 +324,6 @@ namespace CubeAD
 				Console.WriteLine("Size: " + count);
 			});
 
-
 			BitArray[] edgePermMasks = new BitArray[permsWithSymmetry.Length];
 			ReadFromFileOrCreateUnsafeBitArray(Path.Combine(PRE_COMP_PATH, "symmetry_edgde_perm_bitarray.bin"), edgePermMasks, (ret) =>
 			{
@@ -294,7 +331,7 @@ namespace CubeAD
 				{
 					uint val = permsWithSymmetry[i];
 					CubeIndex cubeIndex = new CubeIndex();
-					cubeIndex.EdgePermutation = val;
+					cubeIndex.EdgePermutationIndex = val;
 					BitArray array = new BitArray();
 					for (int j = 0; j < SymmetryElement.Elements.Length; j++)
 					{
@@ -306,8 +343,7 @@ namespace CubeAD
 				}
 			});
 
-			SymmetryEdgePermMask = new Dictionary<uint, BitArray>(permsWithSymmetry.Length);
-			
+			SymmetryEdgePermMask = new Dictionary<uint, BitArray>(permsWithSymmetry.Length);		
 			for(int i = 0; i < permsWithSymmetry.Length; i++)
 			{
 				SymmetryEdgePermMask.Add(permsWithSymmetry[i], edgePermMasks[i]);
@@ -321,7 +357,7 @@ namespace CubeAD
 				CubeIndex cubeIndex = new CubeIndex();
 				for (ushort i = 0; i < MAX_EDGE_ORIENTATION; i++)
 				{
-					cubeIndex.EdgeOrientation = i;
+					cubeIndex.EdgeOrientationIndex = i;
 					BitArray array = new BitArray();
 					for (int j = 0; j < SymmetryElement.Elements.Length; j++)
 					{
@@ -350,7 +386,7 @@ namespace CubeAD
 				CubeIndex cubeIndex = new CubeIndex();
 				for (ushort i = 0; i < MAX_CORNER_PERMUTATION; i++)
 				{
-					cubeIndex.CornerPermutation = i;
+					cubeIndex.CornerPermutationIndex = i;
 					BitArray array = new BitArray();
 					for (int j = 0; j < SymmetryElement.Elements.Length; j++)
 					{
@@ -380,7 +416,7 @@ namespace CubeAD
 				CubeIndex cubeIndex = new CubeIndex();
 				for (ushort i = 0; i < MAX_CORNER_ORIENTATION; i++)
 				{
-					cubeIndex.CornerOrientation = i;
+					cubeIndex.CornerOrientationIndex = i;
 					BitArray array = new BitArray();
 					for (int j = 0; j < SymmetryElement.Elements.Length; j++)
 					{
@@ -414,7 +450,7 @@ namespace CubeAD
 				ushort[,] cast = (ushort[,])ret;
 				for (int i = 0; i < MAX_CORNER_PERMUTATION; i++)
 				{
-					index.CornerPermutation = (ushort)i;
+					index.CornerPermutationIndex = (ushort)i;
 					index.ApplyToCube(c);
 
 					for (int j = 0; j < 18; j++)
@@ -435,7 +471,7 @@ namespace CubeAD
 				ushort[,] cast = (ushort[,])ret;
 				for (int i = 0; i < MAX_CORNER_ORIENTATION; i++)
 				{
-					index.CornerOrientation = (ushort)i;
+					index.CornerOrientationIndex = (ushort)i;
 					index.ApplyToCube(c);
 
 					for (int j = 0; j < 18; j++)
@@ -458,7 +494,7 @@ namespace CubeAD
 				ushort[,] cast = (ushort[,])ret;
 				for (int i = 0; i < MAX_EDGE_ORIENTATION; i++)
 				{
-					index.EdgeOrientation = (ushort)i;
+					index.EdgeOrientationIndex = (ushort)i;
 					index.ApplyToCube(c);
 
 					for (int j = 0; j < 18; j++)
@@ -576,6 +612,77 @@ namespace CubeAD
 				}
 			});
 
+			//Symmetry Corner Orientation
+			for (int i = 0; i < 48; i++)
+			{
+				//Console.WriteLine("Symmetry: " + i);
+				SymmetryElement se = SymmetryElement.Elements[i];
+				bool[,,] seen = new bool[8, 8, 3];
+				int sCounter = 0;
+				byte[] symTranfrom = SymmetryCornerPermutation[i];
+				CubeIndex c1 = new CubeIndex();
+				CubeIndex c2 = new CubeIndex();
+
+				var array = new byte[8, 8, 3];
+				SymmetryCornerOrientation[i] = array;
+
+				ushort[] permutations = new ushort[8];
+				for(int j = 0; j < 8; j++)
+				{
+					int[] perm = new int[8];
+					for (int k = 0; k < 8; k++)
+						perm[k] = (k + j) % 8;
+
+					permutations[j] = (ushort)GetIndex(perm);
+				}
+				ushort[] orientaions = new ushort[3] { 0, 3280, 6560 };
+
+
+				Cube cube = new Cube();
+				for (int pos = 0; pos < 8; pos++)
+				{
+					c1.CornerPermutationIndex = permutations[pos];
+					for (int rot = 0; rot < 3; rot++)
+					{
+						c1.CornerOrientationIndex = orientaions[rot];
+
+						int[] perm = GetInverse(c1.GetCornerPerm());
+						int[] orient = c1.GetCornerOrient();
+
+						c1.GetCube().InsertSymmetryTransformation(se, cube);
+						c2 = new CubeIndex(cube);
+
+						int[] otherOrient = c2.GetCornerOrient();
+
+						for (int k = 0; k < 8; k++)
+						{
+							//if(i == 16 && k == 4 && perm[k] == 6 && orient[perm[k]] == 0)
+							//{
+							//	c1.GetCube().PrintSideView();
+							//	cube.PrintSideView();
+							//	Console.WriteLine("Copy: ");
+							//	c2.GetCube().PrintSideView();	
+							//}
+							if (!seen[k, perm[k], orient[perm[k]]])
+							{
+								sCounter++;
+								seen[k, perm[k], orient[perm[k]]] = true;
+								array[k, perm[k], orient[perm[k]]] = (byte)otherOrient[symTranfrom[perm[k]]];
+							}
+							else
+							{
+								if (array[k, perm[k], orient[perm[k]]] != otherOrient[symTranfrom[perm[k]]])
+								{
+									Console.WriteLine("Ambiguous value detected S:" + i + " M: " + pos + " C: " + k);
+								}
+							}
+						}
+					}
+				}
+
+				//Console.WriteLine("Counter: " + sCounter);
+			}
+
 			GC.Collect();
 			Console.WriteLine("TotalRamUsage: " + GC.GetTotalMemory(true).ToString("0 000 000 000"));
 
@@ -601,6 +708,7 @@ namespace CubeAD
 					Console.WriteLine("Created " + path.Split("\\").Last());
 				}
 			}
+
 			void ReadFromFileOrCreateUnsafeBitArray(string path, BitArray[] dest, Action<BitArray[]> fillAction)
 			{
 				if (File.Exists(path))
@@ -640,8 +748,47 @@ namespace CubeAD
 					Console.WriteLine("Created " + path.Split("\\").Last());
 				}
 			}
-		}
 
+			void ReadFromFileOrCreateUnsafeCubeMove(string path, CubeMove[] dest, Action<CubeMove[]> fillAction)
+			{
+				if (File.Exists(path))
+				{
+					byte[] byteBuffer = File.ReadAllBytes(path);
+
+					unsafe
+					{
+						fixed (void* source = byteBuffer)
+						{
+							fixed (void* destination = dest)
+							{
+								Buffer.MemoryCopy(source, destination, byteBuffer.Length, byteBuffer.Length);
+							}
+						}
+					}
+				}
+				else
+				{
+					Console.WriteLine("Generating: " + path.Split("\\").Last());
+					fillAction(dest);
+
+					byte[] byteBuffer = new byte[dest.Length];
+
+					unsafe
+					{
+						fixed (void* source = dest)
+						{
+							fixed (void* destination = byteBuffer)
+							{
+								Buffer.MemoryCopy(source, destination, byteBuffer.Length, byteBuffer.Length);
+							}
+						}
+					}
+
+					File.WriteAllBytes(path, byteBuffer);
+					Console.WriteLine("Created " + path.Split("\\").Last());
+				}
+			}
+		}
 		private static uint[] GenerateShortendEdgePermArrays(CubeMove m)
 		{
 			int N = 12;

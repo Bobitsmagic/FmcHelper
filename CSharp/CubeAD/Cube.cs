@@ -485,6 +485,41 @@ namespace CubeAD
 
 			return true;
 		}
+		public void InsertSymmetryTransformation(SymmetryElement se, Cube cube)
+		{
+			//Check edges
+			for (int x = 0; x < 6; x++)
+			{
+				int nextX = se.TransformColor(x);
+				for (int y = 0; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+
+					int nextY = se.TransformColor(y);
+
+					cube.SetEdgeColor(nextX, nextY, (int)se.TransformColor(GetEdgeColor(x, y)));
+				}
+			}
+
+			//Check corners
+			for (int x = 0; x < 6; x++)
+			{
+				int nextX = se.TransformColor(x);
+				for (int y = 0; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+					int nextY = se.TransformColor(y);
+
+					for (int z = 0; z < 6; z++)
+					{
+						if (x / 2 == z / 2 || y / 2 == z / 2) continue;
+						int nextZ = se.TransformColor(z);
+
+						cube.SetCornerColor(nextX, nextY, nextZ, (int)se.TransformColor(GetCornerColor(x, y, z)));
+					}
+				}
+			}
+		}
 
 		public string GetSideView()
 		{

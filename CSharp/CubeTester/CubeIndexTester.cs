@@ -32,18 +32,18 @@ namespace CubeTester
 			Cube c = new Cube();
 			CubeIndex index = new CubeIndex(c);
 
-			Assert.AreEqual(0, index.EdgePermutation);
+			Assert.AreEqual(0, index.EdgePermutationIndex);
 
 			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 
 			index = new CubeIndex(c);
-			Assert.AreEqual(0, index.EdgePermutation);
+			Assert.AreEqual(0, index.EdgePermutationIndex);
 
 			c.ApplyMoveSequenz(MoveSequenz.CheckerBoard);
 			index = new CubeIndex(c);
 
 			//index of permutation 5 4 7 6 1 0 3 2 11 10 9 8
-			Assert.AreEqual(216080063, index.EdgePermutation);
+			Assert.AreEqual(216080063, index.EdgePermutationIndex);
 		}
 
 		[Test]
@@ -52,7 +52,7 @@ namespace CubeTester
 			Cube c = new Cube();
 			CubeIndex index = new CubeIndex(c);
 
-			Assert.AreEqual(0, index.CornerPermutation);
+			Assert.AreEqual(0, index.CornerPermutationIndex);
 
 			c.MakeMove(CubeMove.U);
 			c.MakeMove(CubeMove.L2);
@@ -61,7 +61,7 @@ namespace CubeTester
 			index = new CubeIndex(c);
 
 			//index of permutation 5 4 7 6 1 0 3 2 11 10 9 8
-			Assert.AreEqual(13805, index.CornerPermutation);
+			Assert.AreEqual(13805, index.CornerPermutationIndex);
 		}
 
 
@@ -71,17 +71,17 @@ namespace CubeTester
 			Cube c = new Cube();
 			CubeIndex index = new CubeIndex(c);
 
-			Assert.AreEqual(0, index.EdgeOrientation);
+			Assert.AreEqual(0, index.EdgeOrientationIndex);
 
 			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 
 			index = new CubeIndex(c);
-			Assert.AreEqual(CubeIndex.MAX_EDGE_ORIENTATION - 1, index.EdgeOrientation);
+			Assert.AreEqual(CubeIndex.MAX_EDGE_ORIENTATION - 1, index.EdgeOrientationIndex);
 
 			c.ApplyMoveSequenz(MoveSequenz.CheckerBoard);
 
 			index = new CubeIndex(c);
-			Assert.AreEqual(CubeIndex.MAX_EDGE_ORIENTATION - 1, index.EdgeOrientation);
+			Assert.AreEqual(CubeIndex.MAX_EDGE_ORIENTATION - 1, index.EdgeOrientationIndex);
 		}
 
 		[Test]
@@ -90,7 +90,7 @@ namespace CubeTester
 			Cube c = new Cube();
 			CubeIndex index = new CubeIndex(c);
 
-			Assert.AreEqual(0, index.CornerOrientation);
+			Assert.AreEqual(0, index.CornerOrientationIndex);
 
 			//double sune on top
 			//rotates corner 2 3 6 7
@@ -99,11 +99,11 @@ namespace CubeTester
 
 			int val = (Power(3, 7 - 2) + Power(3, 7 - 3) + Power(3, 7 - 6) + Power(3, 7 - 7));
 
-			Assert.AreEqual(val, index.CornerOrientation);
+			Assert.AreEqual(val, index.CornerOrientationIndex);
 
 			c.ApplyMoveSequenz(new MoveSequenz("R U R' U R U' R' U R U2 R'"));
 			index = new CubeIndex(c);
-			Assert.AreEqual(val * 2, index.CornerOrientation);
+			Assert.AreEqual(val * 2, index.CornerOrientationIndex);
 
 
 			int Power(int x, int y)
@@ -187,10 +187,10 @@ namespace CubeTester
 
 				CubeIndex buffer = new CubeIndex(cube);
 
-				Assert.AreEqual(buffer.CornerOrientation, index.CornerOrientation);
-				Assert.AreEqual(buffer.CornerPermutation, index.CornerPermutation);
-				Assert.AreEqual(buffer.EdgeOrientation, index.EdgeOrientation);
-				Assert.AreEqual(buffer.EdgePermutation, index.EdgePermutation);
+				Assert.AreEqual(buffer.CornerOrientationIndex, index.CornerOrientationIndex);
+				Assert.AreEqual(buffer.CornerPermutationIndex, index.CornerPermutationIndex);
+				Assert.AreEqual(buffer.EdgeOrientationIndex, index.EdgeOrientationIndex);
+				Assert.AreEqual(buffer.EdgePermutationIndex, index.EdgePermutationIndex);
 
 				Assert.AreEqual(buffer, index);
 			}
@@ -208,10 +208,10 @@ namespace CubeTester
 
 				Assert.AreEqual(cube, index.GetCube());
 
-				Assert.AreEqual(buffer.CornerOrientation, index.CornerOrientation);
-				Assert.AreEqual(buffer.CornerPermutation, index.CornerPermutation);
-				Assert.AreEqual(buffer.EdgeOrientation, index.EdgeOrientation);
-				Assert.AreEqual(buffer.EdgePermutation, index.EdgePermutation);
+				Assert.AreEqual(buffer.CornerOrientationIndex, index.CornerOrientationIndex);
+				Assert.AreEqual(buffer.CornerPermutationIndex, index.CornerPermutationIndex);
+				Assert.AreEqual(buffer.EdgeOrientationIndex, index.EdgeOrientationIndex);
+				Assert.AreEqual(buffer.EdgePermutationIndex, index.EdgePermutationIndex);
 
 				Assert.AreEqual(buffer, index);
 			}
@@ -224,7 +224,7 @@ namespace CubeTester
 
 			foreach (SymmetryElement se in SymmetryElement.Elements)
 			{
-				Assert.True(c.HasSymmetry(se));
+				Assert.True(c.HasSymmetry(se), "Solved cube should have symmetry: " + se.ToString());
 			}
 
 			//Super flip
@@ -254,6 +254,46 @@ namespace CubeTester
 				SymmetryElement se = SymmetryElement.Elements[i];
 
 				Assert.AreEqual(se == mirrorX, c.HasSymmetry(se));
+			}
+		}
+
+		[Test]
+		public void IsEqualWithSymmetry()
+		{
+			CubeIndex c1 = new CubeIndex();
+			CubeIndex c2 = new CubeIndex();			
+
+			Random rnd = new Random(0);
+			
+			for(int i = 0; i < 48; i++)
+			{
+				SymmetryElement se = SymmetryElement.Elements[i];
+
+				c1.Reset();
+				c2.Reset();
+
+				for (int j = 0; j < 100; j++)
+				{
+					CubeMove cm = (CubeMove)rnd.Next(18);
+
+					c1.MakeMove(cm);
+					CubeMove transformed = se.TransformMove(cm);
+
+					for(int k = 0; k < 18; k++)
+					{
+						CubeMove wrongMove = (CubeMove)k;
+						if (wrongMove == transformed) continue;
+
+						CubeIndex c3 = new CubeIndex(c2, wrongMove);
+
+						Assert.IsFalse(c1.IsEqualWithSymmetry(c3, se));
+
+					}
+
+					c2.MakeMove(transformed);
+					Assert.IsTrue(c1.IsEqualWithSymmetry(c2, se));
+				}
+
 			}
 		}
 	}

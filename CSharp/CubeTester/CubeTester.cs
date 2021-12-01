@@ -234,8 +234,6 @@ namespace CubeTester
 
 				Assert.IsTrue(c1.IsEqualWithSymmetry(c2, se));
 			}
-
-
 		}
 
 		[Test]

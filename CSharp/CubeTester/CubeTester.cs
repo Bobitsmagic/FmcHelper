@@ -159,7 +159,7 @@ namespace CubeTester
 		{
 			Cube c = new Cube();
 
-			BitArray sym = c.GetSymmetrySet();
+			BitMap64 sym = c.GetSymmetrySet();
 			Assert.AreEqual(SymmetryElement.FullSymmetry, sym);
 
 			//Super flip
@@ -209,7 +209,7 @@ namespace CubeTester
 			c1.ApplyMoveSequenz(new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
 			c2.ApplyMoveSequenz(new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
 
-			BitArray sym = c1.GetSymmetrySet();
+			BitMap64 sym = c1.GetSymmetrySet();
 			SymmetryElement[] elements = new SymmetryElement[sym.BitCount];
 
 			int counter = 0;

@@ -3,7 +3,7 @@
 namespace CubeAD
 {
 	//Bool array of size 64
-	public struct BitArray
+	public struct BitMap64
 	{
 		public const int SIZE_IN_BYTES = 8;
 
@@ -36,52 +36,52 @@ namespace CubeAD
 		public bool Empty { get { return Data == 0; } }
 
 		ulong Data;
-		public BitArray(ulong data)
+		public BitMap64(ulong data)
 		{
 			Data = data;
 		}
 
-		public static BitArray operator &(BitArray a, BitArray b)
+		public static BitMap64 operator &(BitMap64 a, BitMap64 b)
 		{
-			return new BitArray(a.Data & b.Data);
+			return new BitMap64(a.Data & b.Data);
 		}
-		public static BitArray operator &(BitArray a, ulong b)
+		public static BitMap64 operator &(BitMap64 a, ulong b)
 		{
-			return new BitArray(a.Data & b);
+			return new BitMap64(a.Data & b);
 		}
-		public static BitArray operator |(BitArray a, BitArray b)
+		public static BitMap64 operator |(BitMap64 a, BitMap64 b)
 		{
-			return new BitArray(a.Data | b.Data);
+			return new BitMap64(a.Data | b.Data);
 		}
-		public static BitArray operator |(BitArray a, ulong b)
+		public static BitMap64 operator |(BitMap64 a, ulong b)
 		{
-			return new BitArray(a.Data | b);
+			return new BitMap64(a.Data | b);
 		}
-		public static BitArray operator ^(BitArray a, BitArray b)
+		public static BitMap64 operator ^(BitMap64 a, BitMap64 b)
 		{
-			return new BitArray(a.Data ^ b.Data);
+			return new BitMap64(a.Data ^ b.Data);
 		}
-		public static BitArray operator ^(BitArray a, ulong b)
+		public static BitMap64 operator ^(BitMap64 a, ulong b)
 		{
-			return new BitArray(a.Data ^ b);
+			return new BitMap64(a.Data ^ b);
 		}
 
-		public static BitArray operator ~(BitArray a)
+		public static BitMap64 operator ~(BitMap64 a)
 		{
-			return new BitArray(~a.Data);
+			return new BitMap64(~a.Data);
 		}
-		public static bool operator ==(BitArray a, BitArray b)
+		public static bool operator ==(BitMap64 a, BitMap64 b)
 		{
 			return a.Data == b.Data;
 		}
-		public static bool operator !=(BitArray a, BitArray b)
+		public static bool operator !=(BitMap64 a, BitMap64 b)
 		{
 			return a.Data != b.Data;
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj is BitArray board &&
+			return obj is BitMap64 board &&
 				   Data == board.Data;
 		}
 

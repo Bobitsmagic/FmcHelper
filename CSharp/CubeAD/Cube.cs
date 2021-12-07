@@ -367,12 +367,12 @@ namespace CubeAD
 			return true;
 		}
 
-		public BitArray GetSymmetrySet()
+		public BitMap64 GetSymmetrySet()
 		{
-			BitArray ret = new BitArray();
+			BitMap64 ret = new BitMap64();
 
 			ret[0] = true;
-			BitArray inverse = new BitArray();
+			BitMap64 inverse = new BitMap64();
 
 			var array = SymmetryElement.Elements;
 
@@ -432,8 +432,8 @@ namespace CubeAD
 
 		public bool IsEqualWithSymmetry(Cube other)
 		{
-			BitArray sym1 = GetSymmetrySet();
-			BitArray sym2 = other.GetSymmetrySet();
+			BitMap64 sym1 = GetSymmetrySet();
+			BitMap64 sym2 = other.GetSymmetrySet();
 
 			if (sym1 != sym2) return false;
 

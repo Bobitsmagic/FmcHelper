@@ -100,7 +100,7 @@ namespace CubeAD
 		};
 		public static int[,] GroupIndexTable = new int[ORDER, ORDER];
 		public static int[][] MultGroupIndices = new int[ORDER][];
-		public static BitArray FullSymmetry = new BitArray((1UL << ORDER) - 1);
+		public static BitMap64 FullSymmetry = new BitMap64((1UL << ORDER) - 1);
 
 		static SymmetryElement()
 		{

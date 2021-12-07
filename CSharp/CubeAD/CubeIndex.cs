@@ -328,11 +328,11 @@ namespace CubeAD
 			return GetCornerOrient()[index];
 		}
 
-		public BitArray GetSymmetryMask()
+		public BitMap64 GetSymmetryMask()
 		{
 			if (SymmetryEdgePermMask.ContainsKey(EdgePermutationIndex))
 			{
-				BitArray mask = SymmetryEdgePermMask[EdgePermutationIndex];
+				BitMap64 mask = SymmetryEdgePermMask[EdgePermutationIndex];
 
 				mask &= SymmetryCornerPermMask[CornerPermutationIndex];
 				mask &= SymmetryCornerOrientMask[CornerOrientationIndex];
@@ -342,7 +342,7 @@ namespace CubeAD
 			}
 
 			//Identity sym
-			return new BitArray(1);
+			return new BitMap64(1);
 		}
 
 		public bool HasSymmetry(SymmetryElement se)

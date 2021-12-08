@@ -2,7 +2,9 @@
 
 namespace CubeAD
 {
-	//Bool array of size 64
+	/// <summary>
+	/// A Bool array of size 64
+	/// </summary>
 	public struct BitMap64
 	{
 		public const int SIZE_IN_BYTES = 8;
@@ -22,7 +24,6 @@ namespace CubeAD
 			}
 		}
 
-		//public ulong Value { get { return Val; } }
 		public int BitCount
 		{
 			get
@@ -87,12 +88,12 @@ namespace CubeAD
 
 		public override int GetHashCode()
 		{
-			return HashCode.Combine(Data);
+			return Data.GetHashCode();
 		}
 		public override string ToString()
 		{
 			string s = "";
-			for (int i = 0; i < 48; i++)
+			for (int i = 0; i < 64; i++)
 			{
 				s += this[i] ? "1" : "0";
 			}

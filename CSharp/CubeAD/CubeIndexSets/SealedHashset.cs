@@ -63,7 +63,7 @@ namespace CubeAD.CubeIndexSets
 		}
 
 		/// <summary>
-		/// Loads a <see cref="SealedHashset"/> from a memory dump file.
+		/// Loads a <see cref="SealedHashset"/> from a memory dump file
 		/// </summary>
 		/// <param name="path">The path to the memory dump file</param>
 		public SealedHashset(string path)
@@ -101,7 +101,7 @@ namespace CubeAD.CubeIndexSets
 		}
 
 		/// <summary>
-		/// Creates a memory dump file of the <see cref="SealedHashset"/>.
+		/// Creates a memory dump file of the <see cref="SealedHashset"/>
 		/// </summary>
 		/// <param name="path">The path and the name of the file to create</param>
 		public void SaveToFile(string path)

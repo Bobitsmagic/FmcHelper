@@ -50,10 +50,10 @@ namespace CubeAD
 			}
 		}
 
-		public static SortedBuckets GenerateSolvedTree(int maxDepth)
+		public static SortedBucketsSet GenerateSolvedTree(int maxDepth)
 		{
 			Stack<CubeMove> currentMoves = new Stack<CubeMove>(maxDepth);
-			SortedBuckets set = new SortedBuckets(2_000);
+			SortedBucketsSet set = new SortedBucketsSet(2_000);
 
 			//HashSet<CubeIndex> set = new HashSet<CubeIndex>();
 
@@ -127,10 +127,10 @@ namespace CubeAD
 				}
 			}
 		}
-		public static SortedBuckets GenerateSolvedTreeOrientedEdges(int maxDepth)
+		public static SortedBucketsSet GenerateSolvedTreeOrientedEdges(int maxDepth)
 		{
 			Stack<CubeMove> currentMoves = new Stack<CubeMove>(maxDepth);
-			SortedBuckets set = new SortedBuckets(2_000);
+			SortedBucketsSet set = new SortedBucketsSet(2_000);
 
 			//HashSet<CubeIndex> set = new HashSet<CubeIndex>();
 

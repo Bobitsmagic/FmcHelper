@@ -19,7 +19,7 @@ namespace CubeTester
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
 			var sortCubeInd = new SortedCubeIndexSet();
-			var bucketCubeInd = new SortedBuckets();
+			var bucketCubeInd = new SortedBucketsSet();
 			var setBucket = new SetBuckets();
 
 			foreach (CubeIndex index in Cube.GetRandomCubes(4, 1000, new Random(0)))
@@ -54,7 +54,7 @@ namespace CubeTester
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
 			var sortCubeInd = new SortedCubeIndexSet();
-			var bucketCubeInd = new SortedBuckets();
+			var bucketCubeInd = new SortedBucketsSet();
 			var setBucket = new SetBuckets();
 
 			foreach (CubeIndex index in Cube.GetRandomCubes(4, 1000, new Random(0)))
@@ -126,7 +126,7 @@ namespace CubeTester
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
 			var sortCubeInd = new SortedCubeIndexSet();
-			var bucketCubeInd = new SortedBuckets();
+			var bucketCubeInd = new SortedBucketsSet();
 			var setBuckets = new SetBuckets();
 
 			List<CubeIndex> list = Cube.GetRandomCubes(20, 1000, new Random(0));

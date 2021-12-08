@@ -17,7 +17,7 @@ namespace CubeBenchmarks
 		//static RadixTreeDictionary radixTreeDic;
 		//static RadixTreeIterative radixTreeIt;
 		static SortedCubeIndexSet sortCubeInd;
-		static SortedBuckets bucketCubeIndices;
+		static SortedBucketsSet bucketCubeIndices;
 		static SetBuckets setBuckets;
 
 		static SolvedSetAddBenchmark()
@@ -27,7 +27,7 @@ namespace CubeBenchmarks
 			////radixTreeArray = new RadixTreeArray();
 			//radixTreeIt = new RadixTreeIterative();
 			sortCubeInd = new SortedCubeIndexSet();
-			bucketCubeIndices = new SortedBuckets();
+			bucketCubeIndices = new SortedBucketsSet();
 			setBuckets = new SetBuckets(0);
 
 			Console.WriteLine("Created other sets");

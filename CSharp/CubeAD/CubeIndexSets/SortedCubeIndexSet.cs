@@ -14,6 +14,8 @@ namespace CubeAD.CubeIndexSets
 		public int Count => Data.Count;
 
 		public List<CubeIndex> Data;
+
+		//Flag whether this instance can contain duplicates
 		bool IsDirty = false;
 
 		public SortedCubeIndexSet(int capacity = 0)
@@ -27,9 +29,7 @@ namespace CubeAD.CubeIndexSets
 			IsDirty = true;
 		}
 
-		/// <summary>
-		/// Sorts the <see cref="CubeIndexBuffer"/> and removes all duplicates afterwards
-		/// </summary>
+		//Sorts the CubeIndexBuffer and removes all duplicates afterwards
 		public void RemoveDuplicates()
 		{
 			if (Data.Count > 1 && IsDirty)
@@ -68,6 +68,7 @@ namespace CubeAD.CubeIndexSets
 			IsDirty = false;
 		}
 
+		//For testing purposes
 		public bool Contains(CubeIndex cube)
 		{
 			if (IsDirty)

@@ -335,7 +335,6 @@ namespace CubeAD
 				BitMap64 mask = SymmetryEdgePermMask[EdgePermutationIndex];
 
 				mask &= SymmetryCornerPermMask[CornerPermutationIndex];
-				mask &= SymmetryCornerOrientMask[CornerOrientationIndex];
 				mask &= SymmetryEdgePermMask[EdgeOrientationIndex];
 
 				return mask;
@@ -435,6 +434,64 @@ namespace CubeAD
 			}
 
 			return true;
+		}
+		public bool IsEqualWithSymmetry(CubeIndex other, int se)
+		{
+			int[] perm = GetCornerPerm();
+			int[] inversePerm = GetInverse(perm);
+			int[] orient = GetCornerOrient();
+
+			int[] otherInversePerm = GetInverse(other.GetCornerPerm());
+			int[] otherOrient = other.GetCornerOrient();
+
+			byte[] symTransfrom = SymmetryCornerPermutation[se];
+			byte[,,] symCornerOrient = SymmetryCornerOrientation[se];
+
+			for (int i = 0; i < 8; i++)
+			{
+				if (symTransfrom[inversePerm[i]] != otherInversePerm[symTransfrom[i]] ||
+ 					symCornerOrient[i, inversePerm[i], orient[inversePerm[i]]] != otherOrient[symTransfrom[inversePerm[i]]])
+				{
+					return false;
+				}
+			}
+
+			//edges
+			perm = GetEdgePerm();
+			inversePerm = GetInverse(perm);
+			orient = GetEdgeOrient();
+
+			otherInversePerm = GetInverse(other.GetEdgePerm());
+			otherOrient = other.GetEdgeOrient();
+
+			symTransfrom = SymmetryEdgePermutation[se];
+			byte[] symOrientation = SymmetryEdgeOrientation[se];
+
+			for (int i = 0; i < 8; i++)
+			{
+				if (symTransfrom[inversePerm[i]] != otherInversePerm[symTransfrom[i]] ||
+					orient[i] != (otherOrient[symTransfrom[i]] ^ symOrientation[i] ^ symOrientation[perm[i]]))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+		public bool IsEqualWithSymmetry(CubeIndex other)
+		{
+			if (this == other)
+				return true;
+
+			for(int i = 1; i < 48; i++)
+			{
+				if (IsEqualWithSymmetry(other, i))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		//Statics
@@ -548,10 +605,6 @@ namespace CubeAD
 			return (ushort)ret;
 		}
 	
-
-
-
-
 		//Sorting
 		public static void RadixSortCubeIndices(CubeIndex[] data, CubeIndex[] CubeBuffer)
 		{
@@ -654,7 +707,7 @@ namespace CubeAD
 		//Overrides
 		public override string ToString()
 		{
-			return Index.ToString("000 000 000 000 000 000 000");
+			return Index.ToString("00 000 000 000 000 000 000");
 		}
 		public override bool Equals(object obj)
 		{
@@ -667,6 +720,11 @@ namespace CubeAD
 		public override int GetHashCode()
 		{
 			return HashCode.Combine(EdgePermutationIndex, CornerPermutationIndex, EdgeOrientationIndex, CornerOrientationIndex);
+		}
+
+		public int GetSymmetryHashCode()
+		{
+			return HashCode.Combine(SymmetryCornerMatrix[CornerPermutationIndex], SymmetryEdgeMatrix[EdgePermutationIndex]);
 		}
 		public int CompareTo(CubeIndex other)
 		{

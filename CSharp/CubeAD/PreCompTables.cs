@@ -81,6 +81,9 @@ namespace CubeAD
 		public static byte[][] SymmetryEdgeOrientation = new byte[SymmetryElement.ORDER][];
 
 		public static ushort[] SymmetryCornerMatrix = new ushort[MAX_CORNER_PERMUTATION];
+		public static byte[] SymmetryElementCornerMatrix = new byte[MAX_CORNER_PERMUTATION]; // [TODO]
+		public static uint[] SymmetryEdgeMatrix = new uint[MAX_EDGE_PERMUTATION];
+		public static byte[] SymmetryElementEdgeMatrix = new byte[MAX_EDGE_PERMUTATION];// [TODO]
 
 		public static Dictionary<uint, BitMap64> SymmetryEdgePermMask = new Dictionary<uint, BitMap64>();
 		public static BitMap64[] SymmetryCornerPermMask = new BitMap64[MAX_CORNER_PERMUTATION];
@@ -634,6 +637,7 @@ namespace CubeAD
 				int[] inverse = new int[8];
 				int[] perm = new int[8];
 				int[] transformed = new int[8];
+
 				for (int i = 0; i < fac; i++)
 				{
 					if(cast[i] == ushort.MaxValue)
@@ -646,13 +650,53 @@ namespace CubeAD
 						//Skip identity
 						for(int j = 1; j < 48; j++)
 						{
+							byte[] symmetryTranform = SymmetryCornerPermutation[j];
+							
 							for(int k = 0; k < 8; k++)
 							{
-								transformed[k] = 
+								//symTransfrom[inversePerm[i]] == otherInversePerm[symTransfrom[i]]
+								transformed[symmetryTranform[k]] = symmetryTranform[inverse[k]]; 
 							}
 
+							cast[GetIndex(GetInverse(transformed))] = (ushort)i;							
+						}
+					}
+				}
+			});
 
+			//Symmetry Edge representator
+			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "symmetry_edge_matrix.bin"), SymmetryEdgeMatrix, (ret) =>
+			{
+				uint[] cast = ret as uint[];
 
+				Array.Fill(cast, uint.MaxValue);
+
+				int fac = Factorial(12);
+				int[] inverse = new int[12];
+				int[] perm = new int[12];
+				int[] transformed = new int[12];
+
+				for (int i = 0; i < fac; i++)
+				{
+					if (cast[i] == uint.MaxValue)
+					{
+						cast[i] = (uint)i;
+
+						GetIndexedPerm(inverse, i);
+						perm = GetInverse(inverse);
+
+						//Skip identity
+						for (int j = 1; j < 48; j++)
+						{
+							byte[] symmetryTranform = SymmetryCornerPermutation[j];
+
+							for (int k = 0; k < 12; k++)
+							{
+								//symTransfrom[inversePerm[i]] == otherInversePerm[symTransfrom[i]]
+								transformed[symmetryTranform[k]] = symmetryTranform[inverse[k]];
+							}
+
+							cast[GetIndex(GetInverse(transformed))] = (uint)i;
 						}
 					}
 				}

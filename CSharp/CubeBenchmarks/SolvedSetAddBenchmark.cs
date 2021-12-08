@@ -16,7 +16,7 @@ namespace CubeBenchmarks
 		//static RadixTreeArray radixTreeArray;
 		//static RadixTreeDictionary radixTreeDic;
 		//static RadixTreeIterative radixTreeIt;
-		static SortedCubeIndexList sortCubeInd;
+		static SortedCubeIndexSet sortCubeInd;
 		static SortedBuckets bucketCubeIndices;
 		static SetBuckets setBuckets;
 
@@ -26,7 +26,7 @@ namespace CubeBenchmarks
 			//radixTreeDic = new RadixTreeDictionary();
 			////radixTreeArray = new RadixTreeArray();
 			//radixTreeIt = new RadixTreeIterative();
-			sortCubeInd = new SortedCubeIndexList();
+			sortCubeInd = new SortedCubeIndexSet();
 			bucketCubeIndices = new SortedBuckets();
 			setBuckets = new SetBuckets(0);
 

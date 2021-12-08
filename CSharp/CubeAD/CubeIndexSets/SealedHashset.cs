@@ -1,19 +1,32 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace CubeAD.CubeIndexSets
 {
+	//A read-only hash-based set class for CubeIndex with all elements in consecutive memory
 	public class SealedHashset
 	{
-		const int LENGTH = (int)CubeIndex.MAX_EDGE_PERMUTATION;
+		//Bucket count
+		const int BUCKET_COUNT = (int)CubeIndex.MAX_EDGE_PERMUTATION;
+		
+		//Size in bytes for binary writer
 		public int DataSizeInBytes => Data.Length * CubeIndex.SIZE_IN_BYTES + 4;
+
+		//Amount of cubes in the set
 		public int Count => Data.Length;
 
 		CubeIndex[] Data;
-		int[] StartIndex = new int[LENGTH + 1];
 
-		//Input array is not preserved!
+		//Start-indices of buckets
+		//+1 to store end of last bucket
+		int[] StartIndex = new int[BUCKET_COUNT + 1];
+
+		/// <summary>
+		/// Creates a <see cref="SealedHashset"/> from an array of  <see cref="CubeIndex"/>
+		/// </summary>
+		/// <param name="cubes">The array of <see cref="CubeIndex"/> (not preserved)</param>
 		public SealedHashset(CubeIndex[] cubes)
 		{
 			Data = new CubeIndex[cubes.Length];
@@ -21,37 +34,44 @@ namespace CubeAD.CubeIndexSets
 
 			CubeIndex.RadixSortCubeIndices(Data, cubes);
 
-			//count cubes
+			//Count cubes for each bucket
 			for (int i = 0; i < cubes.Length; i++)
 				StartIndex[cubes[i].EdgePermutationIndex]++;
 
-			double Mean = (double)cubes.Length / LENGTH;
+			//Calculate distribution metrics
+			double Mean = (double)cubes.Length / BUCKET_COUNT;
 			double Std = 0;
 			for (int i = 0; i < StartIndex.Length; i++)
 				Std += (StartIndex[i] - Mean) * (StartIndex[i] - Mean);
 
-			Std /= LENGTH;
+			Std /= BUCKET_COUNT;
 
 			Console.WriteLine("Maximum bucket size: " + StartIndex.Max());
 			Console.WriteLine("Minimum bucket size: " + StartIndex.Min());
 			Console.WriteLine("Mean: " + Mean);
 			Console.WriteLine("Std: " + Std);
 
-			//Sum up the first i cubes
+			//Sum up the first i cubes (prefix sum)
 			for (int i = 1; i < StartIndex.Length; i++)
 				StartIndex[i] += StartIndex[i - 1];
 
-			//calculated indices
+			//Calculated start-indices 
 			for (int i = StartIndex.Length - 1; i >= 1; i--)
 				StartIndex[i] = StartIndex[i - 1];
 
 			StartIndex[0] = 0;
 		}
 
-		public SealedHashset(string file)
+		/// <summary>
+		/// Loads a <see cref="SealedHashset"/> from a memory dump file.
+		/// </summary>
+		/// <param name="path">The path to the memory dump file</param>
+		public SealedHashset(string path)
 		{
-			byte[] array = File.ReadAllBytes(file);
+			byte[] array = File.ReadAllBytes(path);
 			Data = new CubeIndex[array.Length / CubeIndex.PADDED_SIZE_IN_BYTES];
+
+			//Copy all bytes from array to Data
 			unsafe
 			{
 				fixed (void* source = array)
@@ -65,14 +85,13 @@ namespace CubeAD.CubeIndexSets
 			
 			Console.WriteLine("Done reading " + Data.Length + " cubes");
 
-			//count cubes
+			//Count cubes for each bucket
 			for (int i = 0; i < Data.Length; i++)
 				StartIndex[Data[i].EdgePermutationIndex]++;
-
-			//Sum up the first i cubes
+			//Sum up the first i cubes (prefix sum)
 			for (int i = 1; i < StartIndex.Length; i++)
 				StartIndex[i] += StartIndex[i - 1];
-			//calculated indices
+			//Calculated start-indices
 			for (int i = StartIndex.Length - 1; i >= 1; i--)
 				StartIndex[i] = StartIndex[i - 1];
 
@@ -81,9 +100,15 @@ namespace CubeAD.CubeIndexSets
 			Console.WriteLine("Finished creating sealed HS");
 		}
 
-		public void SaveToFile(string file)
+		/// <summary>
+		/// Creates a memory dump file of the <see cref="SealedHashset"/>.
+		/// </summary>
+		/// <param name="path">The path and the name of the file to create</param>
+		public void SaveToFile(string path)
 		{
 			byte[] array = new byte[Data.Length * CubeIndex.PADDED_SIZE_IN_BYTES];
+
+			//Copy all bytes from Data to array
 			unsafe
 			{
 				fixed (void* source = Data)
@@ -95,42 +120,12 @@ namespace CubeAD.CubeIndexSets
 				}
 			}
 
-			File.WriteAllBytes(file, array);
-		}
-
-		public byte[] ToByteArray()
-		{
-			byte[] array = new byte[Data.Length * CubeIndex.SIZE_IN_BYTES];
-			MemoryStream ms = new MemoryStream(array);
-			BinaryWriter bw = new BinaryWriter(ms);
-
-			for (int i = 0; i < Data.Length; i++)
-			{
-				Data[i].Write(bw);
-			}
-
-			return array;
-		}
-
-		public byte[] ToByteArrayUnsafe()
-		{
-			byte[] array = new byte[Data.Length * CubeIndex.PADDED_SIZE_IN_BYTES];
-			unsafe
-			{
-				fixed (void* source = Data)
-				{
-					fixed (void* dest = array)
-					{
-						Buffer.MemoryCopy(source, dest, array.Length, array.Length);
-					}
-				}
-			}
-
-			return array;
+			File.WriteAllBytes(path, array);
 		}
 
 		public bool Contains(CubeIndex index)
 		{
+			//Find start and end of corresbonding bucket
 			int start = StartIndex[index.EdgePermutationIndex];
 			int end = StartIndex[index.EdgePermutationIndex + 1];
 

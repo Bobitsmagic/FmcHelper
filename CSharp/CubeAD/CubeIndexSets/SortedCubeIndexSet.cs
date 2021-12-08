@@ -4,7 +4,7 @@ using System.IO;
 
 namespace CubeAD.CubeIndexSets
 {
-	public class SortedCubeIndexList
+	public class SortedCubeIndexSet
 	{
 		public static List<CubeIndex> CubeIndexBuffer = new List<CubeIndex>();
 
@@ -13,12 +13,12 @@ namespace CubeAD.CubeIndexSets
 		public List<CubeIndex> Data;
 		bool IsDirty = false;
 
-		public SortedCubeIndexList(int capacity = 0)
+		public SortedCubeIndexSet(int capacity = 0)
 		{
 			Data = new List<CubeIndex>(capacity);
 		}
 
-		public SortedCubeIndexList(BinaryReader br)
+		public SortedCubeIndexSet(BinaryReader br)
 		{
 			int length = br.ReadInt32();
 			Data = new List<CubeIndex>(length);
@@ -40,7 +40,6 @@ namespace CubeAD.CubeIndexSets
 			if (Data.Count > 1 && IsDirty)
 			{
 				CubeIndex.RadixSortCubeIndices(Data, CubeIndexBuffer);
-				//Data.Sort();
 				CubeIndex current = Data[0];
 
 				int deleteCount = 0;

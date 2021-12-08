@@ -19,7 +19,7 @@ namespace CubeAD.CubeIndexSets
 			}
 		}
 
-		SortedCubeIndexList[] Data = new SortedCubeIndexList[CubeIndex.MAX_CORNER_PERMUTATION];
+		SortedCubeIndexSet[] Data = new SortedCubeIndexSet[CubeIndex.MAX_CORNER_PERMUTATION];
 
 		bool IsDirty = false;
 
@@ -27,7 +27,7 @@ namespace CubeAD.CubeIndexSets
 		{
 			for (int i = 0; i < Data.Length; i++)
 			{
-				Data[i] = new SortedCubeIndexList(bucketCapacity);
+				Data[i] = new SortedCubeIndexSet(bucketCapacity);
 			}
 		}
 
@@ -38,7 +38,7 @@ namespace CubeAD.CubeIndexSets
 
 			for (int i = 0; i < Data.Length; i++)
 			{
-				Data[i] = new SortedCubeIndexList(br);
+				Data[i] = new SortedCubeIndexSet(br);
 			}
 
 			Console.WriteLine("Done reading");

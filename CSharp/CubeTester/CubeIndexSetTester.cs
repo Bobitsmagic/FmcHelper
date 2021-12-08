@@ -18,7 +18,7 @@ namespace CubeTester
 			var radixTreeDic = new RadixTreeDictionary();
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
-			var sortCubeInd = new SortedCubeIndexList();
+			var sortCubeInd = new SortedCubeIndexSet();
 			var bucketCubeInd = new SortedBuckets();
 			var setBucket = new SetBuckets();
 
@@ -53,7 +53,7 @@ namespace CubeTester
 			var radixTreeDic = new RadixTreeDictionary();
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
-			var sortCubeInd = new SortedCubeIndexList();
+			var sortCubeInd = new SortedCubeIndexSet();
 			var bucketCubeInd = new SortedBuckets();
 			var setBucket = new SetBuckets();
 
@@ -125,7 +125,7 @@ namespace CubeTester
 			var radixTreeDic = new RadixTreeDictionary();
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
-			var sortCubeInd = new SortedCubeIndexList();
+			var sortCubeInd = new SortedCubeIndexSet();
 			var bucketCubeInd = new SortedBuckets();
 			var setBuckets = new SetBuckets();
 

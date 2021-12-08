@@ -4,6 +4,9 @@ using System.IO;
 
 namespace CubeAD.CubeIndexSets
 {
+	/// <summary>
+	/// An add-only set class for <see cref="CubeIndex"/>, optimized for add operations and space efficiency
+	/// </summary>
 	public class SortedCubeIndexSet
 	{
 		public static List<CubeIndex> CubeIndexBuffer = new List<CubeIndex>();
@@ -18,30 +21,24 @@ namespace CubeAD.CubeIndexSets
 			Data = new List<CubeIndex>(capacity);
 		}
 
-		public SortedCubeIndexSet(BinaryReader br)
-		{
-			int length = br.ReadInt32();
-			Data = new List<CubeIndex>(length);
-
-			for (int i = 0; i < Data.Capacity; i++)
-			{
-				Data.Add(new CubeIndex(br));
-			}
-		}
-
 		public void Add(CubeIndex element)
 		{
 			Data.Add(element);
 			IsDirty = true;
 		}
 
+		/// <summary>
+		/// Sorts the <see cref="CubeIndexBuffer"/> and removes all duplicates afterwards
+		/// </summary>
 		public void RemoveDuplicates()
 		{
 			if (Data.Count > 1 && IsDirty)
 			{
 				CubeIndex.RadixSortCubeIndices(Data, CubeIndexBuffer);
-				CubeIndex current = Data[0];
 
+
+				//Copy all unique elements at the first duplicate and count duplicates
+				CubeIndex current = Data[0];
 				int deleteCount = 0;
 				for (int i = 1; i < Data.Count; i++)
 				{
@@ -52,26 +49,18 @@ namespace CubeAD.CubeIndexSets
 						Data[i - deleteCount] = cube;
 					}
 					else
-					{
-						
+					{						
 						deleteCount++;
 					}
 				}
 
+				//Remove all duplicates at the end of the list
 				Data.RemoveRange(Data.Count - deleteCount, deleteCount);
 			}
 
 			IsDirty = false;
 		}
 
-		public void Write(BinaryWriter bw)
-		{
-			bw.Write(Data.Count);
-			for (int i = 0; i < Data.Count; i++)
-			{
-				Data[i].Write(bw);
-			}
-		}
 		public void Clear()
 		{
 			Data.Clear();
@@ -83,15 +72,8 @@ namespace CubeAD.CubeIndexSets
 		{
 			if (IsDirty)
 				throw new Exception("Contains call on dirty list");
+
 			return Data.BinarySearch(cube) >= 0;
-		}
-
-		public override string ToString()
-		{
-			if (IsDirty)
-				throw new Exception("Count call on dirty list");
-
-			return "Count: " + Count;
 		}
 	}
 }

@@ -5,16 +5,16 @@ using System.Linq;
 
 namespace CubeAD.CubeIndexSets
 {
-	//A read-only hash-based set class for CubeIndex with all elements in consecutive memory
+	/// <summary>
+	/// A read-only hash-based set class for CubeIndex with all elements in consecutive memory,
+	/// optimized for Contains calls and space-efficiency
+	/// </summary>
 	public class SealedHashset
 	{
-		//Bucket count
 		const int BUCKET_COUNT = (int)CubeIndex.MAX_EDGE_PERMUTATION;
 		
-		//Size in bytes for binary writer
 		public int DataSizeInBytes => Data.Length * CubeIndex.SIZE_IN_BYTES + 4;
 
-		//Amount of cubes in the set
 		public int Count => Data.Length;
 
 		CubeIndex[] Data;

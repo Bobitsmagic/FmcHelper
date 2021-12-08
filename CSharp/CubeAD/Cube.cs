@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace CubeAD
 {
+	/// <summary>
+	/// A class representing a 3x3x3 rubiks cube storing the color of each sticker
+	/// </summary>
 	public class Cube
 	{
 		const int SIDE_COUNT = 6;
@@ -16,6 +19,7 @@ namespace CubeAD
 		const int FRONT = 4;
 		const int BACK = 5;
 
+		//The side values of a solved Cube
 		private static readonly Side[] SolvedColors =
 {
 			new Side((CubeColor)0),
@@ -26,7 +30,7 @@ namespace CubeAD
 			new Side((CubeColor)5)
 		};
 
-		//Adj stripes of adj sides (Clockwise order)
+		//Adjacent stripes of adj sides (Clockwise order)
 		private static readonly (int Side, int Stripe)[][] AdjStripes = new (int Side, int Stripe)[][]
 		{
 			//Left
@@ -92,7 +96,6 @@ namespace CubeAD
 			(BOTTOM,    1, FRONT,   2),
 			(BOTTOM,    0, BACK,    3)
 		};
-
 		private static (int side1, int square1, int side2, int square2)[] RedBlocks =
 		{
 			(BOTTOM,    3, BACK,    0),
@@ -101,33 +104,15 @@ namespace CubeAD
 			(TOP,       0, BACK,    1)
 		};
 
+		//SIDE_COUNT Sides of the cube
 		Side[] Sides = new Side[SIDE_COUNT];
-		byte Blocked;
 
-		public Cube()
+		/// <summary>
+		/// Creates a solved cube
+		/// </summary>
+		public Cube() 
 		{
 			Reset();
-		}
-		public Cube(Cube old)
-		{
-			Blocked = old.Blocked;
-
-			for (int i = 0; i < 6; i++)
-			{
-				Sides[i] = old.Sides[i];
-			}
-		}
-
-		public Cube(Cube old, CubeMove m)
-		{
-			Blocked = old.Blocked;
-
-			for (int i = 0; i < 6; i++)
-			{
-				Sides[i] = old.Sides[i];
-			}
-
-			MakeMove(m);
 		}
 		public void Reset()
 		{
@@ -135,60 +120,58 @@ namespace CubeAD
 			{
 				Sides[i] = new Side((CubeColor)i);
 			}
-
-			Blocked = 0;
 		}
+
+		/// <summary>
+		/// Creates a copy of a cube
+		/// </summary>
+		public Cube(Cube old) 
+		{
+			for (int i = 0; i < SIDE_COUNT; i++)
+			{
+				Sides[i] = old.Sides[i];
+			}
+		}
+
+		/// <summary>
+		/// Creates copy of a <see cref="Cube"/> and makes a <see cref="CubeMove"/> afterwards
+		/// </summary>
+		public Cube(Cube old, CubeMove m)
+		{
+			for (int i = 0; i < SIDE_COUNT; i++)
+			{
+				Sides[i] = old.Sides[i];
+			}
+
+			MakeMove(m);
+		}
+		
 		public void CopyValuesFrom(Cube c)
 		{
-			Blocked = c.Blocked;
-
-			for (int i = 0; i < 6; i++)
+			for (int i = 0; i < SIDE_COUNT; i++)
 			{
 				Sides[i] = c.Sides[i];
 			}
 		}
 
-		public void AddPossibleMoves(List<CubeMove> list)
-		{
-			list.Clear();
-			for (int i = 0; i < 6; i++)
-			{
-				if (((Blocked >> i) & 1) == 0)
-				{
-					for (int j = 0; j < 3; j++)
-					{
-						list.Add((CubeMove)(i * 3 + j));
-					}
-				}
-			}
-		}
-
-		//ALARM
 		public void ApplyMoveSequenz(MoveSequenz s)
 		{
 			for (int i = 0; i < s.Moves.Count; i++)
 				MakeMove(s.Moves[i]);
-
-			ResetBlocked(); //does not necessarily need to be reset
-		}
-
-		public void ResetBlocked()
-		{
-			Blocked = 0;
 		}
 
 		public void MakeMove(CubeMove m)
 		{
 			int side = (int)m / 3;
 
+			//Rotate affected side
 			Sides[side].Rotate(((int)m % 3) + 1);
-
-			UpdateBlocked(side);
 
 			uint buffer;
 			int moveType = (int)m % 3;
 			(int Side, int Stripe)[] stripes = AdjStripes[side];
 
+			//Swap stickers from adjacent sides
 			switch (moveType)
 			{
 				case 0:
@@ -235,34 +218,19 @@ namespace CubeAD
 			}
 		}
 
-		public void UpdateBlocked(int side)
-		{
-			Blocked |= (byte)(1 << side);
-
-			if (side % 2 == 0)
-				Blocked |= (byte)(1 << (side + 1));
-
-			for (int i = 0; i < 6; i++)
-			{
-				if (i / 2 != side / 2)
-				{
-					Blocked &= (byte)(~(1 << i));
-				}
-			}
-		}
-
 		public bool IsSolved
 		{
 			get
 			{
-				for (int i = 0; i < 6; i++)
+				for (int i = 0; i < SIDE_COUNT; i++)
 					if (Sides[i] != SolvedColors[i]) return false;
 
 				return true;
 			}
 		}
 
-		public static int[,] AdjEdges = new int[,]
+		//The index of the sticker on the first side which is adjacent to the second side 
+		public static int[,] AdjEdges = new int[SIDE_COUNT, SIDE_COUNT]
 		{
 			//Left
 			{ -1, -1, 7, 3, 5, 1 },
@@ -279,23 +247,25 @@ namespace CubeAD
 			//Back
 			{ 7, 3, 1, 5, -1, -1 },
 		};
+
+		/// <returns>The color of the sticker on <paramref name="side1"/> adjacent to <paramref name="side2"/> </returns>
 		public CubeColor GetEdgeColor(int side1, int side2)
 		{
 			return (CubeColor)Sides[side1][AdjEdges[side1, side2]];
 		}
-		public CubeColor GetEdgeColor(CubeColor side1, CubeColor side2)
-		{
-			return (CubeColor)Sides[(int)side1][AdjEdges[(int)side1, (int)side2]];
-		}
-
+		/// <summary>
+		/// Set the color of the sticker on <paramref name="side1"/> adjacent to <paramref name="side2"/> to <paramref name="color"/> 
+		/// </summary>
 		public void SetEdgeColor(int side1, int side2, int color)
 		{
 			Sides[side1][AdjEdges[side1, side2]] = (uint)color;
 		}
 
-		public static int[,] AdjCorners =
+		//The index of the sticker on the first side which is adjacent to the second and third side
+		//Only the parity of the last side is considered
+		public static int[,] AdjCorners = new int[SIDE_COUNT, SIDE_COUNT * 2]
 		{
-			//Left						removed cuz redundancy
+			//Left						removed because of redundancy
 			{ -1, -1, -1, -1, 6, 0, 4, 2, -2, -2, -2, -2 },
 			//Right
 			{ -1, -1, -1, -1, 4, 2, 6, 0, -2, -2, -2, -2 },
@@ -310,6 +280,8 @@ namespace CubeAD
 			//Back
 			{ 0, 6, 2, 4, -2, -2, -2, -2, -1, -1, -1, -1},
 		};
+
+		/// <returns>The color of the sticker on <paramref name="side1"/> adjacent to <paramref name="side2"/> and <paramref name="side3"/></returns>
 		public CubeColor GetCornerColor(int side1, int side2, int side3)
 		{
 			int lower = Math.Min(side2, side3);
@@ -318,6 +290,9 @@ namespace CubeAD
 			return (CubeColor)Sides[side1][AdjCorners[side1, lower * 2 + (higher & 1)]];
 		}
 
+		/// <summary>
+		/// Set the color of the sticker on <paramref name="side1"/> adjacent to <paramref name="side2"/> and <paramref name="side3"/> to <paramref name="color"/> 
+		/// </summary>
 		public void SetCornerColor(int side1, int side2, int side3, int color)
 		{
 			int lower = Math.Min(side2, side3);
@@ -326,37 +301,43 @@ namespace CubeAD
 			Sides[side1][AdjCorners[side1, lower * 2 + (higher & 1)]] = (uint)color;
 		}
 
+		/// <summary>
+		///  Checks whether this <see cref="Cube"/> is self symmetric
+		/// </summary>
+		/// <param name="se">Symmetry to check for</param>
 		public bool HasSymmetry(SymmetryElement se)
 		{
 			//Check edges
-			for (int x = 0; x < 6; x++)
+			for (int x = 0; x < SIDE_COUNT; x++)
 			{
 				int nextX = se.TransformColor(x);
-				for (int y = 0; y < 6; y++)
+				for (int y = 0; y < SIDE_COUNT; y++)
 				{
 					if (x / 2 == y / 2) continue;
 
 					int nextY = se.TransformColor(y);
-
+					
+					//Check whether the sticker has the correct color after the transformation and the color change
 					if (se.TransformColor(GetEdgeColor(x, y)) != GetEdgeColor(nextX, nextY))
 						return false;
 				}
 			}
 
 			//Check corners
-			for (int x = 0; x < 6; x++)
+			for (int x = 0; x < SIDE_COUNT; x++)
 			{
 				int nextX = se.TransformColor(x);
-				for (int y = 0; y < 6; y++)
+				for (int y = 0; y < SIDE_COUNT; y++)
 				{
 					if (x / 2 == y / 2) continue;
 					int nextY = se.TransformColor(y);
 
-					for (int z = 0; z < 6; z++)
+					for (int z = 0; z < SIDE_COUNT; z++)
 					{
 						if (x / 2 == z / 2 || y / 2 == z / 2) continue;
 						int nextZ = se.TransformColor(z);
 
+						//Check whether the sticker has the correct color after the transformation and the color change
 						if (se.TransformColor(GetCornerColor(x, y, z)) != GetCornerColor(nextX, nextY, nextZ))
 							return false;
 					}
@@ -367,76 +348,21 @@ namespace CubeAD
 			return true;
 		}
 
+		/// <returns>A bit vector containing a 1 for each <see cref="SymmetryElement"/> this <see cref="Cube"/> has</returns>
 		public BitMap64 GetSymmetrySet()
 		{
 			BitMap64 ret = new BitMap64();
 
-			ret[0] = true;
-			BitMap64 inverse = new BitMap64();
-
-			var array = SymmetryElement.Elements;
-
-			//skipping identity
-			for (int i = 1; i < array.Length; i++)
-			{
-				if (!ret[i] && !inverse[i])
-				{
-					if (HasSymmetry(array[i]))
-					{
-						ret[i] = true;
-
-						//multiplying all implied symmetries to avoid HasSymmetry calls
-						//skipping identity
-						for (int j = 1; j < array.Length; j++)
-						{
-							if (!ret[j]) continue;
-
-							for (int k = 1; k < SymmetryElement.MultGroupIndices[i].Length; k++)
-							{
-								ret[SymmetryElement.GroupIndexTable[SymmetryElement.MultGroupIndices[i][k], j]] = true;
-							}
-						}
-					}
-					else
-					{
-						inverse[i] = true;
-
-						//multiplying all implied symmetries to avoid HasSymmetry calls
-						//skipping identity
-						for (int j = 1; j < array.Length; j++)
-						{
-							//Alarm
-							if (!ret[j]) continue;
-
-							for (int k = 1; k < SymmetryElement.MultGroupIndices[i].Length; k++)
-							{
-								inverse[SymmetryElement.GroupIndexTable[SymmetryElement.MultGroupIndices[i][k], j]] = true;
-							}
-						}
-					}
-				}
+			for(int i = 0; i < SymmetryElement.ORDER; i++) {
+				ret[i] = HasSymmetry(SymmetryElement.Elements[i]);
 			}
 
 			return ret;
 		}
 
-		public string GetSimpleSideView()
-		{
-			string s = "";
-			for (int i = 0; i < 6; i++)
-			{
-				s += Sides[i].WriteAsSide(((CubeColor)i).ToString()[0]) + "\n####################\n";
-			}
-			return s;
-		}
-
+		/// <returns>Whether this <see cref="Cube"/> is equal to <paramref name="other"/> with any symmetry </returns>
 		public bool IsEqualWithSymmetry(Cube other)
 		{
-			BitMap64 sym1 = GetSymmetrySet();
-			BitMap64 sym2 = other.GetSymmetrySet();
-
-			if (sym1 != sym2) return false;
-
 			for (int i = 0; i < SymmetryElement.ORDER; i++)
 			{
 				if (IsEqualWithSymmetry(other, SymmetryElement.Elements[i]))
@@ -445,6 +371,11 @@ namespace CubeAD
 
 			return false;
 		}
+
+
+		/// <summary>
+		/// Computes whether this <see cref="Cube"/> is symmetric to <paramref name="other"/> over <paramref name="se"/>
+		/// </summary>
 		public bool IsEqualWithSymmetry(Cube other, SymmetryElement se)
 		{
 			//Check edges
@@ -457,6 +388,7 @@ namespace CubeAD
 
 					int nextY = se.TransformColor(y);
 
+					//Check whether the sticker has the correct color after the transformation and the color change
 					if (se.TransformColor(GetEdgeColor(x, y)) != other.GetEdgeColor(nextX, nextY))
 						return false;
 				}
@@ -476,6 +408,7 @@ namespace CubeAD
 						if (x / 2 == z / 2 || y / 2 == z / 2) continue;
 						int nextZ = se.TransformColor(z);
 
+						//Check whether the sticker has the correct color after the transformation and the color change
 						if (se.TransformColor(GetCornerColor(x, y, z)) != other.GetCornerColor(nextX, nextY, nextZ))
 							return false;
 					}
@@ -485,6 +418,10 @@ namespace CubeAD
 
 			return true;
 		}
+
+		/// <summary>
+		/// Copies over <paramref name="se"/> transformed stickers to <paramref name="cube"/>
+		/// </summary>
 		public void InsertSymmetryTransformation(SymmetryElement se, Cube cube)
 		{
 			//Check edges
@@ -521,6 +458,7 @@ namespace CubeAD
 			}
 		}
 
+		/// <returns> A cube net like representation</returns>
 		public string GetSideView()
 		{
 			string s = new string(' ', 3 * 2 - 1) + new string('-', 3 * 2 + 1) + "\n";
@@ -583,6 +521,9 @@ namespace CubeAD
 			return s + "\n";
 		}
 
+		/// <summary>
+		/// Prints a colored side view of this <see cref="Cube"/> to the console
+		/// </summary>
 		public void PrintSideView()
 		{
 			string s = GetSideView();
@@ -607,136 +548,7 @@ namespace CubeAD
 			Colorful.Console.Write("\n", Color.White);
 		}
 
-		public int GetValue()
-		{
-			return CountPlacedEdges() + CountF2LPairs() * 100 + CountBlocks() * 100 * (100 - 3);
-		}
-		public int CountBlocks()
-		{
-			int topCounter = 0;
-			int bottomCounter = 0;
-			for (int i = 0; i < 4; i++)
-			{
-				if (Sides[LEFT].FitsPattern(SolvedColors[LEFT], Side.SQUARE_MASK[i]))
-				{
-					(int side1, int square1, int side2, int square2) = OrangeBlocks[i];
-					if (Sides[side1].FitsPattern(SolvedColors[side1], Side.SQUARE_MASK[square1]) &&
-						Sides[side2].FitsPattern(SolvedColors[side2], Side.SQUARE_MASK[square2]))
-					{
-						if (side1 == 2 || side2 == 2)
-							bottomCounter++;
-						else
-							topCounter++;
-					}
-				}
-
-				if (Sides[RIGHT].FitsPattern(SolvedColors[RIGHT], Side.SQUARE_MASK[i]))
-				{
-					(int side1, int square1, int side2, int square2) = RedBlocks[i];
-					if (Sides[side1].FitsPattern(SolvedColors[side1], Side.SQUARE_MASK[square1]) &&
-						Sides[side2].FitsPattern(SolvedColors[side2], Side.SQUARE_MASK[square2]))
-					{
-						if (side1 == 2 || side2 == 2)
-							bottomCounter++;
-						else
-							topCounter++;
-					}
-				}
-			}
-
-			return topCounter + bottomCounter;
-		}
-
-		public int CountSquares()
-		{
-			int counter = 0;
-			for (int i = 0; i < 6; i++)
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					if (Sides[i].FitsPattern(SolvedColors[i], Side.SQUARE_MASK[j]))
-					{
-						counter++;
-					}
-				}
-			}
-
-			return counter;
-		}
-
-		public bool IsPLL()
-		{
-			return !IsSolved && CountBlocks() == 4 && CountSquares() >= 16;
-		}
-
-		public bool IsAUF()
-		{
-			return !IsSolved && CountBlocks() == 4 && CountSquares() >= 16 && CountF2LPairs() >= 20;
-		}
-
-		public static (int Side1, int Side2, int pair1, int Pair2)[] F2LPairs =
-		{
-			//LEFT
-			(LEFT, BACK,    0, 7),
-			(LEFT, BACK,    1, 6),
-			(LEFT, TOP,     2, 7),
-			(LEFT, TOP,     3, 6),
-			(LEFT, FRONT,   4, 7),
-			(LEFT, FRONT,   5, 6),
-			(LEFT, BOTTOM,  6, 3),
-			(LEFT, BOTTOM,  7, 2),
-
-			//1
-			(RIGHT, BACK,   0, 3),
-			(RIGHT, BACK,   1, 2),
-			(RIGHT, BOTTOM, 2, 7),
-			(RIGHT, BOTTOM, 3, 6),
-			(RIGHT, FRONT,  4, 3),
-			(RIGHT, FRONT,  5, 2),
-			(RIGHT, TOP,    6, 3),
-			(RIGHT, TOP,    7, 2),
-
-			//2
-			(BOTTOM, BACK,  0, 1),
-			(BOTTOM, BACK,  1, 0),
-			(BOTTOM, FRONT, 4, 5),
-			(BOTTOM, FRONT, 5, 4),
-
-			//3
-			(TOP, BACK, 0, 5),
-			(TOP, BACK, 1, 4),
-			(TOP, FRONT, 4, 1),
-			(TOP, FRONT, 5, 0)
-		};
-		public int CountF2LPairs()
-		{
-			int counter = 0;
-
-			foreach ((int Side1, int Side2, int Pair1, int Pair2) in F2LPairs)
-			{
-				if (Sides[Side1].IsPair(Pair1) && Sides[Side2].IsPair(Pair2))
-				{
-					counter++;
-				}
-			}
-
-			return counter;
-		}
-		public int CountPlacedEdges()
-		{
-			int counter = 0;
-			for (int i = 0; i < 6; i++)
-			{
-				for (int j = 1; j < 8; j += 2)
-				{
-					if (Sides[i][j] == i)
-						counter++;
-				}
-			}
-
-			return counter;
-		}
-
+		/// <returns>The orientaion of the edge at <paramref name="side1"/>/<paramref name="side2"/></returns>
 		public bool EdgeIsOriented(int side1, int side2)
 		{
 			if (side2 < side1)
@@ -763,6 +575,7 @@ namespace CubeAD
 			}
 		}
 
+		/// <returns>The orientaion of the corner at <paramref name="side1"/>/<paramref name="side2"/>/<paramref name="side3"/></returns>
 		public int CornerOrientaion(int side1, int side2, int side3)
 		{
 			if (!(side1 < side2 && side2 < side3))
@@ -775,310 +588,6 @@ namespace CubeAD
 				return 1;
 
 			return 2;
-		}
-
-		public int CountOrientedEgdes()
-		{
-			int counter = 0;
-
-			//Check white/yellow edges containing on bottom/top
-			for (int i = 1; i < 8; i += 2)
-			{
-				if (Sides[BOTTOM][i] / 2 == 1)
-					counter++;
-				if (Sides[TOP][i] / 2 == 1)
-					counter++;
-			}
-
-
-			//Check white/yellow containing edges on front/back
-			if (Sides[FRONT][3] / 2 == 1)
-				counter++;
-			if (Sides[FRONT][7] / 2 == 1)
-				counter++;
-
-			if (Sides[BACK][3] / 2 == 1)
-				counter++;
-			if (Sides[BACK][7] / 2 == 1)
-				counter++;
-
-			//Check green/blue containing edges on top/bottom
-
-			//all none bot/top sides
-			for (int x = 0; x < 6; x++)
-			{
-				if (x / 2 == 1) continue;
-				//main color (blue/green) on bot/top and secondary color (orange/red) on another side 
-				if ((int)GetEdgeColor(BOTTOM, x) / 2 == 2 &&
-					(int)GetEdgeColor(x, BOTTOM) / 2 == 0) counter++;
-
-				if ((int)GetEdgeColor(TOP, x) / 2 == 2 &&
-					(int)GetEdgeColor(x, TOP) / 2 == 0) counter++;
-			}
-
-
-			if (Sides[BACK][3] / 2 == 2 && Sides[RIGHT][1] / 2 != 1)
-				counter++;
-			if (Sides[FRONT][3] / 2 == 2 && Sides[RIGHT][5] / 2 != 1)
-				counter++;
-
-			if (Sides[BACK][7] / 2 == 2 && Sides[LEFT][1] / 2 != 1)
-				counter++;
-			if (Sides[FRONT][7] / 2 == 2 && Sides[LEFT][5] / 2 != 1)
-				counter++;
-
-			return counter;
-		}
-
-		public static HashSet<CubeIndex> GetRandomCubesDistinct(int moveCount, int count, Random rnd)
-		{
-			HashSet<CubeIndex> ret = new HashSet<CubeIndex>(count);
-
-			List<CubeMove> list = new List<CubeMove>();
-			while (ret.Count < count)
-			{
-				Cube c = new Cube();
-				for (int j = 0; j < moveCount; j++)
-				{
-					c.AddPossibleMoves(list);
-
-					c.MakeMove(list[rnd.Next(list.Count)]);
-				}
-
-				ret.Add(new CubeIndex(c));
-			}
-			Console.WriteLine("Found random cubes");
-
-			return ret;
-		}
-		public static List<CubeIndex> GetRandomCubes(int moveCount, int count, Random rnd)
-		{
-			List<CubeIndex> ret = new List<CubeIndex>(count);
-
-			List<CubeMove> list = new List<CubeMove>();
-			while (ret.Count < count)
-			{
-				Cube c = new Cube();
-				for (int j = 0; j < moveCount; j++)
-				{
-					c.AddPossibleMoves(list);
-
-					c.MakeMove(list[rnd.Next(list.Count)]);
-				}
-
-				ret.Add(new CubeIndex(c));
-			}
-			Console.WriteLine("Found random cubes");
-
-			return ret;
-		}
-		public static HashSet<Cube> GetSolvedCubesDFS(int maxDepth)
-		{
-			HashSet<Cube> ret = new HashSet<Cube>();
-
-			//Avoid GC Pressure
-			List<CubeMove>[] moveBuffer = new List<CubeMove>[20];
-			for (int i = 0; i < moveBuffer.Length; i++)
-				moveBuffer[i] = new List<CubeMove>(18);
-
-			Cube[] cubeBuffer = new Cube[20];
-			for (int i = 0; i < cubeBuffer.Length; i++)
-				cubeBuffer[i] = new Cube();
-
-			Stack<CubeMove> currentMoves = new Stack<CubeMove>(20);
-
-			long bytes = GC.GetTotalMemory(true);
-			long cubeCount = 0;
-
-			Stopwatch sw = new Stopwatch();
-			sw.Start();
-			Solve(0);
-			//Console.WriteLine("CC: " + cubeCount);
-			//Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
-
-			return ret;
-
-			void Solve(int depth)
-			{
-				Cube cube = cubeBuffer[depth];
-				ret.Add(new Cube(cube));
-
-				if (depth < maxDepth)
-				{
-					List<CubeMove> list = moveBuffer[depth];
-					list.Clear();
-					cube.AddPossibleMoves(list);
-					Cube next = cubeBuffer[depth + 1];
-
-					foreach (CubeMove move in list)
-					{
-						next.CopyValuesFrom(cube);
-						next.MakeMove(move);
-
-						//depth++;
-						currentMoves.Push(move);
-
-						Solve(depth + 1);
-						if (depth == 0)
-						{
-							//Console.WriteLine(move + " done");
-							//Console.WriteLine("CubeCount: " + ret.Count.ToString("0 000 000 000"));
-							//Console.WriteLine("Memeory: " + GC.GetTotalMemory(true).ToString("000 000 000 000"));
-							//Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000 000"));
-						}
-
-						currentMoves.Pop();
-						//depth--;
-					}
-
-					cubeCount += list.Count;
-				}
-			}
-		}
-		public static HashSet<CubeIndex> GetSolvedCubeIndicesDFS(int maxDepth)
-		{
-			HashSet<CubeIndex> ret = new HashSet<CubeIndex>();
-
-			//Avoid GC Pressure
-			List<CubeMove>[] moveBuffer = new List<CubeMove>[20];
-			for (int i = 0; i < moveBuffer.Length; i++)
-				moveBuffer[i] = new List<CubeMove>(18);
-
-			Cube[] cubeBuffer = new Cube[20];
-			for (int i = 0; i < cubeBuffer.Length; i++)
-				cubeBuffer[i] = new Cube();
-
-
-			long bytes = GC.GetTotalMemory(true);
-			long cubeCount = 0;
-
-			Stopwatch sw = new Stopwatch();
-			sw.Start();
-			Solve(0);
-			//Console.WriteLine("CC: " + cubeCount);
-			//Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
-
-			return ret;
-
-			void Solve(int depth)
-			{
-				Cube cube = cubeBuffer[depth];
-				ret.Add(new CubeIndex(cube));
-
-				if (depth < maxDepth)
-				{
-					List<CubeMove> list = moveBuffer[depth];
-					list.Clear();
-					cube.AddPossibleMoves(list);
-					Cube next = cubeBuffer[depth + 1];
-
-					foreach (CubeMove move in list)
-					{
-						next.CopyValuesFrom(cube);
-						next.MakeMove(move);
-
-						//depth++;
-						//currentMoves.Push(move);
-
-						Solve(depth + 1);
-						if (depth == 0)
-						{
-							//Console.WriteLine(move + " done");
-							//Console.WriteLine("CubeCount: " + ret.Count.ToString("0 000 000 000"));
-							//Console.WriteLine("Memeory: " + GC.GetTotalMemory(true).ToString("000 000 000 000"));
-							//Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000 000"));
-						}
-
-						//currentMoves.Pop();
-						//depth--;
-					}
-
-					cubeCount += list.Count;
-				}
-			}
-		}
-		public static HashSet<CubeIndex> GetSolvedCubeIndicesBFS(int maxDepth)
-		{
-			const int CAPACITY = 1_000_000;
-			HashSet<CubeIndex> ret = new HashSet<CubeIndex>(CAPACITY);
-
-			//Avoid GC Pressure
-			Cube cube = new Cube();
-
-			List<Cube> current = new List<Cube>(CAPACITY);
-			List<Cube> next = new List<Cube>(CAPACITY);
-
-			current.Add(new Cube());
-			ret.Add(new CubeIndex(current.ElementAt(0)));
-
-			long bytes = GC.GetTotalMemory(true);
-
-			long cubeCount = 0;
-			for (int i = 0; i < maxDepth; i++)
-			{
-				foreach (Cube c in current)
-				{
-					for (int j = 0; j < 18; j++)
-					{
-						cube.CopyValuesFrom(c);
-						cube.MakeMove((CubeMove)j);
-						if (ret.Add(new CubeIndex(cube)))
-							next.Add(new Cube(cube));
-
-					}
-				}
-
-				if (next.Count >= next.Capacity)
-					Console.WriteLine("Alarm");
-				cubeCount += current.Count * 18;
-
-				List<Cube> buffer = next;
-				next = current;
-				current = buffer;
-
-				next.Clear();
-			}
-			//Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
-			//Console.WriteLine("MakeMoveCount: " + cubeCount);
-
-			return ret;
-		}
-
-		public static HashSet<Cube> GetSolvedCubesBFSNaive(int maxDepth)
-		{
-			const int CAPACITY = 1_000_000;
-			HashSet<Cube> ret = new HashSet<Cube>(CAPACITY);
-
-			//Avoid GC Pressure
-			Cube cube = new Cube();
-			List<Cube> next = new List<Cube>();
-
-			ret.Add(new Cube(cube));
-			for (int i = 0; i < maxDepth; i++)
-			{
-				foreach (Cube c in ret)
-				{
-					for (int j = 0; j < 18; j++)
-					{
-						cube.CopyValuesFrom(c);
-						cube.MakeMove((CubeMove)j);
-
-						if (!ret.Contains(cube))
-						{
-							next.Add(new Cube(cube));
-						}
-					}
-				}
-
-				for (int j = 0; j < next.Count; j++)
-					ret.Add(next[j]);
-
-				next.Clear();
-			}
-			//Console.WriteLine("Memory DIf: " + (GC.GetTotalMemory(true) - bytes).ToString("000 000 000 000"));
-			//Console.WriteLine("MakeMoveCount: " + cubeCount);
-
-			return ret;
 		}
 
 		public static bool operator ==(Cube a, Cube b)
@@ -1105,9 +614,7 @@ namespace CubeAD
 
 		public override int GetHashCode()
 		{
-			return Sides[0].GetHashCode() ^ (Sides[1].GetHashCode() << 8) ^
-				Sides[2].GetHashCode() ^ (Sides[3].GetHashCode() << 8) ^
-				Sides[4].GetHashCode() ^ (Sides[5].GetHashCode() << 8);
+			return HashCode.Combine(Sides[0], Sides[1], Sides[2], Sides[3], Sides[4], Sides[5]);
 		}
 	}
 }

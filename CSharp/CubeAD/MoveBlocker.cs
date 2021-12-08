@@ -2,32 +2,36 @@
 
 namespace CubeAD
 {
+	/// <summary>
+	/// A struct that helps reducing redundancy on longer move sequenzes,
+	/// blocked moves: L-L2 = LP, R-L-R = R2-L, RL = LR 
+	/// </summary>
 	public struct MoveBlocker
 	{
 		public bool this[int i] => ((Blocked >> i) & 1) != 0;
+		public bool this[CubeMove m] => this[(int)m / 3];
 
+		//Contains information on which side is blocked
 		private byte Blocked;
 
-		public MoveBlocker(MoveBlocker old, CubeMove m)
-		{
-			Blocked = old.Blocked;
-			UpdateBlocked((int)m / 3);
-		}
-		public MoveBlocker(MoveBlocker old, int side, bool soft = false)
+		/// <summary>
+		/// Creates copy of a <see cref="MoveBlocker"/> and updates it with <paramref name="m"/> afterwards
+		/// </summary>
+		public MoveBlocker(MoveBlocker old, CubeMove m, bool soft = false)
 		{
 			Blocked = old.Blocked;
 
 			if (soft)
-				UpdateBlockedSoft(side);
+				UpdateBlockedSoft(m);
 			else 
-				UpdateBlocked(side);
+				UpdateBlocked(m);
 		}
 
-
-
 		public void ResetBlocked() => Blocked = 0;
-		public void UpdateBlocked(int side)
+
+		public void UpdateBlocked(CubeMove m)
 		{
+			int side = (int)m / 3;
 			Blocked |= (byte)(1 << side);
 
 			if (side % 2 == 0)
@@ -42,9 +46,10 @@ namespace CubeAD
 			}
 		}
 
-		//Ignores RL == LR
-		public void UpdateBlockedSoft(int side)
+		//Ignores RL = LR
+		public void UpdateBlockedSoft(CubeMove m)
 		{
+			int side = (int)m / 3;
 			Blocked |= (byte)(1 << side);
 
 			for (int i = 0; i < 6; i++)

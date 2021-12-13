@@ -11,14 +11,14 @@ namespace CubeBenchmarks
 		const int DEPTH = 7;
 		static Random rnd = new Random(0);
 
-		static CubeIndex[] Cubes = new CubeIndex[10000];
+		static IndexCube[] Cubes = new IndexCube[10000];
 		//static HashSet<CubeIndex> HashSet;
 		//static SetBuckets SetBuckets;
 		static SealedHashset SealedHS;
 
 		static SolvedSetContainsBenchmark()
 		{
-			CubeIndex[] array = SearchingAlgorithms.GenerateSolvedTree(DEPTH).GetArray();
+			IndexCube[] array = SearchingAlgorithms.GenerateSolvedTree(DEPTH).GetArray();
 
 			Console.WriteLine("Created Array");
 
@@ -41,7 +41,7 @@ namespace CubeBenchmarks
 			}
 
 			int count = Cubes.Length / 10;
-			foreach (CubeIndex index in Cube.GetRandomCubesDistinct(7, 9000, rnd))
+			foreach (IndexCube index in StickerCube.GetRandomCubesDistinct(7, 9000, rnd))
 			{
 				Cubes[count++] = index;
 

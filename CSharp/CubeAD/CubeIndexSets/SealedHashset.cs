@@ -11,28 +11,28 @@ namespace CubeAD.CubeIndexSets
 	/// </summary>
 	public class SealedHashset
 	{
-		const int BUCKET_COUNT = (int)CubeIndex.MAX_EDGE_PERMUTATION;
+		const int BUCKET_COUNT = (int)IndexCube.MAX_EDGE_PERMUTATION;
 		
-		public int DataSizeInBytes => Data.Length * CubeIndex.SIZE_IN_BYTES + 4;
+		public int DataSizeInBytes => Data.Length * IndexCube.SIZE_IN_BYTES + 4;
 
 		public int Count => Data.Length;
 
-		CubeIndex[] Data;
+		IndexCube[] Data;
 
 		//Start-indices of buckets
 		//+1 to store end of last bucket
 		int[] StartIndex = new int[BUCKET_COUNT + 1];
 
 		/// <summary>
-		/// Creates a <see cref="SealedHashset"/> from an array of  <see cref="CubeIndex"/>
+		/// Creates a <see cref="SealedHashset"/> from an array of  <see cref="IndexCube"/>
 		/// </summary>
-		/// <param name="cubes">The array of <see cref="CubeIndex"/> (not preserved)</param>
-		public SealedHashset(CubeIndex[] cubes)
+		/// <param name="cubes">The array of <see cref="IndexCube"/> (not preserved)</param>
+		public SealedHashset(IndexCube[] cubes)
 		{
-			Data = new CubeIndex[cubes.Length];
+			Data = new IndexCube[cubes.Length];
 			cubes.CopyTo(Data, 0);
 
-			CubeIndex.RadixSortCubeIndices(Data, cubes);
+			IndexCube.RadixSortCubeIndices(Data, cubes);
 
 			//Count cubes for each bucket
 			for (int i = 0; i < cubes.Length; i++)
@@ -69,7 +69,7 @@ namespace CubeAD.CubeIndexSets
 		public SealedHashset(string path)
 		{
 			byte[] array = File.ReadAllBytes(path);
-			Data = new CubeIndex[array.Length / CubeIndex.PADDED_SIZE_IN_BYTES];
+			Data = new IndexCube[array.Length / IndexCube.PADDED_SIZE_IN_BYTES];
 
 			//Copy all bytes from array to Data
 			unsafe
@@ -106,7 +106,7 @@ namespace CubeAD.CubeIndexSets
 		/// <param name="path">The path and the name of the file to create</param>
 		public void SaveToFile(string path)
 		{
-			byte[] array = new byte[Data.Length * CubeIndex.PADDED_SIZE_IN_BYTES];
+			byte[] array = new byte[Data.Length * IndexCube.PADDED_SIZE_IN_BYTES];
 
 			//Copy all bytes from Data to array
 			unsafe
@@ -123,7 +123,7 @@ namespace CubeAD.CubeIndexSets
 			File.WriteAllBytes(path, array);
 		}
 
-		public bool Contains(CubeIndex index)
+		public bool Contains(IndexCube index)
 		{
 			//Find start and end of corresbonding bucket
 			int start = StartIndex[index.EdgePermutationIndex];
@@ -138,7 +138,7 @@ namespace CubeAD.CubeIndexSets
 			return false;
 		}
 
-		public bool TryGetValue(CubeIndex index, out CubeIndex actual)
+		public bool TryGetValue(IndexCube index, out IndexCube actual)
 		{
 			int start = StartIndex[index.EdgePermutationIndex];
 			int end = StartIndex[index.EdgePermutationIndex + 1];

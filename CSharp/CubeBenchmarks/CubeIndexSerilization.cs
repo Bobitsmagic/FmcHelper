@@ -9,15 +9,15 @@ namespace CubeBenchmarks
 		static SealedHashset set;
 		static CubeIndexSerilization()
 		{
-			CubeIndex[] cubes = new CubeIndex[COUNT];
+			IndexCube[] cubes = new IndexCube[COUNT];
 
 			for (int i = 0; i < COUNT; i++)
 			{
-				cubes[i] = new CubeIndex(
-					(uint)(i % CubeIndex.MAX_EDGE_PERMUTATION),
-					(ushort)(i % CubeIndex.MAX_CORNER_PERMUTATION),
-					(ushort)(i % CubeIndex.MAX_EDGE_ORIENTATION),
-					(ushort)(i % CubeIndex.MAX_CORNER_ORIENTATION),
+				cubes[i] = new IndexCube(
+					(uint)(i % IndexCube.MAX_EDGE_PERMUTATION),
+					(ushort)(i % IndexCube.MAX_CORNER_PERMUTATION),
+					(ushort)(i % IndexCube.MAX_EDGE_ORIENTATION),
+					(ushort)(i % IndexCube.MAX_CORNER_ORIENTATION),
 					(CubeMove)(i % 18));
 			}
 

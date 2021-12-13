@@ -14,7 +14,7 @@ namespace CubeTester
 		[Test]
 		public void AddOperation()
 		{
-			var hashset = new HashSet<CubeIndex>();
+			var hashset = new HashSet<IndexCube>();
 			var radixTreeDic = new RadixTreeDictionary();
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
@@ -22,7 +22,7 @@ namespace CubeTester
 			var bucketCubeInd = new SortedBucketsSet();
 			var setBucket = new SetBuckets();
 
-			foreach (CubeIndex index in Cube.GetRandomCubes(4, 1000, new Random(0)))
+			foreach (IndexCube index in StickerCube.GetRandomCubes(4, 1000, new Random(0)))
 			{
 				hashset.Add(index);
 				radixTreeArray.Add(index);
@@ -49,7 +49,7 @@ namespace CubeTester
 		[Test]
 		public void ClearOperation()
 		{
-			var hashset = new HashSet<CubeIndex>();
+			var hashset = new HashSet<IndexCube>();
 			var radixTreeDic = new RadixTreeDictionary();
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
@@ -57,7 +57,7 @@ namespace CubeTester
 			var bucketCubeInd = new SortedBucketsSet();
 			var setBucket = new SetBuckets();
 
-			foreach (CubeIndex index in Cube.GetRandomCubes(4, 1000, new Random(0)))
+			foreach (IndexCube index in StickerCube.GetRandomCubes(4, 1000, new Random(0)))
 			{
 				hashset.Add(index);
 				radixTreeArray.Add(index);
@@ -95,7 +95,7 @@ namespace CubeTester
 			Assert.AreEqual(0, bucketCubeInd.Count);
 			Assert.AreEqual(0, setBucket.Count);
 
-			foreach (CubeIndex index in Cube.GetRandomCubes(4, 1000, new Random(0)))
+			foreach (IndexCube index in StickerCube.GetRandomCubes(4, 1000, new Random(0)))
 			{
 				hashset.Add(index);
 				radixTreeArray.Add(index);
@@ -121,7 +121,7 @@ namespace CubeTester
 		[Test]
 		public void ContainsOperation()
 		{
-			var hashset = new HashSet<CubeIndex>();
+			var hashset = new HashSet<IndexCube>();
 			var radixTreeDic = new RadixTreeDictionary();
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
@@ -129,10 +129,10 @@ namespace CubeTester
 			var bucketCubeInd = new SortedBucketsSet();
 			var setBuckets = new SetBuckets();
 
-			List<CubeIndex> list = Cube.GetRandomCubes(20, 1000, new Random(0));
+			List<IndexCube> list = StickerCube.GetRandomCubes(20, 1000, new Random(0));
 			for (int i = 0; i < list.Count; i += 10)
 			{
-				CubeIndex index = list[i];
+				IndexCube index = list[i];
 				hashset.Add(index);
 				radixTreeArray.Add(index);
 				radixTreeDic.Add(index);
@@ -148,7 +148,7 @@ namespace CubeTester
 			var sealedHS = new SealedHashset(hashset.ToArray());
 
 
-			foreach (CubeIndex index in list)
+			foreach (IndexCube index in list)
 			{
 				Assert.AreEqual(hashset.Contains(index), radixTreeArray.Contains(index));
 				Assert.AreEqual(hashset.Contains(index), radixTreeDic.Contains(index));

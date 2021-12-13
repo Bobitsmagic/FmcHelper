@@ -6,7 +6,7 @@ using System.Linq;
 namespace CubeAD.CubeIndexSets
 {
 	/// <summary>
-	/// An add-only set class for <see cref="CubeIndex"/>, optimized for add operations and space efficiency
+	/// An add-only set class for <see cref="IndexCube"/>, optimized for add operations and space efficiency
 	/// </summary>
 	public class SortedBucketsSet
 	{
@@ -24,7 +24,7 @@ namespace CubeAD.CubeIndexSets
 
 		//Each bucket is a SortedCubeIndexSet
 		//All buckets are indexed by the corner permutation index
-		SortedCubeIndexSet[] Data = new SortedCubeIndexSet[CubeIndex.MAX_CORNER_PERMUTATION];
+		SortedCubeIndexSet[] Data = new SortedCubeIndexSet[IndexCube.MAX_CORNER_PERMUTATION];
 
 		//Flag whether this instance can contain duplicates
 		bool IsDirty = false;
@@ -41,7 +41,7 @@ namespace CubeAD.CubeIndexSets
 			}
 		}
 
-		public void Add(CubeIndex element)
+		public void Add(IndexCube element)
 		{
 			Data[element.CornerPermutationIndex].Add(element);
 			IsDirty = true;
@@ -74,17 +74,17 @@ namespace CubeAD.CubeIndexSets
 		/// 
 		/// </summary>
 		/// <returns>An array containing all unique elements</returns>
-		public CubeIndex[] GetArray()
+		public IndexCube[] GetArray()
 		{
 			if(IsDirty) 
 				RemoveDuplicates();
 
-			CubeIndex[] cubeIndices = new CubeIndex[Count];
+			IndexCube[] cubeIndices = new IndexCube[Count];
 
 			int counter = 0;
 			for (int i = 0; i < Data.Length; i++)
 			{
-				List<CubeIndex> list = Data[i].Data;
+				List<IndexCube> list = Data[i].Data;
 
 				for (int j = 0; j < list.Count; j++)
 				{
@@ -96,7 +96,7 @@ namespace CubeAD.CubeIndexSets
 		}
 
 		//For testing purposes
-		public bool Contains(CubeIndex cube)
+		public bool Contains(IndexCube cube)
 		{
 			if (IsDirty)
 				Console.WriteLine("Possible dirty call of contains");

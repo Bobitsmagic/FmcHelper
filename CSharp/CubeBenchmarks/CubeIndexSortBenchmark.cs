@@ -11,8 +11,8 @@ namespace CubeBenchmarks
 		const int COUNT = 10_000_000;
 		Random Rnd = new Random(0);
 
-		CubeIndex[] Indices = Cube.GetRandomCubesDistinct(15, COUNT, new Random(0)).ToArray();
-		CubeIndex[] Buffer = new CubeIndex[COUNT];
+		IndexCube[] Indices = StickerCube.GetRandomCubesDistinct(15, COUNT, new Random(0)).ToArray();
+		IndexCube[] Buffer = new IndexCube[COUNT];
 
 		[IterationSetup]
 		public void Setup()
@@ -21,7 +21,7 @@ namespace CubeBenchmarks
 			{
 				int index = Rnd.Next(i + 1, COUNT);
 
-				CubeIndex buffer = Indices[i];
+				IndexCube buffer = Indices[i];
 				Indices[i] = Indices[index];
 				Indices[index] = buffer;
 			}
@@ -37,7 +37,7 @@ namespace CubeBenchmarks
 		[Benchmark]
 		public void RadixSort()
 		{
-			CubeIndex.RadixSortCubeIndices(Indices, Buffer);
+			IndexCube.RadixSortCubeIndices(Indices, Buffer);
 		}
 
 

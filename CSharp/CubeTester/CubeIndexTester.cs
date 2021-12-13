@@ -29,18 +29,18 @@ namespace CubeTester
 		[Test]
 		public void EdgePermutationIndex()
 		{
-			Cube c = new Cube();
-			CubeIndex index = new CubeIndex(c);
+			StickerCube c = new StickerCube();
+			IndexCube index = new IndexCube(c);
 
 			Assert.AreEqual(0, index.EdgePermutationIndex);
 
 			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 
-			index = new CubeIndex(c);
+			index = new IndexCube(c);
 			Assert.AreEqual(0, index.EdgePermutationIndex);
 
 			c.ApplyMoveSequenz(MoveSequenz.CheckerBoard);
-			index = new CubeIndex(c);
+			index = new IndexCube(c);
 
 			//index of permutation 5 4 7 6 1 0 3 2 11 10 9 8
 			Assert.AreEqual(216080063, index.EdgePermutationIndex);
@@ -49,8 +49,8 @@ namespace CubeTester
 		[Test]
 		public void CornerPermutationIndex()
 		{
-			Cube c = new Cube();
-			CubeIndex index = new CubeIndex(c);
+			StickerCube c = new StickerCube();
+			IndexCube index = new IndexCube(c);
 
 			Assert.AreEqual(0, index.CornerPermutationIndex);
 
@@ -58,7 +58,7 @@ namespace CubeTester
 			c.MakeMove(CubeMove.L2);
 			c.MakeMove(CubeMove.R2);
 
-			index = new CubeIndex(c);
+			index = new IndexCube(c);
 
 			//index of permutation 5 4 7 6 1 0 3 2 11 10 9 8
 			Assert.AreEqual(13805, index.CornerPermutationIndex);
@@ -68,41 +68,41 @@ namespace CubeTester
 		[Test]
 		public void EdgeOrientationIndex()
 		{
-			Cube c = new Cube();
-			CubeIndex index = new CubeIndex(c);
+			StickerCube c = new StickerCube();
+			IndexCube index = new IndexCube(c);
 
 			Assert.AreEqual(0, index.EdgeOrientationIndex);
 
 			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 
-			index = new CubeIndex(c);
-			Assert.AreEqual(CubeIndex.MAX_EDGE_ORIENTATION - 1, index.EdgeOrientationIndex);
+			index = new IndexCube(c);
+			Assert.AreEqual(IndexCube.MAX_EDGE_ORIENTATION - 1, index.EdgeOrientationIndex);
 
 			c.ApplyMoveSequenz(MoveSequenz.CheckerBoard);
 
-			index = new CubeIndex(c);
-			Assert.AreEqual(CubeIndex.MAX_EDGE_ORIENTATION - 1, index.EdgeOrientationIndex);
+			index = new IndexCube(c);
+			Assert.AreEqual(IndexCube.MAX_EDGE_ORIENTATION - 1, index.EdgeOrientationIndex);
 		}
 
 		[Test]
 		public void CornerOrientationIndex()
 		{
-			Cube c = new Cube();
-			CubeIndex index = new CubeIndex(c);
+			StickerCube c = new StickerCube();
+			IndexCube index = new IndexCube(c);
 
 			Assert.AreEqual(0, index.CornerOrientationIndex);
 
 			//double sune on top
 			//rotates corner 2 3 6 7
 			c.ApplyMoveSequenz(new MoveSequenz("R U R' U R U' R' U R U2 R'"));
-			index = new CubeIndex(c);
+			index = new IndexCube(c);
 
 			int val = (Power(3, 7 - 2) + Power(3, 7 - 3) + Power(3, 7 - 6) + Power(3, 7 - 7));
 
 			Assert.AreEqual(val, index.CornerOrientationIndex);
 
 			c.ApplyMoveSequenz(new MoveSequenz("R U R' U R U' R' U R U2 R'"));
-			index = new CubeIndex(c);
+			index = new IndexCube(c);
 			Assert.AreEqual(val * 2, index.CornerOrientationIndex);
 
 
@@ -120,11 +120,11 @@ namespace CubeTester
 		[Test]
 		public void CubeIndexSorting()
 		{
-			HashSet<CubeIndex> indices = Cube.GetRandomCubesDistinct(10, 1000, new System.Random(0));
+			HashSet<IndexCube> indices = StickerCube.GetRandomCubesDistinct(10, 1000, new System.Random(0));
 
-			CubeIndex[] array1 = indices.ToArray();
-			CubeIndex[] array2 = array1.ToArray();
-			CubeIndex[] buffer = new CubeIndex[array1.Length];
+			IndexCube[] array1 = indices.ToArray();
+			IndexCube[] array2 = array1.ToArray();
+			IndexCube[] buffer = new IndexCube[array1.Length];
 
 			Array.Sort(array1);
 
@@ -133,7 +133,7 @@ namespace CubeTester
 				Assert.IsTrue(array1[i].Index < array1[i + 1].Index);
 			}
 
-			CubeIndex.RadixSortCubeIndices(array2, buffer);
+			IndexCube.RadixSortCubeIndices(array2, buffer);
 
 			Assert.IsTrue(array1.SequenceEqual(array2));
 		}
@@ -159,11 +159,11 @@ namespace CubeTester
 		{
 			Random rnd = new Random(0);
 
-			Cube c = new Cube();
+			StickerCube c = new StickerCube();
 			for (int i = 0; i < 1000; i++)
 			{
 				c.MakeMove((CubeMove)rnd.Next(18));
-				Assert.AreEqual(c, (new CubeIndex(c)).GetCube());
+				Assert.AreEqual(c, (new IndexCube(c)).GetCube());
 			}
 		}
 
@@ -172,9 +172,9 @@ namespace CubeTester
 		{
 			Random rnd = new Random(0);
 
-			Cube cube = new Cube();
-			CubeIndex index = new CubeIndex();
-			Assert.AreEqual(new CubeIndex(cube), index);
+			StickerCube cube = new StickerCube();
+			IndexCube index = new CubeIndex();
+			Assert.AreEqual(new IndexCube(cube), index);
 
 			for (int i = 0; i < 18; i++)
 			{
@@ -185,7 +185,7 @@ namespace CubeTester
 				index.MakeMove(m);
 				cube.MakeMove(m);
 
-				CubeIndex buffer = new CubeIndex(cube);
+				IndexCube buffer = new IndexCube(cube);
 
 				Assert.AreEqual(buffer.CornerOrientationIndex, index.CornerOrientationIndex);
 				Assert.AreEqual(buffer.CornerPermutationIndex, index.CornerPermutationIndex);
@@ -203,7 +203,7 @@ namespace CubeTester
 
 				System.Diagnostics.Debug.WriteLine(i + " -> " + m);
 
-				CubeIndex buffer = new CubeIndex(cube);
+				IndexCube buffer = new IndexCube(cube);
 
 
 				Assert.AreEqual(cube, index.GetCube());
@@ -220,7 +220,7 @@ namespace CubeTester
 		[Test]
 		public void HasSymmetry()
 		{
-			CubeIndex c = new CubeIndex();
+			IndexCube c = new CubeIndex();
 
 			foreach (SymmetryElement se in SymmetryElement.Elements)
 			{
@@ -260,8 +260,8 @@ namespace CubeTester
 		[Test]
 		public void IsEqualWithSymmetry()
 		{
-			CubeIndex c1 = new CubeIndex();
-			CubeIndex c2 = new CubeIndex();			
+			IndexCube c1 = new CubeIndex();
+			IndexCube c2 = new CubeIndex();			
 
 			Random rnd = new Random(0);
 			
@@ -284,7 +284,7 @@ namespace CubeTester
 						CubeMove wrongMove = (CubeMove)k;
 						if (wrongMove == transformed) continue;
 
-						CubeIndex c3 = new CubeIndex(c2, wrongMove);
+						IndexCube c3 = new IndexCube(c2, wrongMove);
 
 						Assert.IsFalse(c1.IsEqualWithSymmetry(c3, se));
 

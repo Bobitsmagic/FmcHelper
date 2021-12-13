@@ -46,14 +46,14 @@ namespace CubeAD
 
 							MoveSequenz ms = new MoveSequenz(line);
 
-							if (ms.Length == shortest)
+							if (ms.Count == shortest)
 							{
 								best.Add(ms);
 							}
 
-							if (ms.Length < shortest)
+							if (ms.Count < shortest)
 							{
-								shortest = ms.Length;
+								shortest = ms.Count;
 								best.Clear();
 								best.Add(ms);
 							}

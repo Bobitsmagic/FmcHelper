@@ -11,8 +11,8 @@ namespace CubeBenchmarks
 	{
 		static Random rnd = new Random(0);
 
-		static CubeIndex[] Cubes = new CubeIndex[10000000];
-		static HashSet<CubeIndex> hashset;
+		static IndexCube[] Cubes = new IndexCube[10000000];
+		static HashSet<IndexCube> hashset;
 		//static RadixTreeArray radixTreeArray;
 		//static RadixTreeDictionary radixTreeDic;
 		//static RadixTreeIterative radixTreeIt;
@@ -22,7 +22,7 @@ namespace CubeBenchmarks
 
 		static SolvedSetAddBenchmark()
 		{
-			hashset = new HashSet<CubeIndex>();
+			hashset = new HashSet<IndexCube>();
 			//radixTreeDic = new RadixTreeDictionary();
 			////radixTreeArray = new RadixTreeArray();
 			//radixTreeIt = new RadixTreeIterative();
@@ -33,7 +33,7 @@ namespace CubeBenchmarks
 			Console.WriteLine("Created other sets");
 
 			int count = 0;
-			foreach (CubeIndex index in Cube.GetRandomCubes(7, Cubes.Length, rnd))
+			foreach (IndexCube index in StickerCube.GetRandomCubes(7, Cubes.Length, rnd))
 			{
 				Cubes[count++] = index;
 			}
@@ -44,7 +44,7 @@ namespace CubeBenchmarks
 		[IterationSetup]
 		public void Setup()
 		{
-			hashset = new HashSet<CubeIndex>();
+			hashset = new HashSet<IndexCube>();
 			//radixTreeDic.Clear();
 			//radixTreeArray.Clear();
 			//radixTreeIt.Clear();

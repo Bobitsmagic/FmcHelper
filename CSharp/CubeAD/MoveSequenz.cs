@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace CubeAD
 {
+	/// <summary>
+	/// A class holding a sequenz of <see cref="CubeMove"/> 
+	/// </summary>
 	public class MoveSequenz
 	{
 		public static Random Rnd = new Random();
@@ -19,7 +22,9 @@ namespace CubeAD
 		public static readonly MoveSequenz TPerm = new MoveSequenz("R U R' U' R' F R2 U' R' U' R U R' F'");
 		public static readonly MoveSequenz HPerm = new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2");
 
-		public int Length { get { return Moves.Count; } }
+
+		public int Count { get { return Moves.Count; } }
+
 		public readonly List<CubeMove> Moves;
 
 		public MoveSequenz(IEnumerable<CubeMove> moves)
@@ -35,6 +40,9 @@ namespace CubeAD
 			Moves = cm.ToList();
 		}
 
+		/// <summary>
+		/// Creates a <see cref="MoveSequenz"/> from a string of <see cref="CubeMove"/> 
+		/// </summary>
 		public MoveSequenz(string s)
 		{
 			Moves = s.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(x => FromString(x)).ToList();
@@ -50,11 +58,24 @@ namespace CubeAD
 			}
 		}
 
+		/// <summary>
+		/// Generates a random irreducable <see cref="MoveSequenz"/> with <paramref name="length"/> moves.
+		/// </summary>
 		public MoveSequenz(int length)
 		{
 			Moves = new List<CubeMove>(length);
 
-			bool[] blocked = new bool[6];
+			ReRoll(length);
+		}
+
+		/// <summary>
+		/// Randomizes the moves of this <see cref="MoveSequenz"/>
+		/// </summary>
+		public void ReRoll(int length)
+		{
+			Moves.Clear();
+
+			MoveBlocker mb = new MoveBlocker();
 
 			List<int> list = new List<int>(6);
 			for (int i = 0; i < length; i++)
@@ -63,32 +84,30 @@ namespace CubeAD
 
 				for (int j = 0; j < 6; j++)
 				{
-					if (!blocked[j])
+					if (!mb[j])
 						list.Add(j);
 				}
 
 				int index = Rnd.Next(list.Count);
-
 				int side = list[index];
-				blocked[side] = true;
-
-				for (int j = 0; j < 6; j++)
-				{
-					if (j / 2 != side / 2)
-					{
-						blocked[j] = false;
-					}
-				}
 
 				Moves.Add((CubeMove)(side * 3 + Rnd.Next(3)));
+
+				mb.UpdateBlocked(Moves.Last());
 			}
 		}
 
+		/// <returns>A <see cref="MoveSequenz"/> that reverses all moves of this <see cref="MoveSequenz"/> </returns>
 		public MoveSequenz GetReverse()
 		{
 			return new MoveSequenz(Moves.Select(x => ReverseMove(x)).Reverse().ToList());
 		}
 
+
+		//[TODO] unit test with moveblocker
+		/// <summary>
+		/// Reduces this <see cref="MoveSequenz"/> if possible
+		/// </summary>
 		public void Reduce()
 		{
 			bool reduced = false;
@@ -117,62 +136,19 @@ namespace CubeAD
 			} while (reduced);
 		}
 
+		/// <returns> A new <see cref="MoveSequenz"/> with all moves transformed by <paramref name="se"/> </returns>
 		public MoveSequenz Rotate(SymmetryElement se)
 		{
-			List<CubeMove> ret = new List<CubeMove>();
-
-			foreach (CubeMove m in Moves)
-			{
-				int side = ((int)m) / 3;
-				int nextSide = se.TransformColor(side);
-				CubeMove nextMove = (CubeMove)(((int)m) - side + nextSide);
-
-				if (se.HasReflection)
-					ret.Add(ReverseMove(nextMove));
-				else
-					ret.Add(nextMove);
-			}
-
-			return new MoveSequenz(ret);
+			return new MoveSequenz(Moves.Select(x => se.TransformMove(x)));
 		}
 
+		/// <returns>The reverse <see cref="CubeMove"/> to <paramref name="m"/></returns>
 		public static CubeMove ReverseMove(CubeMove m)
 		{
 			int val = (int)m;
 			return (CubeMove)(val - val % 3 + (2 * val + 2) % 3); 
 		}
-		public void ReRoll()
-		{
-			Moves.Clear();
-			bool[] blocked = new bool[6];
 
-			List<int> list = new List<int>(6);
-			for (int i = 0; i < Moves.Capacity; i++)
-			{
-				list.Clear();
-
-				for (int j = 0; j < 6; j++)
-				{
-					if (!blocked[j])
-						list.Add(j);
-				}
-
-				int index = Rnd.Next(list.Count);
-
-				int side = list[index];
-				blocked[side] = true;
-
-				for (int j = 0; j < 6; j++)
-				{
-					if (j / 2 != side / 2)
-					{
-						blocked[j] = false;
-					}
-				}
-
-				Moves.Add((CubeMove)(side * 3 + Rnd.Next(3)));
-			}
-		}
 		public override string ToString()
 		{
 			return string.Join(" ", Moves.Select(x => x.ToString().Replace('P', '\'')));

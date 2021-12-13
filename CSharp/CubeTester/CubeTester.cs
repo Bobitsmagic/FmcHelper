@@ -9,7 +9,7 @@ namespace CubeTester
 		[Test]
 		public void RotateSingleSide()
 		{
-			Cube cube = new Cube();
+			StickerCube cube = new StickerCube();
 			Assert.IsTrue(cube.IsSolved);
 
 			for (int i = 0; i < 6; i++)
@@ -58,7 +58,7 @@ namespace CubeTester
 						cubeMoves[k + 3] = (CubeMove)(j * 3 + 2);
 					}
 
-					Cube cube = new Cube();
+					StickerCube cube = new StickerCube();
 					Assert.IsTrue(cube.IsSolved);
 
 					for (int k = 0; k < cubeMoves.Length - 1; k++)
@@ -78,7 +78,7 @@ namespace CubeTester
 		[Test]
 		public void GetEdges()
 		{
-			Cube c = new Cube();
+			StickerCube c = new StickerCube();
 			for (int x = 0; x < 6; x++)
 			{
 				for (int y = 0; y < 6; y++)
@@ -105,7 +105,7 @@ namespace CubeTester
 		[Test]
 		public void GetCorners()
 		{
-			Cube c = new Cube();
+			StickerCube c = new StickerCube();
 			//Super flip
 			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 			for (int x = 0; x < 6; x++)
@@ -127,7 +127,7 @@ namespace CubeTester
 		[Test]
 		public void HasSymmetry()
 		{
-			Cube c = new Cube();
+			StickerCube c = new StickerCube();
 
 			foreach (SymmetryElement se in SymmetryElement.Elements)
 			{
@@ -157,7 +157,7 @@ namespace CubeTester
 		[Test]
 		public void GetSymmetrySet()
 		{
-			Cube c = new Cube();
+			StickerCube c = new StickerCube();
 
 			BitMap64 sym = c.GetSymmetrySet();
 			Assert.AreEqual(SymmetryElement.FullSymmetry, sym);
@@ -200,8 +200,8 @@ namespace CubeTester
 		[Test]
 		public void IsEqualWithSymmetry()
 		{
-			Cube c1 = new Cube();
-			Cube c2 = new Cube();
+			StickerCube c1 = new StickerCube();
+			StickerCube c2 = new StickerCube();
 
 			Random rnd = new Random(0);
 
@@ -239,7 +239,7 @@ namespace CubeTester
 		[Test]
 		public void CountSquares()
 		{
-			Cube cube = new Cube();
+			StickerCube cube = new StickerCube();
 
 			Assert.AreEqual(24, cube.CountSquares());
 
@@ -253,7 +253,7 @@ namespace CubeTester
 		[Test]
 		public void CheckBlocks()
 		{
-			Cube cube = new Cube();
+			StickerCube cube = new StickerCube();
 
 			Assert.AreEqual(8, cube.CountBlocks());
 
@@ -267,7 +267,7 @@ namespace CubeTester
 		[Test]
 		public void CountOrientedEdges()
 		{
-			Cube cube = new Cube();
+			StickerCube cube = new StickerCube();
 
 			Assert.AreEqual(12, cube.CountOrientedEgdes());
 
@@ -307,7 +307,7 @@ namespace CubeTester
 		[Test]
 		public void SingleEdges()
 		{
-			Cube cube = new Cube();
+			StickerCube cube = new StickerCube();
 
 			Random rnd = new Random(0);
 

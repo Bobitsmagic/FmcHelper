@@ -27,7 +27,7 @@ namespace CubeAD
 
 			//H
 			MoveSequenz ms = new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2").GetReverse();
-			Cube c = new Cube();
+			StickerCube c = new StickerCube();
 			c.ApplyMoveSequenz(ms);
 
 			Console.WriteLine(ms);
@@ -42,7 +42,7 @@ namespace CubeAD
 				Solve(c);
 			}
 
-			void Solve(Cube cube)
+			void Solve(StickerCube cube)
 			{
 				counter++;
 				if (counter % 100000000 == 0)
@@ -73,7 +73,7 @@ namespace CubeAD
 								depth++;
 
 								currentMoves.Push(move);
-								Solve(new Cube(cube, move));
+								Solve(new StickerCube(cube, move));
 								currentMoves.Pop();
 
 								depth--;
@@ -85,7 +85,7 @@ namespace CubeAD
 						{
 							depth++;
 							currentMoves.Push(move);
-							Solve(new Cube(cube, move));
+							Solve(new StickerCube(cube, move));
 							currentMoves.Pop();
 							depth--;
 						}

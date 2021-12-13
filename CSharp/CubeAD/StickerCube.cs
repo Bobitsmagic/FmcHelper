@@ -9,7 +9,7 @@ namespace CubeAD
 	/// <summary>
 	/// A class representing a 3x3x3 rubiks cube storing the color of each sticker
 	/// </summary>
-	public class Cube
+	public class StickerCube
 	{
 		const int SIDE_COUNT = 6;
 		const int LEFT = 0;
@@ -110,7 +110,7 @@ namespace CubeAD
 		/// <summary>
 		/// Creates a solved cube
 		/// </summary>
-		public Cube() 
+		public StickerCube() 
 		{
 			Reset();
 		}
@@ -125,7 +125,7 @@ namespace CubeAD
 		/// <summary>
 		/// Creates a copy of a cube
 		/// </summary>
-		public Cube(Cube old) 
+		public StickerCube(StickerCube old) 
 		{
 			for (int i = 0; i < SIDE_COUNT; i++)
 			{
@@ -134,9 +134,9 @@ namespace CubeAD
 		}
 
 		/// <summary>
-		/// Creates copy of a <see cref="Cube"/> and makes a <see cref="CubeMove"/> afterwards
+		/// Creates copy of a <see cref="StickerCube"/> and makes a <see cref="CubeMove"/> afterwards
 		/// </summary>
-		public Cube(Cube old, CubeMove m)
+		public StickerCube(StickerCube old, CubeMove m)
 		{
 			for (int i = 0; i < SIDE_COUNT; i++)
 			{
@@ -146,7 +146,7 @@ namespace CubeAD
 			MakeMove(m);
 		}
 		
-		public void CopyValuesFrom(Cube c)
+		public void CopyValuesFrom(StickerCube c)
 		{
 			for (int i = 0; i < SIDE_COUNT; i++)
 			{
@@ -302,7 +302,7 @@ namespace CubeAD
 		}
 
 		/// <summary>
-		///  Checks whether this <see cref="Cube"/> is self symmetric
+		///  Checks whether this <see cref="StickerCube"/> is self symmetric
 		/// </summary>
 		/// <param name="se">Symmetry to check for</param>
 		public bool HasSymmetry(SymmetryElement se)
@@ -348,7 +348,7 @@ namespace CubeAD
 			return true;
 		}
 
-		/// <returns>A bit vector containing a 1 for each <see cref="SymmetryElement"/> this <see cref="Cube"/> has</returns>
+		/// <returns>A bit vector containing a 1 for each <see cref="SymmetryElement"/> this <see cref="StickerCube"/> has</returns>
 		public BitMap64 GetSymmetrySet()
 		{
 			BitMap64 ret = new BitMap64();
@@ -360,8 +360,8 @@ namespace CubeAD
 			return ret;
 		}
 
-		/// <returns>Whether this <see cref="Cube"/> is equal to <paramref name="other"/> with any symmetry </returns>
-		public bool IsEqualWithSymmetry(Cube other)
+		/// <returns>Whether this <see cref="StickerCube"/> is equal to <paramref name="other"/> with any symmetry </returns>
+		public bool IsEqualWithSymmetry(StickerCube other)
 		{
 			for (int i = 0; i < SymmetryElement.ORDER; i++)
 			{
@@ -374,9 +374,9 @@ namespace CubeAD
 
 
 		/// <summary>
-		/// Computes whether this <see cref="Cube"/> is symmetric to <paramref name="other"/> over <paramref name="se"/>
+		/// Computes whether this <see cref="StickerCube"/> is symmetric to <paramref name="other"/> over <paramref name="se"/>
 		/// </summary>
-		public bool IsEqualWithSymmetry(Cube other, SymmetryElement se)
+		public bool IsEqualWithSymmetry(StickerCube other, SymmetryElement se)
 		{
 			//Check edges
 			for (int x = 0; x < 6; x++)
@@ -422,7 +422,7 @@ namespace CubeAD
 		/// <summary>
 		/// Copies over <paramref name="se"/> transformed stickers to <paramref name="cube"/>
 		/// </summary>
-		public void InsertSymmetryTransformation(SymmetryElement se, Cube cube)
+		public void InsertSymmetryTransformation(SymmetryElement se, StickerCube cube)
 		{
 			//Check edges
 			for (int x = 0; x < 6; x++)
@@ -522,7 +522,7 @@ namespace CubeAD
 		}
 
 		/// <summary>
-		/// Prints a colored side view of this <see cref="Cube"/> to the console
+		/// Prints a colored side view of this <see cref="StickerCube"/> to the console
 		/// </summary>
 		public void PrintSideView()
 		{
@@ -590,20 +590,20 @@ namespace CubeAD
 			return 2;
 		}
 
-		public static bool operator ==(Cube a, Cube b)
+		public static bool operator ==(StickerCube a, StickerCube b)
 		{
 			for (int i = 0; i < 6; i++)
 				if (a.Sides[i] != b.Sides[i]) return false;
 
 			return true;
 		}
-		public static bool operator !=(Cube a, Cube b)
+		public static bool operator !=(StickerCube a, StickerCube b)
 		{
 			return !(a == b);
 		}
 		public override bool Equals(object obj)
 		{
-			Cube c = (Cube)obj;
+			StickerCube c = (StickerCube)obj;
 
 			for (int i = 0; i < 6; i++)
 			{

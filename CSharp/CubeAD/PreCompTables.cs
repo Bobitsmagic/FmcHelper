@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using static CubeAD.CubeIndex;
+using static CubeAD.IndexCube;
 using static CubeAD.SearchingAlgorithms;
 using static CubeAD.Permutation;
 using System.Diagnostics;
@@ -299,7 +299,7 @@ namespace CubeAD
 				for (int i = 0; i < permsWithSymmetry.Length; i++)
 				{
 					uint val = permsWithSymmetry[i];
-					CubeIndex cubeIndex = new CubeIndex();
+					IndexCube cubeIndex = new CubeIndex();
 					cubeIndex.EdgePermutationIndex = val;
 					BitMap64 array = new BitMap64();
 					for (int j = 0; j < SymmetryElement.Elements.Length; j++)
@@ -322,7 +322,7 @@ namespace CubeAD
 			ReadFromFileOrCreateUnsafeBitArray(Path.Combine(PRE_COMP_PATH, "symmetry_corner_perm_mask.bin"), SymmetryCornerPermMask, (ret) =>
 			{
 				int min = int.MaxValue, max = int.MinValue, sum = 0, zeroCount = 0;
-				CubeIndex cubeIndex = new CubeIndex();
+				IndexCube cubeIndex = new CubeIndex();
 				for (ushort i = 0; i < MAX_CORNER_PERMUTATION; i++)
 				{
 					cubeIndex.CornerPermutationIndex = i;
@@ -350,9 +350,9 @@ namespace CubeAD
 			//Next corner perm
 			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "next_corner_perm.bin"), NextCornerPerm, (ret) =>
 			{
-				Cube c = new Cube();
-				Cube buffer = new Cube();
-				CubeIndex index = new CubeIndex();
+				StickerCube c = new StickerCube();
+				StickerCube buffer = new StickerCube();
+				IndexCube index = new CubeIndex();
 				int[] permBuffer = new int[8];
 
 				ushort[,] cast = (ushort[,])ret;
@@ -373,9 +373,9 @@ namespace CubeAD
 			//Next corner orient
 			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "next_corner_orient.bin"), NextCornerOrient, (ret) =>
 			{
-				Cube c = new Cube();
-				Cube buffer = new Cube();
-				CubeIndex index = new CubeIndex();
+				StickerCube c = new StickerCube();
+				StickerCube buffer = new StickerCube();
+				IndexCube index = new CubeIndex();
 				ushort[,] cast = (ushort[,])ret;
 				for (int i = 0; i < MAX_CORNER_ORIENTATION; i++)
 				{
@@ -396,9 +396,9 @@ namespace CubeAD
 			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "next_edge_orient.bin"), NextEdgeOrient, (ret) =>
 			{
 
-				Cube c = new Cube();
-				Cube buffer = new Cube();
-				CubeIndex index = new CubeIndex();
+				StickerCube c = new StickerCube();
+				StickerCube buffer = new StickerCube();
+				IndexCube index = new CubeIndex();
 				ushort[,] cast = (ushort[,])ret;
 				for (int i = 0; i < MAX_EDGE_ORIENTATION; i++)
 				{
@@ -563,8 +563,8 @@ namespace CubeAD
 				bool[,,] seen = new bool[8, 8, 3];
 				int sCounter = 0;
 				byte[] symTranfrom = SymmetryCornerPermutation[i];
-				CubeIndex c1 = new CubeIndex();
-				CubeIndex c2 = new CubeIndex();
+				IndexCube c1 = new CubeIndex();
+				IndexCube c2 = new CubeIndex();
 
 				var array = new byte[8, 8, 3];
 				SymmetryCornerOrientation[i] = array;
@@ -581,7 +581,7 @@ namespace CubeAD
 				ushort[] orientaions = new ushort[3] { 0, 3280, 6560 };
 
 
-				Cube cube = new Cube();
+				StickerCube cube = new StickerCube();
 				for (int pos = 0; pos < 8; pos++)
 				{
 					c1.CornerPermutationIndex = permutations[pos];
@@ -589,13 +589,13 @@ namespace CubeAD
 					{
 						c1.CornerOrientationIndex = orientaions[rot];
 
-						int[] perm = GetInverse(c1.GetCornerPerm());
-						int[] orient = c1.GetCornerOrient();
+						int[] perm = GetInverse(c1.GetCornerPermuation());
+						int[] orient = c1.GetCornerOrientation();
 
 						c1.GetCube().InsertSymmetryTransformation(se, cube);
-						c2 = new CubeIndex(cube);
+						c2 = new IndexCube(cube);
 
-						int[] otherOrient = c2.GetCornerOrient();
+						int[] otherOrient = c2.GetCornerOrientation();
 
 						for (int k = 0; k < 8; k++)
 						{
@@ -815,7 +815,7 @@ namespace CubeAD
 			int N = 12;
 			//Generate full array
 			int[] data = new int[MAX_EDGE_PERMUTATION];
-			Cube c = new Cube();
+			StickerCube c = new StickerCube();
 			c.MakeMove(m);
 			uint singleIndex = FindEdgePermutationIndex(c);
 

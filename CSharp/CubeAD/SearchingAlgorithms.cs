@@ -62,7 +62,7 @@ namespace CubeAD
 			int currentMaxDepth;
 			for (currentMaxDepth = 0; currentMaxDepth <= maxDepth; currentMaxDepth++)
 			{
-				CubeIndex start = new CubeIndex();
+				IndexCube start = new CubeIndex();
 				start.LastMove = CubeMove.None;
 				DFS(0, start, new MoveBlocker());
 				set.RemoveDuplicates();
@@ -71,7 +71,7 @@ namespace CubeAD
 			set.RemoveDuplicates();
 			return set;
 
-			void DFS(int depth, CubeIndex cube, MoveBlocker blocker)
+			void DFS(int depth, IndexCube cube, MoveBlocker blocker)
 			{
 				set.Add(cube);
 				if (++counter % 10_000_000 == 0)
@@ -88,17 +88,17 @@ namespace CubeAD
 						if (blocker[i / 3]) continue;
 
 						currentMoves.Push((CubeMove)i);
-						DFS(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3));
+						DFS(depth + 1, new IndexCube(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3));
 						currentMoves.Pop();
 					}
 				}
 			}
 		}
 
-		public static HashSet<CubeIndex> SolvedTreeOrientedEdgesSet(int maxDepth)
+		public static HashSet<IndexCube> SolvedTreeOrientedEdgesSet(int maxDepth)
 		{
 			Stack<CubeMove> currentMoves = new Stack<CubeMove>(maxDepth);
-			HashSet<CubeIndex> set = new HashSet<CubeIndex>();
+			HashSet<IndexCube> set = new HashSet<IndexCube>();
 
 			//HashSet<CubeIndex> set = new HashSet<CubeIndex>();
 
@@ -109,7 +109,7 @@ namespace CubeAD
 			}
 			return set;
 
-			void DFS(int depth, CubeIndex cube, MoveBlocker blocker)
+			void DFS(int depth, IndexCube cube, MoveBlocker blocker)
 			{
 				set.Add(cube);
 
@@ -121,7 +121,7 @@ namespace CubeAD
 						if (i / 3 > 3 && i % 3 != 1) continue;
 
 						currentMoves.Push((CubeMove)i);
-						DFS(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3));
+						DFS(depth + 1, new IndexCube(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3));
 						currentMoves.Pop();
 					}
 				}
@@ -146,7 +146,7 @@ namespace CubeAD
 			set.RemoveDuplicates();
 			return set;
 
-			void DFS(int depth, CubeIndex cube, MoveBlocker blocker)
+			void DFS(int depth, IndexCube cube, MoveBlocker blocker)
 			{
 				set.Add(cube);
 				if (counter++ % 100_000_000 == 0)
@@ -163,18 +163,18 @@ namespace CubeAD
 						if (i / 3 > 3 && i % 3 != 1) continue;
 
 						currentMoves.Push((CubeMove)i);
-						DFS(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3));
+						DFS(depth + 1, new IndexCube(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3));
 						currentMoves.Pop();
 					}
 				}
 			}
 		}
-		public static MoveSequenz FindSolutionWithEO(CubeIndex cube)
+		public static MoveSequenz FindSolutionWithEO(IndexCube cube)
 		{
 			const int MAX_DEPTH = 10;
 
 			List<MoveSequenz> eoMoves = FindEdgeOrientationMoves(cube.EdgeOrientationIndex);
-			Console.WriteLine("Eo Length: " + eoMoves[0].Length + " count: " + eoMoves.Count);
+			Console.WriteLine("Eo Length: " + eoMoves[0].Count + " count: " + eoMoves.Count);
 			List<CubeMove> solution = new List<CubeMove>();
 
 			bool foundSolution = false;
@@ -199,7 +199,7 @@ namespace CubeAD
 				//Console.WriteLine("MaxSearchDepth: " + currentMaxDepth);
 				Parallel.ForEach(eoMoves, ms =>
 				{
-					CubeIndex copy = cube;
+					IndexCube copy = cube;
 
 					copy.ApplyMoveSequenz(ms);
 
@@ -216,13 +216,13 @@ namespace CubeAD
 			return new MoveSequenz(solution);
 
 
-			bool FindEOSolution(CubeIndex cube)
+			bool FindEOSolution(IndexCube cube)
 			{
 				Stack<CubeMove> currentMoves = new Stack<CubeMove>(20);
 
 				return DFS(0, cube, new MoveBlocker());
 
-				bool DFS(int depth, CubeIndex cube, MoveBlocker blocker)
+				bool DFS(int depth, IndexCube cube, MoveBlocker blocker)
 				{
 					if (foundSolution) return false;
 
@@ -254,7 +254,7 @@ namespace CubeAD
 							if (i / 3 > 3 && i % 3 != 1) continue;
 
 							currentMoves.Push((CubeMove)i);
-							if (DFS(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3)))
+							if (DFS(depth + 1, new IndexCube(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3)))
 								return true;
 							currentMoves.Pop();
 						}
@@ -267,7 +267,7 @@ namespace CubeAD
 			}
 		}
 
-		public static MoveSequenz FindSolutionBruteForceMultithreaded(CubeIndex cube)
+		public static MoveSequenz FindSolutionBruteForceMultithreaded(IndexCube cube)
 		{
 			bool foundSolution = false;
 			int currentMaxDepth;
@@ -287,7 +287,7 @@ namespace CubeAD
 				for (int j = 0; j < 18; j++)
 				{
 					threads[j] = new Thread(CallThread);
-					threads[j].Start(new CubeIndex(cube, (CubeMove)j));
+					threads[j].Start(new IndexCube(cube, (CubeMove)j));
 				}
 
 				for (int j = 0; j < 18; j++)
@@ -302,7 +302,7 @@ namespace CubeAD
 			void CallThread(object o)
 			{
 				MoveBlocker mb = new MoveBlocker();
-				CubeIndex cast = (CubeIndex)o;
+				IndexCube cast = (IndexCube)o;
 				mb.UpdateBlocked((int)cast.LastMove / 3);
 				int index = (int)cast.LastMove;
 				//Console.WriteLine("Index: " + index);
@@ -313,7 +313,7 @@ namespace CubeAD
 					Console.WriteLine("Setupmove: " + cast.LastMove);
 				}
 
-				bool DFS(int depth, CubeIndex cube, MoveBlocker blocker)
+				bool DFS(int depth, IndexCube cube, MoveBlocker blocker)
 				{
 					if (foundSolution) return false;
 
@@ -349,7 +349,7 @@ namespace CubeAD
 							if (blocker[i / 3]) continue;
 
 							currentMoves[index].Push((CubeMove)i);
-							if (DFS(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3)))
+							if (DFS(depth + 1, new IndexCube(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3)))
 								return true;
 							currentMoves[index].Pop();
 						}
@@ -371,21 +371,21 @@ namespace CubeAD
 			
 			for(int i = 0; i < 18; i++)
 			{
-				CubeIndex first = new CubeIndex();
+				IndexCube first = new CubeIndex();
 				first.MakeMove((CubeMove)i);
 				for(int j = 0; j < 18; j++)
 				{
-					CubeIndex second = new CubeIndex();
+					IndexCube second = new CubeIndex();
 					second.MakeMove((CubeMove)j);
 
-					CubeIndex third =	new CubeIndex();
+					IndexCube third =	new CubeIndex();
 					third.MakeMove((CubeMove)i);
 					third.MakeMove((CubeMove)j);
 
 
-					int[] firstPerm = Permutation.GetInverse(first.GetCornerPerm());
-					int[] secondPerm = Permutation.GetInverse(second.GetCornerPerm());
-					int[] thirdPerm = Permutation.GetInverse(third.GetCornerPerm());
+					int[] firstPerm = Permutation.GetInverse(first.GetCornerPermuation());
+					int[] secondPerm = Permutation.GetInverse(second.GetCornerPermuation());
+					int[] thirdPerm = Permutation.GetInverse(third.GetCornerPermuation());
 
 					int v1 = first.GetSingleCornerOrientation(firstPerm[checkedCorner]);
 					int v2 = second.GetSingleCornerOrientation(thirdPerm[checkedCorner]);
@@ -411,7 +411,7 @@ namespace CubeAD
 				}
 			}
 		}
-		public static MoveSequenz FindSolutionBruteForce(CubeIndex cube)
+		public static MoveSequenz FindSolutionBruteForce(IndexCube cube)
 		{
 			List<CubeMove> solution = new List<CubeMove>();
 			Stack<CubeMove> currentMoves = new Stack<CubeMove>(20);
@@ -432,7 +432,7 @@ namespace CubeAD
 			return new MoveSequenz(solution);
 
 
-			bool DFS(int depth, CubeIndex cube, MoveBlocker blocker)
+			bool DFS(int depth, IndexCube cube, MoveBlocker blocker)
 			{
 				if (GetMoveTree.Contains(cube))
 				{
@@ -458,7 +458,7 @@ namespace CubeAD
 						if (blocker[i / 3]) continue;
 
 						currentMoves.Push((CubeMove)i);
-						if (DFS(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3)))
+						if (DFS(depth + 1, new IndexCube(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3)))
 							return true;
 						currentMoves.Pop();
 					}
@@ -470,7 +470,7 @@ namespace CubeAD
 
 
 		}
-		public static List<CubeMove> FindSolutionInTree(CubeIndex cube, SealedHashset hs)
+		public static List<CubeMove> FindSolutionInTree(IndexCube cube, SealedHashset hs)
 		{
 			List<CubeMove> list = new List<CubeMove>();
 
@@ -500,7 +500,7 @@ namespace CubeAD
 		{
 			Stack<CubeMove> currentMoves = new Stack<CubeMove>(20);
 			List<CubeMove> list = new List<CubeMove>();
-			HashSet<CubeIndex> visited = new HashSet<CubeIndex>();
+			HashSet<IndexCube> visited = new HashSet<IndexCube>();
 			int currentMaxDepth = 0;
 
 			for(int i = 0; i <= MAX_MOVE_DEPTH; i++)
@@ -510,7 +510,7 @@ namespace CubeAD
 				currentMaxDepth++;
 			}
 
-			void DFS(int depth, CubeIndex cube, MoveBlocker blocker)
+			void DFS(int depth, IndexCube cube, MoveBlocker blocker)
 			{
 				if (depth == currentMaxDepth)
 				{
@@ -538,7 +538,7 @@ namespace CubeAD
 
 						currentMoves.Push((CubeMove)i);
 
-						DFS(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3));
+						DFS(depth + 1, new IndexCube(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3));
 							
 						currentMoves.Pop();
 					}
@@ -550,7 +550,7 @@ namespace CubeAD
 		{
 			Stack<CubeMove> currentMoves = new Stack<CubeMove>(20);
 			List<CubeMove> list = new List<CubeMove>();
-			HashSet<CubeIndex> visited = new HashSet<CubeIndex>();
+			HashSet<IndexCube> visited = new HashSet<IndexCube>();
 			int currentMaxDepth = 0;
 
 			for (int i = 0; i <= MAX_EO_MOVE_DEPTH; i++)
@@ -560,7 +560,7 @@ namespace CubeAD
 				currentMaxDepth++;
 			}
 
-			void DFS(int depth, CubeIndex cube, MoveBlocker blocker)
+			void DFS(int depth, IndexCube cube, MoveBlocker blocker)
 			{
 				if (depth == currentMaxDepth)
 				{
@@ -588,14 +588,14 @@ namespace CubeAD
 						if (i / 3 > 3 && i % 3 != 1) continue; //Skipping F, F', B, B'
 						currentMoves.Push((CubeMove)i);
 
-						DFS(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3));
+						DFS(depth + 1, new IndexCube(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3));
 
 						currentMoves.Pop();
 					}
 				}
 			}
 		}
-		public static MoveSequenz FindCommutator(CubeIndex cube, int maxDepth)
+		public static MoveSequenz FindCommutator(IndexCube cube, int maxDepth)
 		{
 			Stack<CubeMove> currentMoves = new Stack<CubeMove>();
 			List<CubeMove> ret = new List<CubeMove>();
@@ -616,7 +616,7 @@ namespace CubeAD
 
 			return null;
 
-			void GenerateMoveSeq(int depth, CubeIndex cube, MoveBlocker blocker)
+			void GenerateMoveSeq(int depth, IndexCube cube, MoveBlocker blocker)
 			{
 				if (depth == currentMaxLength)
 				{
@@ -660,9 +660,9 @@ namespace CubeAD
 
 								ms.Reduce();
 
-								if (ms.Length < bestSolution)
+								if (ms.Count < bestSolution)
 								{
-									bestSolution = ms.Length;
+									bestSolution = ms.Count;
 
 									string s = "Setup: ";
 									for (int i = 0; i < setupLength; i++)
@@ -691,7 +691,7 @@ namespace CubeAD
 						if (blocker[i / 3]) continue;
 
 						currentMoves.Push((CubeMove)i);
-						GenerateMoveSeq(depth + 1, new CubeIndex(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3, true));
+						GenerateMoveSeq(depth + 1, new IndexCube(cube, (CubeMove)i), new MoveBlocker(blocker, i / 3, true));
 
 						currentMoves.Pop();
 					}

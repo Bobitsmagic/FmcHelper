@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using static CubeAD.PreCompTables;
+using static CubeAD.Permutation;
 
 namespace CubeAD
 {
@@ -372,7 +374,6 @@ namespace CubeAD
 			return false;
 		}
 
-
 		/// <summary>
 		/// Computes whether this <see cref="StickerCube"/> is symmetric to <paramref name="other"/> over <paramref name="se"/>
 		/// </summary>
@@ -588,6 +589,93 @@ namespace CubeAD
 				return 1;
 
 			return 2;
+		}
+
+		//CubeIndex generation
+
+		/// <param name="permBuffer"> A buffer to avoid GC pressure </param>
+		/// <returns> The edge permutation index of this <see cref="StickerCube"/> </returns>
+		public uint FindEdgePermutationIndex(int[] permBuffer)
+		{
+			if (permBuffer.Length != 12)
+				throw new ArgumentException("Array must be of length 12");
+
+			int counter = 0;
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = x + 1; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+
+					permBuffer[counter++] = EdgeIndices[(int)GetEdgeColor(x, y), (int)GetEdgeColor(y, x)];
+				}
+			}
+			return (uint)GetIndex(permBuffer);
+		}
+		/// <returns> The edge permutation index of this <see cref="StickerCube"/> </returns>
+		public uint FindEdgePermutationIndex()
+		{
+			return FindEdgePermutationIndex(new int[12]);
+		}
+		/// <param name="permBuffer"> A buffer to avoid GC pressure </param>
+		/// <returns> The corner permutation index of this <see cref="StickerCube"/> </returns>
+		public ushort FindCornerPermutationIndex(int[] permBuffer)
+		{
+			if (permBuffer.Length != 8)
+				throw new ArgumentException("Array must be of length 8");
+
+			int counter = 0;
+			for (int x = 0; x < 2; x++)
+			{
+				for (int y = 2; y < 4; y++)
+				{
+					for (int z = 4; z < 6; z++)
+					{
+						permBuffer[counter++] = CornerIndices[(int)GetCornerColor(x, y, z), (int)GetCornerColor(y, x, z), (int)GetCornerColor(z, x, y)];
+					}
+				}
+			}
+
+			return (ushort)GetIndex(permBuffer);
+		}
+		/// <returns> The edge permutation index of this <see cref="StickerCube"/> </returns>
+		public ushort FindCornerPermutationIndex()
+		{
+			return FindCornerPermutationIndex(new int[8]);
+		}
+		/// <returns> The edge orientation index of this <see cref="StickerCube"/> </returns>
+		public ushort FindEdgeOrientationIndex()
+		{
+			int ret = 0;
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = x + 1; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+
+					ret = (ret << 1) | (EdgeIsOriented(x, y) ? 0 : 1);
+				}
+			}
+
+			return (ushort)ret;
+		}
+		/// <returns> The corner orientation index of this <see cref="StickerCube"/> </returns>
+		public ushort FindCornerOrientationIndex()
+		{
+			int ret = 0;
+			for (int x = 0; x < 2; x++)
+			{
+				for (int y = 2; y < 4; y++)
+				{
+					for (int z = 4; z < 6; z++)
+					{
+						//Console.WriteLine(c.CornerOrientaion(x, y, z));
+						ret = (ret * 3) + CornerOrientaion(x, y, z);
+					}
+				}
+			}
+
+			return (ushort)ret;
 		}
 
 		public static bool operator ==(StickerCube a, StickerCube b)

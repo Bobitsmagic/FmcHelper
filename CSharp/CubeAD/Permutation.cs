@@ -121,5 +121,17 @@ namespace CubeAD
 			}
 			return ret;
 		}
+
+		public static void Transform(int[] left, int[] right, int[] result)
+		{
+			if (left.Length != right.Length || left.Length != result.Length)
+				throw new ArgumentException("Arrays need to have the same length");
+
+			for (int i = 0; i < left.Length; i++)
+			{
+				result[i] = left[right[i]];
+
+			}
+		}
 	}
 }

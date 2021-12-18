@@ -14,7 +14,7 @@ using static CubeAD.Permutation;
 namespace CubeAD
 {
 	//Compressed representation of a cube
-	public class IndexCube : IComparable<IndexCube>
+	public struct IndexCube : IComparable<IndexCube>
 	{
 		public const int SIZE_IN_BYTES = 11;
 		public const int PADDED_SIZE_IN_BYTES = 12;
@@ -94,10 +94,10 @@ namespace CubeAD
 		/// </summary>
 		public IndexCube(StickerCube c)
 		{
-			EdgePermutationIndex = FindEdgePermutationIndex(c);
-			CornerPermutationIndex = FindCornerPermutationIndex(c);
-			EdgeOrientationIndex = FindEdgeOrientationIndex(c);
-			CornerOrientationIndex = FindCornerOrientationIndex(c);
+			EdgePermutationIndex = c.FindEdgePermutationIndex();
+			CornerPermutationIndex = c.FindCornerPermutationIndex();
+			EdgeOrientationIndex = c.FindEdgeOrientationIndex();
+			CornerOrientationIndex = c.FindCornerOrientationIndex();
 
 			LastMove = CubeMove.None;
 		}
@@ -280,8 +280,6 @@ namespace CubeAD
 			ApplyToCube(c);
 			return c;
 		}
-
-		//[TODO] Rework to fix inverse perm
 		public void MakeMove(CubeMove m)
 		{
 			int move = (int)m;
@@ -318,7 +316,6 @@ namespace CubeAD
 		/// <summary> 
 		/// Uses <paramref name="cube"/> as a transformation such that every move to scramble <paramref name="cube"/> is applied on this <see cref="IndexCube"/>
 		/// </summary>
-		/// <param name="cube"></param>
 		public void Transform(IndexCube cube)
 		{
 			int[] edgePerm = GetEdgePermutation();
@@ -353,7 +350,6 @@ namespace CubeAD
 				resultCornerOrient[resultCornerPerm[i]] = (cornerOrient[cornerPerm[i]] + transformCornerOrient[transformCornerPerm[i]]) % 3;
 			}
 		}
-
 		public void ApplyMoveSequenz(MoveSequenz ms)
 		{
 			for (int i = 0; i < ms.Count; i++)
@@ -407,7 +403,6 @@ namespace CubeAD
 			//Identity sym
 			return new BitMap64(1);
 		}
-
 		public bool HasSymmetry(SymmetryElement se)
 		{
 			return CornersHaveSymmetry(se) && EdgesHaveSymmetry(se);
@@ -436,7 +431,6 @@ namespace CubeAD
 		}
 		public bool EdgesHaveSymmetry(SymmetryElement se)
 		{
-			//edges
 			int[] perm = GetEdgePermutation();
 			int[] inversePerm = GetInverse(perm);
 			int[] orient = GetEdgeOrientation();
@@ -458,46 +452,7 @@ namespace CubeAD
 
 		public bool IsEqualWithSymmetry(IndexCube other, SymmetryElement se)
 		{
-			int[] perm = GetCornerPermuation();
-			int[] inversePerm = GetInverse(perm);
-			int[] orient = GetCornerOrientation();
-
-			int[] otherInversePerm = GetInverse(other.GetCornerPermuation());
-			int[] otherOrient = other.GetCornerOrientation();
-
-			byte[] symTransfrom = SymmetryCornerPermutation[se.Index];
-			byte[,,] symCornerOrient = SymmetryCornerOrientation[se.Index];
-
-			for (int i = 0; i < 8; i++)
-			{
-				if (symTransfrom[inversePerm[i]] != otherInversePerm[symTransfrom[i]] ||
- 					symCornerOrient[i, inversePerm[i], orient[inversePerm[i]]] != otherOrient[symTransfrom[inversePerm[i]]])
-				{
-					return false;
-				}
-			}
-
-			//edges
-			perm = GetEdgePermutation();
-			inversePerm = GetInverse(perm);
-			orient = GetEdgeOrientation();
-
-			otherInversePerm = GetInverse(other.GetEdgePermutation());
-			otherOrient = other.GetEdgeOrientation();
-
-			symTransfrom = SymmetryEdgePermutation[se.Index];
-			byte[] symOrientation = SymmetryEdgeOrientation[se.Index];
-
-			for (int i = 0; i < 8; i++)
-			{
-				if (symTransfrom[inversePerm[i]] != otherInversePerm[symTransfrom[i]] || 
-					orient[i] != (otherOrient[symTransfrom[i]] ^ symOrientation[i] ^ symOrientation[perm[i]]))
-				{
-					return false;
-				}
-			}
-
-			return true;
+			return IsEqualWithSymmetry(other, se.Index);
 		}
 		public bool IsEqualWithSymmetry(IndexCube other, int se)
 		{
@@ -557,119 +512,11 @@ namespace CubeAD
 
 			return false;
 		}
-
+		public int GetSymmetryHashCode()
+		{
+			return HashCode.Combine(SymmetryCornerMatrix[CornerPermutationIndex], SymmetryEdgeMatrix[EdgePermutationIndex]);
+		}
 		#endregion
-
-		//Statics
-		public static IndexCube[] ReadCubeIndicesFromFile(string path)
-		{
-			MemoryStream ms = new MemoryStream(File.ReadAllBytes(path));
-			BinaryReader br = new BinaryReader(ms);
-
-			IndexCube[] ret = new IndexCube[br.ReadInt32()];
-
-			for (int i = 0; i < ret.Length; i++)
-			{
-				ret[i] = new IndexCube(br);
-			}
-
-			return ret;
-		}
-		public static void WriteCubeIndicesToFile(IndexCube[] array, string path)
-		{
-			MemoryStream ms = new MemoryStream(array.Length * SIZE_IN_BYTES);
-
-			BinaryWriter bw = new BinaryWriter(ms);
-
-			bw.Write(array.Length);
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i].Write(bw);
-			}
-
-			File.WriteAllBytes(path, ms.ToArray());
-
-			bw.Close();
-			ms.Close();
-		}
-
-		//CubeIndex generation
-		public static uint FindEdgePermutationIndex(StickerCube c, int[] permBuffer)
-		{
-			if (permBuffer.Length != 12)
-				throw new ArgumentException("Array must be of length 12");
-
-			int counter = 0;
-			for (int x = 0; x < 6; x++)
-			{
-				for (int y = x + 1; y < 6; y++)
-				{
-					if (x / 2 == y / 2) continue;
-
-					permBuffer[counter++] = EdgeIndices[(int)c.GetEdgeColor(x, y), (int)c.GetEdgeColor(y, x)];
-				}
-			}
-			return (uint)GetIndex(permBuffer);
-		}
-		public static uint FindEdgePermutationIndex(StickerCube c)
-		{
-			return FindEdgePermutationIndex(c, new int[12]);
-		}
-		public static ushort FindCornerPermutationIndex(StickerCube c, int[] permBuffer)
-		{
-			if (permBuffer.Length != 8)
-				throw new ArgumentException("Array must be of length 8");
-
-			int counter = 0;
-			for (int x = 0; x < 2; x++)
-			{
-				for (int y = 2; y < 4; y++)
-				{
-					for (int z = 4; z < 6; z++)
-					{
-						permBuffer[counter++] = CornerIndices[(int)c.GetCornerColor(x, y, z), (int)c.GetCornerColor(y, x, z), (int)c.GetCornerColor(z, x, y)];
-					}
-				}
-			}
-
-			return (ushort)GetIndex(permBuffer);
-		}
-		public static ushort FindCornerPermutationIndex(StickerCube c)
-		{
-			return FindCornerPermutationIndex(c, new int[8]);
-		}
-		public static ushort FindEdgeOrientationIndex(StickerCube c)
-		{
-			int ret = 0;
-			for (int x = 0; x < 6; x++)
-			{
-				for (int y = x + 1; y < 6; y++)
-				{
-					if (x / 2 == y / 2) continue;
-
-					ret = (ret << 1) | (c.EdgeIsOriented(x, y) ? 0 : 1);
-				}
-			}
-
-			return (ushort)ret;
-		}
-		public static ushort FindCornerOrientationIndex(StickerCube c)
-		{
-			int ret = 0;
-			for (int x = 0; x < 2; x++)
-			{
-				for (int y = 2; y < 4; y++)
-				{
-					for (int z = 4; z < 6; z++)
-					{
-						//Console.WriteLine(c.CornerOrientaion(x, y, z));
-						ret = (ret * 3) + c.CornerOrientaion(x, y, z);
-					}
-				}
-			}
-
-			return (ushort)ret;
-		}
 	
 		//Sorting
 		public static void RadixSortCubeIndices(IndexCube[] data, IndexCube[] CubeBuffer)
@@ -690,12 +537,12 @@ namespace CubeAD
 				for (int j = 0; j < RADIX; j++)
 					indices[j] = 0;
 				for (int j = 0; j < data.Length; j++)
-					indices[data[j][i]]++;
+					indices[data[j].GetByte(i)]++;
 
 				for (int j = 1; j < RADIX; j++)
 					indices[j] += indices[j - 1];
 				for (int j = data.Length - 1; j >= 0; j--)
-					CubeBuffer[--indices[data[j][i]]] = data[j];
+					CubeBuffer[--indices[data[j].GetByte(i)]] = data[j];
 
 				IndexCube[] swap = CubeBuffer;
 				CubeBuffer = data;
@@ -722,12 +569,12 @@ namespace CubeAD
 				for (int j = 0; j < RADIX; j++)
 					indices[j] = 0;
 				for (int j = 0; j < N; j++)
-					indices[data[j][i]]++;
+					indices[data[j].GetByte(i)]++;
 
 				for (int j = 1; j < RADIX; j++)
 					indices[j] += indices[j - 1];
 				for (int j = N - 1; j >= 0; j--)
-					CubeBuffer[--indices[data[j][i]]] = data[j];
+					CubeBuffer[--indices[data[j].GetByte(i)]] = data[j];
 
 				var swap = CubeBuffer;
 				CubeBuffer = data;
@@ -763,9 +610,11 @@ namespace CubeAD
 
 			return a.CornerOrientationIndex > b.CornerOrientationIndex;
 		}
+
+		//[TODO]
 		public static IndexCube operator *(IndexCube a, IndexCube b)
 		{
-			IndexCube result = new CubeIndex();
+			IndexCube result = new IndexCube();
 
 			return result;
 		}
@@ -778,28 +627,19 @@ namespace CubeAD
 		public override bool Equals(object obj)
 		{
 			return obj is IndexCube other &&
-				   EdgePermutationIndex == other.EdgePermutationIndex &&
-				   CornerPermutationIndex == other.CornerPermutationIndex &&
-				   EdgeOrientationIndex == other.EdgeOrientationIndex &&
-				   CornerOrientationIndex == other.CornerOrientationIndex;
+					this == other;
 		}
 		public override int GetHashCode()
 		{
 			return HashCode.Combine(EdgePermutationIndex, CornerPermutationIndex, EdgeOrientationIndex, CornerOrientationIndex);
 		}
 
-		public int GetSymmetryHashCode()
-		{
-			return HashCode.Combine(SymmetryCornerMatrix[CornerPermutationIndex], SymmetryEdgeMatrix[EdgePermutationIndex]);
-		}
-
 		public int CompareTo(IndexCube other)
 		{
-			if (EdgePermutationIndex != other.EdgePermutationIndex) return EdgePermutationIndex.CompareTo(other.EdgePermutationIndex);
-			if (CornerPermutationIndex != other.CornerPermutationIndex) return CornerPermutationIndex.CompareTo(other.CornerPermutationIndex);
-			if (EdgeOrientationIndex != other.EdgeOrientationIndex) return EdgeOrientationIndex.CompareTo(other.EdgeOrientationIndex);
+			if(this < other) return -1;
+			if(this > other) return 1;
 
-			return CornerOrientationIndex.CompareTo(other.CornerOrientationIndex);
+			return 0;
 		}
 	}
 }

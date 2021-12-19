@@ -3,8 +3,9 @@ using System.Collections.Generic;
 
 namespace CubeAD
 {
-	//A class that compresses a sequenz of moves into a single data permutation
-	//[TODO] unit tests
+	/// <summary>
+	/// A collection of functions for permutations
+	/// </summary>
 	public static class Permutation
 	{
 		public static int Factorial(int n)
@@ -17,33 +18,22 @@ namespace CubeAD
 
 			return ret;
 		}
+
+		/// <returns> A permutation of <paramref name="n"/> elements with a zero-based lexicographic <paramref name="index"/> </returns>
 		public static int[] GetIndexedPerm(int n, int index)
 		{
-			List<int> list = new List<int>(n);
-			for (int i = 0; i < n; i++) list.Add(i);
-
-			int[] indices = new int[n];
-			for (int i = n - 1; i >= 0; i--)
-			{
-				indices[i] = index / Factorial(i);
-				index -= indices[i] * Factorial(i);
-			}
-
 			int[] ret = new int[n];
-
-			for (int i = ret.Length - 1; i >= 0; i--)
-			{
-				ret[n - i - 1] = list[indices[i]];
-				list.RemoveAt(indices[i]);
-			}
-
+			GetIndexedPerm(ret, index);
 			return ret;
 		}
 
 		private static readonly List<int> bufferList = new List<int>();
-		public static int[] GetIndexedPerm(int[] ret, int index)
+		/// <summary>
+		/// Creates a permutation and inserts it into <paramref name="permutation"/> with a zero-based lexicographic <paramref name="index"/>
+		/// </summary>
+		public static void GetIndexedPerm(int[] permutation, int index)
 		{
-			int n = ret.Length;
+			int n = permutation.Length;
 
 			bufferList.Clear();
 			for (int i = 0; i < n; i++) bufferList.Add(i);
@@ -55,58 +45,58 @@ namespace CubeAD
 				index -= indices[i] * Factorial(i);
 			}
 
-			for (int i = ret.Length - 1; i >= 0; i--)
+			for (int i = permutation.Length - 1; i >= 0; i--)
 			{
-				ret[n - i - 1] = bufferList[indices[i]];
+				permutation[n - i - 1] = bufferList[indices[i]];
 				bufferList.RemoveAt(indices[i]);
 			}
-
-			return ret;
 		}
-		public static int GetIndex(int[] perm)
+
+		/// <returns> The lexicographic index of <paramref name="permutation"/> </returns>
+		public static int GetIndex(int[] permutation)
 		{
 			int ret = 0;
-			for (int i = 0; i < perm.Length; i++)
+			for (int i = 0; i < permutation.Length; i++)
 			{
 				int counter = 0;
-				for (int j = i + 1; j < perm.Length; j++)
+				for (int j = i + 1; j < permutation.Length; j++)
 				{
-					if (perm[i] > perm[j])
+					if (permutation[i] > permutation[j])
 						counter++;
 				}
 
-				ret += Factorial(perm.Length - 1 - i) * counter;
+				ret += Factorial(permutation.Length - 1 - i) * counter;
 			}
 			return ret;
 		}
 
-		public static int[] GetInverse(int[] perm)
+		/// <returns> The inverse of <paramref name="permutation"/> </returns>
+		public static int[] GetInverse(int[] permutation)
 		{
-			int[] ret = new int[perm.Length];
+			int[] ret = new int[permutation.Length];
 
-			for (int i = 0; i < perm.Length; i++)
+			for (int i = 0; i < permutation.Length; i++)
 			{
-				ret[perm[i]] = i;
+				ret[permutation[i]] = i;
 			}
 
 			return ret;
 		}
-		public static int GetInversIndex(int[] perm)
+
+		/// <summary>
+		/// Stores the composition <paramref name="left"/> ° <paramref name="right"/> in <paramref name="result"/>
+		/// </summary>
+		public static void Transform(int[] left, int[] right, int[] result)
 		{
-			int ret = 0;
-			for (int i = 0; i < perm.Length; i++)
-			{
-				int counter = 0;
-				for (int j = i - 1; j >= 0; j--)
-				{
-					if (perm[i] > perm[j])
-						counter++;
-				}
+			if (left.Length != right.Length || left.Length != result.Length)
+				throw new ArgumentException("Arrays need to have the same length");
 
-				ret += Factorial(i) * counter;
+			for (int i = 0; i < left.Length; i++)
+			{
+				result[i] = left[right[i]];
 			}
-			return ret;
 		}
+
 		public static int TransfromToFacNumber(int N, int value)
 		{
 			int ret = 0;
@@ -122,16 +112,5 @@ namespace CubeAD
 			return ret;
 		}
 
-		public static void Transform(int[] left, int[] right, int[] result)
-		{
-			if (left.Length != right.Length || left.Length != result.Length)
-				throw new ArgumentException("Arrays need to have the same length");
-
-			for (int i = 0; i < left.Length; i++)
-			{
-				result[i] = left[right[i]];
-
-			}
-		}
 	}
 }

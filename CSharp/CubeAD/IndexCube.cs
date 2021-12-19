@@ -611,12 +611,11 @@ namespace CubeAD
 			return a.CornerOrientationIndex > b.CornerOrientationIndex;
 		}
 
-		//[TODO]
 		public static IndexCube operator *(IndexCube a, IndexCube b)
 		{
-			IndexCube result = new IndexCube();
+			a.Transform(b);
 
-			return result;
+			return a;
 		}
 
 		//Overrides

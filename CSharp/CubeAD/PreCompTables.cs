@@ -21,9 +21,12 @@ namespace CubeAD
 		public static readonly string PRE_COMP_PATH = @"C:\Users\Martin\source\repos\FmcHelper\Files";
 		public const string MOVE_TREE_PREFIX = "solved_tree_";
 
+		//A unique index for each Edge addressed by its 2 colores/sides
 		public static int[,] EdgeIndices = new int[6, 6];
+		//A unique index for each Corner addressed by its 3 colores/sides
 		public static int[,,] CornerIndices = new int[6, 6, 6];
 
+		//The colors of the stickers of each edge[i, ] indexed from lower dimension to higher dimension [ , j]
 		public static int[,] CubeEdgeColors = new int[12, 2]
 		{
 			{0, 2},
@@ -41,6 +44,7 @@ namespace CubeAD
 			{3, 4 },
 			{3, 5 }
 		};
+		//The colors of the stickers of each corner[i, ] looking towards the X,Y,Z-Dimension [ , j]
 		public static int[,] CornerColors = new int[8, 3]
 		{
 			{ 0, 2, 4 },
@@ -54,9 +58,8 @@ namespace CubeAD
 			{ 1, 3, 5 }
 		};
 
-		public static int[] EdgeTrackSizes = new int[6] { 40320, 24, 2, 1, 1, 1 };
-		public static int[] NextEdgeSizes = new int[6] { 5940, 840, 119750400, 19958400, 1814400, 181440 };
-		public static uint[][] NextEdgePerm = new uint[6][]
+		//The difference (mod 12!) from the current edge permutation index ([i][]) to the next index after one clockwise move (L, R, D, U, F, B) on a side ([][j]) 
+		public static uint[][] NextEdgePermDif = new uint[6][]
 		{
 			new uint[NextEdgeSizes[0]],
 			new uint[NextEdgeSizes[1]],
@@ -65,28 +68,44 @@ namespace CubeAD
 			new uint[NextEdgeSizes[4]],
 			new uint[NextEdgeSizes[5]]
 		};
+		//The sizes of each sub array
+		public static int[] NextEdgeSizes = new int[6] { 5940, 840, 119750400, 19958400, 1814400, 181440 };
+		//The length of consecutively equal values in the uncompressed NextEdgePermDif array
+		public static int[] EdgeTrackSizes = new int[6] { 40320, 24, 2, 1, 1, 1 };
 
+		//The index after a move [, j] given a current index [i, ]
 		public static ushort[,] NextCornerPerm = new ushort[MAX_CORNER_PERMUTATION, 18];
 		public static ushort[,] NextEdgeOrient = new ushort[MAX_EDGE_ORIENTATION, 18];
 		public static ushort[,] NextCornerOrient = new ushort[MAX_CORNER_ORIENTATION, 18];
 
+		//The amount of correct pieces given an index
 		public static byte[] OrientedEdgesCount = new byte[MAX_EDGE_ORIENTATION];
 		public static byte[] OrientedCornersCount = new byte[MAX_CORNER_ORIENTATION];
 		public static byte[] PositionedEdgesCount = new byte[MAX_EDGE_PERMUTATION];
 		public static byte[] PositionedCornersCount = new byte[MAX_CORNER_PERMUTATION];
 
-		public static byte[][] SymmetryCornerPermutation = new byte[SymmetryElement.ORDER][];
-		public static byte[][] SymmetryEdgePermutation = new byte[SymmetryElement.ORDER][];
-		public static byte[][,,] SymmetryCornerOrientation = new byte[SymmetryElement.ORDER][,,]; //color index, position, orient
-		public static byte[][] SymmetryEdgeOrientation = new byte[SymmetryElement.ORDER][];
+		public static class Symmetry
+		{
+			//The permutation that a symmetry transformation performs
+			public static byte[][] CornerPermutation = new byte[SymmetryElement.ORDER][];
+			public static byte[][] EdgePermutation = new byte[SymmetryElement.ORDER][];
+			//The orientation a corner has after a symmetry transformation
+			public static byte[][,,] CornerOrientation = new byte[SymmetryElement.ORDER][,,]; //color index, position, orient
+			//Whether a edge get flipped by a symmetry transformation
+			public static byte[][] EdgeOrientation = new byte[SymmetryElement.ORDER][];
 
-		public static ushort[] SymmetryCornerMatrix = new ushort[MAX_CORNER_PERMUTATION];
-		public static byte[] SymmetryElementCornerMatrix = new byte[MAX_CORNER_PERMUTATION]; // [TODO]
-		public static uint[] SymmetryEdgeMatrix = new uint[MAX_EDGE_PERMUTATION];
-		public static byte[] SymmetryElementEdgeMatrix = new byte[MAX_EDGE_PERMUTATION];// [TODO]
+			//The representing element under all symmetries
+			public static ushort[] CornerMatrix = new ushort[MAX_CORNER_PERMUTATION];
+			public static byte[] ElementCornerMatrix = new byte[MAX_CORNER_PERMUTATION]; // [TODO]
+			public static uint[] EdgeMatrix = new uint[MAX_EDGE_PERMUTATION];
+			public static byte[] ElementEdgeMatrix = new byte[MAX_EDGE_PERMUTATION];// [TODO]
 
-		public static Dictionary<uint, BitMap64> SymmetryEdgePermMask = new Dictionary<uint, BitMap64>();
-		public static BitMap64[] SymmetryCornerPermMask = new BitMap64[MAX_CORNER_PERMUTATION];
+			public static Dictionary<uint, BitMap64> EdgePermMask = new Dictionary<uint, BitMap64>();
+			public static BitMap64[] CornerPermMask = new BitMap64[MAX_CORNER_PERMUTATION];
+		}
+
+
+
 
 		//The hamilton path through all states of corners (ignoering orientation and impossible cases), LDB corner always stays
 		public static CubeMove[] CornerHamilton = new CubeMove[3_674_160]; //3^8 * 8! / 3 / 24
@@ -420,7 +439,7 @@ namespace CubeAD
 				CubeMove m = (CubeMove)i;
 				string path = Path.Combine(PRE_COMP_PATH, "next_edge_perm_" + m.ToString() + ".bin");
 
-				ReadFromFileOrCreate(path, NextEdgePerm[i / 3], (ret) => {
+				ReadFromFileOrCreate(path, NextEdgePermDif[i / 3], (ret) => {
 					Array gen = GenerateShortendEdgePermArrays(m);
 					Console.WriteLine("Gen: " + gen.Length + " ret: " + ret.Length);
 					Array.Copy(gen, ret, gen.Length);
@@ -817,7 +836,7 @@ namespace CubeAD
 			int[] data = new int[MAX_EDGE_PERMUTATION];
 			StickerCube c = new StickerCube();
 			c.MakeMove(m);
-			uint singleIndex = FindEdgePermutationIndex(c);
+			uint singleIndex = c.FindEdgePermutationIndex();
 
 			Console.WriteLine("Generating: " + m);
 			Console.WriteLine(singleIndex);
@@ -916,7 +935,7 @@ namespace CubeAD
 			Console.WriteLine("Has mirror: " + corret);
 
 
-			NextEdgePerm[(int)m / 3] = new uint[minCycle / trackLength / 2];
+			NextEdgePermDif[(int)m / 3] = new uint[minCycle / trackLength / 2];
 
 			uint[] array = new uint[minCycle / trackLength / 2];
 

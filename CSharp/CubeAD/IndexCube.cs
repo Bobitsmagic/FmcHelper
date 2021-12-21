@@ -291,7 +291,7 @@ namespace CubeAD
 			int count = (move % 3) + 1;
 			int side = move / 3;
 
-			uint[] array = NextEdgePerm[side];
+			uint[] array = NextEdgePermDif[side];
 			int trackLength = EdgeTrackSizes[side];
 
 			for (int i = 0; i < count; i++)

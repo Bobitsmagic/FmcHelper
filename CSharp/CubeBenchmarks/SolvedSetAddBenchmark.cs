@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using CubeAD;
-using CubeAD.CubeIndexSets;
+using CubeAD.IndexCubeSets;
 using System;
 using System.Collections.Generic;
 
@@ -16,7 +16,7 @@ namespace CubeBenchmarks
 		//static RadixTreeArray radixTreeArray;
 		//static RadixTreeDictionary radixTreeDic;
 		//static RadixTreeIterative radixTreeIt;
-		static SortedCubeIndexSet sortCubeInd;
+		static SortedListSet sortCubeInd;
 		static SortedBucketsSet bucketCubeIndices;
 		static SetBuckets setBuckets;
 
@@ -26,7 +26,7 @@ namespace CubeBenchmarks
 			//radixTreeDic = new RadixTreeDictionary();
 			////radixTreeArray = new RadixTreeArray();
 			//radixTreeIt = new RadixTreeIterative();
-			sortCubeInd = new SortedCubeIndexSet();
+			sortCubeInd = new SortedListSet();
 			bucketCubeIndices = new SortedBucketsSet();
 			setBuckets = new SetBuckets(0);
 

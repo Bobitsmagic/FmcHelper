@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace CubeAD.CubeIndexSets
+namespace CubeAD.IndexCubeSets
 {
 	/// <summary>
 	/// A read-only hash-based set class for CubeIndex with all elements in consecutive memory,
@@ -152,8 +152,36 @@ namespace CubeAD.CubeIndexSets
 				}
 			}
 
-			actual = new CubeIndex();
+			actual = new IndexCube();
 			return false;
+		}
+
+		/// <summary>
+		/// Searches a cube in this tree/set
+		/// </summary>
+		/// <returns> If this cube is contained within the tree then a list of <see cref="CubeMove"/> that solves is this cube otherwise <see cref="null"/> </returns>
+		public List<CubeMove> SearchSolutionInTree(IndexCube cube)
+        {
+			List<CubeMove> list = new List<CubeMove>();
+
+			while (!cube.IsSovled)
+			{
+				if (TryGetValue(cube, out cube))
+				{
+					if (!cube.IsSovled)
+					{
+						list.Add(MoveSequenz.ReverseMove(cube.LastMove));
+						cube.MakeMove(MoveSequenz.ReverseMove(cube.LastMove));
+					}
+				}
+				else
+				{
+					Console.WriteLine("Cube not in set");
+					return null;
+				}
+			}
+
+			return list;
 		}
 	}
 }

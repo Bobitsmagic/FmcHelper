@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace CubeAD.CubeIndexSets
+namespace CubeAD.IndexCubeSets
 {
 	/// <summary>
 	/// An add-only set class for <see cref="IndexCube"/>, optimized for add operations and space efficiency
 	/// </summary>
-	public class SortedCubeIndexSet
+	public class SortedListSet
 	{
 		public static List<IndexCube> CubeIndexBuffer = new List<IndexCube>();
 
@@ -18,7 +18,7 @@ namespace CubeAD.CubeIndexSets
 		//Flag whether this instance can contain duplicates
 		bool IsDirty = false;
 
-		public SortedCubeIndexSet(int capacity = 0)
+		public SortedListSet(int capacity = 0)
 		{
 			Data = new List<IndexCube>(capacity);
 		}

@@ -1,18 +1,19 @@
-﻿using CubeAD.CubeIndexSets;
+﻿using CubeAD.IndexCubeSets;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using static CubeAD.IndexCube;
 using static CubeAD.SearchingAlgorithms;
 using static CubeAD.Permutation;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Collections;
 
 namespace CubeAD
 {
+	/// <summary>
+	/// A class holding pre-computed data either loaded from files or generated
+	/// </summary>
 	public static class PreCompTables
 	{	
 		public const int MAX_EO_MOVE_DEPTH = 8;

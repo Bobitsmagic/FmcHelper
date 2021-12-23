@@ -26,7 +26,7 @@ namespace CubeAD
 			else 
 				UpdateBlocked(m);
 		}
-
+		
 		public void ResetBlocked() => Blocked = 0;
 
 		public void UpdateBlocked(CubeMove m)

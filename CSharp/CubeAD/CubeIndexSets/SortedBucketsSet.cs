@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace CubeAD.CubeIndexSets
+namespace CubeAD.IndexCubeSets
 {
 	/// <summary>
 	/// An add-only set class for <see cref="IndexCube"/>, optimized for add operations and space efficiency
@@ -24,7 +24,7 @@ namespace CubeAD.CubeIndexSets
 
 		//Each bucket is a SortedCubeIndexSet
 		//All buckets are indexed by the corner permutation index
-		SortedCubeIndexSet[] Data = new SortedCubeIndexSet[IndexCube.MAX_CORNER_PERMUTATION];
+		SortedListSet[] Data = new SortedListSet[IndexCube.MAX_CORNER_PERMUTATION];
 
 		//Flag whether this instance can contain duplicates
 		bool IsDirty = false;
@@ -37,7 +37,7 @@ namespace CubeAD.CubeIndexSets
 		{
 			for (int i = 0; i < Data.Length; i++)
 			{
-				Data[i] = new SortedCubeIndexSet(bucketCapacity);
+				Data[i] = new SortedListSet(bucketCapacity);
 			}
 		}
 

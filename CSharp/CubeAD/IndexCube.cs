@@ -1,4 +1,4 @@
-﻿using CubeAD.CubeIndexSets;
+﻿using CubeAD.IndexCubeSets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using CubeAD;
-using CubeAD.CubeIndexSets;
+using CubeAD.IndexCubeSets;
 using System;
 
 

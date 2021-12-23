@@ -1,5 +1,5 @@
 ﻿using CubeAD;
-using CubeAD.CubeIndexSets;
+using CubeAD.IndexCubeSets;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace CubeTester
 			var radixTreeDic = new RadixTreeDictionary();
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
-			var sortCubeInd = new SortedCubeIndexSet();
+			var sortCubeInd = new SortedListSet();
 			var bucketCubeInd = new SortedBucketsSet();
 			var setBucket = new SetBuckets();
 
@@ -53,7 +53,7 @@ namespace CubeTester
 			var radixTreeDic = new RadixTreeDictionary();
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
-			var sortCubeInd = new SortedCubeIndexSet();
+			var sortCubeInd = new SortedListSet();
 			var bucketCubeInd = new SortedBucketsSet();
 			var setBucket = new SetBuckets();
 
@@ -125,7 +125,7 @@ namespace CubeTester
 			var radixTreeDic = new RadixTreeDictionary();
 			var radixTreeArray = new RadixTreeArray();
 			var radixTreeIt = new RadixTreeIterative();
-			var sortCubeInd = new SortedCubeIndexSet();
+			var sortCubeInd = new SortedListSet();
 			var bucketCubeInd = new SortedBucketsSet();
 			var setBuckets = new SetBuckets();
 

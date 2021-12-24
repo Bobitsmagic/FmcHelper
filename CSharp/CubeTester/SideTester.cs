@@ -9,10 +9,10 @@ namespace CubeTester
 		[Test]
 		public void InitialValueTest()
 		{
-			Side side;
+			StickerSide side;
 			for (int i = 0; i < 6; i++)
 			{
-				side = new Side((CubeColor)i);
+				side = new StickerSide((CubeColor)i);
 
 				for (int j = 0; j < 8; j++)
 				{
@@ -23,10 +23,10 @@ namespace CubeTester
 		[Test]
 		public void SetValueTest()
 		{
-			Side side;
+			StickerSide side;
 			for (int i = 0; i < 6; i++)
 			{
-				side = new Side((CubeColor)i);
+				side = new StickerSide((CubeColor)i);
 
 				for (int j = 0; j < 6; j++)
 				{
@@ -43,10 +43,10 @@ namespace CubeTester
 		[Test]
 		public void RotateTest()
 		{
-			Side side;
+			StickerSide side;
 			for (int i = 0; i < 6; i++)
 			{
-				side = new Side((CubeColor)i);
+				side = new StickerSide((CubeColor)i);
 
 				for (int j = 0; j < 6; j++)
 				{
@@ -72,8 +72,8 @@ namespace CubeTester
 			{
 				for (int j = 0; j < 4; j++)
 				{
-					Side src = new Side((CubeColor)3);
-					Side dest = new Side((CubeColor)5);
+					StickerSide src = new StickerSide((CubeColor)3);
+					StickerSide dest = new StickerSide((CubeColor)5);
 
 					System.Diagnostics.Debug.Write(dest.ToString() + " -> ");
 					dest.SetStripe(i, src.GetStripe(j));

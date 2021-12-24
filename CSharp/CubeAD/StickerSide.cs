@@ -1,11 +1,15 @@
 ﻿namespace CubeAD
 {
-	public struct Side
+	/// <summary>
+	/// Contains the information for 8 stickers of a side (ignoring the center)
+	/// </summary>
+	public struct StickerSide
 	{
 		public const int FACE_COUNT = 8;
 		public const int BIT_COUNT = FACE_COUNT * 3;
 		public const uint BIT_MASK = (1 << 24) - 1;
 
+		//Bit masks containing both vertical and horizontal stripes 
 		public static uint[] STRIPE_MASK =
 		{
 			511U,
@@ -14,6 +18,7 @@
 			7U | (63U << 18)
 		};
 
+		//Bit masks containing stripes on corners 
 		public static uint[] SQUARE_MASK =
 {
 			511U << 3,
@@ -24,6 +29,9 @@
 
 		uint Data;
 
+		/// <summary>
+		/// Gets or sets the color of a specific sticker
+		/// </summary>
 		public uint this[int i]
 		{
 			get
@@ -37,6 +45,7 @@
 			}
 		}
 
+		/// <returns> The color on that coordinate </returns>
 		public CubeColor this[int x, int y]
 		{
 			get
@@ -48,12 +57,18 @@
 			}
 		}
 
-		public Side(uint val)
+		/// <summary>
+		/// Initializes a side with this data
+		/// </summary>
+		public StickerSide(uint val)
 		{
 			Data = val;
 		}
 
-		public Side(CubeColor color)
+		/// <summary>
+		/// Initializes a side with all stickers set to <paramref name="color"/>
+		/// </summary>
+		public StickerSide(CubeColor color)
 		{
 			uint val = (uint)color;
 			Data = 0;
@@ -63,15 +78,19 @@
 			}
 		}
 
-		public bool FitsPattern(Side color, uint bitmask)
+		/// <returns> <see cref="true"/> if this <see cref="StickerSide"/> is equal to <paramref name="color"/> in every set bit in <paramref name="bitmask"/> </returns>
+		public bool FitsPattern(StickerSide color, uint bitmask)
 		{
 			return ((Data ^ color.Data) & bitmask) == 0;
 		}
+
+		/// <returns> <see cref="true"/> if 2 consecutive stickers are equal, starting with <paramref name="index"/> </returns>
 		public bool IsPair(int index)
 		{
 			return this[index] == this[(index + 1) % 8];
 		}
-
+		
+		/// <returns> A bitmask containing 3 set bits for every sticker included in <paramref name="compressed"/> (101 -> 111000111) </returns >
 		public static uint GenerateBitmask(uint compressed)
 		{
 			return ((compressed & 1) * 7) |
@@ -84,30 +103,40 @@
 				((compressed & 128) * (7 << 14));
 		}
 
+		/// <summary>
+		/// Rotates this side <paramref name="count"/> times clockwise
+		/// </summary>
 		public void Rotate(int count)
 		{
 			Data = ((Data << (count * 6)) & BIT_MASK) | (Data >> (BIT_COUNT - count * 6));
 		}
+		/// <summary>
+		/// Rotates the <paramref name="val"/> <paramref name="count"/> times clockwise
+		/// </summary>
 		public static uint RotateVal(uint val, int count)
 		{
 			return ((val << (count * 6))) & BIT_MASK | (val >> (BIT_COUNT - count * 6));
 		}
 
+		/// <returns> The stripe normalized to the first bit (101000 -> 101) </returns>
 		public uint GetStripe(int stripe)
 		{
 			return RotateVal(Data & STRIPE_MASK[stripe], (4 - stripe) & 3);
 		}
+		/// <summary>
+		/// Sets a <paramref name="stripe"/> to <paramref name="val"/>
+		/// </summary>
 		public void SetStripe(int stripe, uint val)
 		{
 			Data &= ~STRIPE_MASK[stripe];
 			Data |= RotateVal(val, stripe);
 		}
 
-		public static bool operator ==(Side a, Side b)
+		public static bool operator ==(StickerSide a, StickerSide b)
 		{
 			return a.Data == b.Data;
 		}
-		public static bool operator !=(Side a, Side b)
+		public static bool operator !=(StickerSide a, StickerSide b)
 		{
 			return a.Data != b.Data;
 		}
@@ -139,12 +168,10 @@
 
 			return s;
 		}
-
 		public override bool Equals(object obj)
 		{
-			return this == (Side)obj;
+			return this == (StickerSide)obj;
 		}
-
 		public override int GetHashCode()
 		{
 			return (int)Data;

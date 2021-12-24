@@ -22,14 +22,14 @@ namespace CubeAD
 		const int BACK = 5;
 
 		//The side values of a solved Cube
-		private static readonly Side[] SolvedColors =
+		private static readonly StickerSide[] SolvedColors =
 {
-			new Side((CubeColor)0),
-			new Side((CubeColor)1),
-			new Side((CubeColor)2),
-			new Side((CubeColor)3),
-			new Side((CubeColor)4),
-			new Side((CubeColor)5)
+			new StickerSide((CubeColor)0),
+			new StickerSide((CubeColor)1),
+			new StickerSide((CubeColor)2),
+			new StickerSide((CubeColor)3),
+			new StickerSide((CubeColor)4),
+			new StickerSide((CubeColor)5)
 		};
 
 		//Adjacent stripes of adj sides (Clockwise order)
@@ -107,7 +107,7 @@ namespace CubeAD
 		};
 
 		//SIDE_COUNT Sides of the cube
-		Side[] Sides = new Side[SIDE_COUNT];
+		StickerSide[] Sides = new StickerSide[SIDE_COUNT];
 
 		/// <summary>
 		/// Creates a solved cube
@@ -120,7 +120,7 @@ namespace CubeAD
 		{
 			for (int i = 0; i < SIDE_COUNT; i++)
 			{
-				Sides[i] = new Side((CubeColor)i);
+				Sides[i] = new StickerSide((CubeColor)i);
 			}
 		}
 

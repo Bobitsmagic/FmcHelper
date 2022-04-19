@@ -14,7 +14,21 @@ namespace FmcSolver
 	{
 		static void Main(string[] args)
 		{
-			SearchingAlgorithms.PrintCornerOrientdist();
+			IndexCube cube = new IndexCube();
+			StickerCube sticker = cube.GetCube();
+			sticker.PrintSideView();
+			sticker.MakeMove(CubeMove.R);
+			sticker.PrintSideView();
+			StickerCube buffer = new StickerCube();
+			SymmetryElement symmetry = new SymmetryElement(CubeColor.Blue, CubeColor.Yellow, CubeColor.Red);
+			sticker.InsertSymmetryTransformation(symmetry, buffer);
+
+			buffer.PrintSideView();
+
+			buffer.MakeMove(symmetry.TransformMove(CubeMove.RP));
+			
+			buffer.PrintSideView();
+
 
 			Console.WriteLine("\nDone");
 			Console.ReadLine();

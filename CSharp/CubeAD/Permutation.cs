@@ -8,15 +8,28 @@ namespace CubeAD
 	/// </summary>
 	public static class Permutation
 	{
+
+		private static int[] FacLookUp = new int[13];
 		public static int Factorial(int n)
 		{
-			int ret = 1;
-			for (int i = 2; i <= n; i++)
-			{
-				ret *= i;
-			}
+			return FacLookUp[n];
+		}
 
-			return ret;
+		static Permutation()
+		{
+			for (int i = 0; i < FacLookUp.Length; i++)
+				FacLookUp[i] = FactorialManual(i);
+
+			int FactorialManual(int n)
+			{
+				int ret = 1;
+				for (int i = 2; i <= n; i++)
+				{
+					ret *= i;
+				}
+
+				return ret;
+			}
 		}
 
 		/// <returns> A permutation of <paramref name="n"/> elements with a zero-based lexicographic <paramref name="index"/> </returns>
@@ -81,6 +94,14 @@ namespace CubeAD
 			}
 
 			return ret;
+		}
+
+		public static void InsertInverse(int[] permutation, int[] target)
+		{
+			for (int i = 0; i < permutation.Length; i++)
+			{
+				target[permutation[i]] = i;
+			}
 		}
 
 		/// <summary>

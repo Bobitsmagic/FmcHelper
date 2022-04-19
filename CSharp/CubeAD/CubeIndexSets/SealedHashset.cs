@@ -7,7 +7,7 @@ namespace CubeAD.IndexCubeSets
 {
 	/// <summary>
 	/// A read-only hash-based set class for CubeIndex with all elements in consecutive memory,
-	/// optimized for Contains calls and space-efficiency
+	/// optimized for contains calls and space-efficiency
 	/// </summary>
 	public class SealedHashset
 	{

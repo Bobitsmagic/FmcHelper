@@ -2,7 +2,7 @@
 using CubeAD;
 using CubeAD.IndexCubeSets;
 using System;
-
+using System.Collections.Generic;
 
 namespace CubeBenchmarks
 {
@@ -12,28 +12,20 @@ namespace CubeBenchmarks
 		static Random rnd = new Random(0);
 
 		static IndexCube[] Cubes = new IndexCube[10000];
-		//static HashSet<CubeIndex> HashSet;
-		//static SetBuckets SetBuckets;
+		static HashSet<IndexCube> HashSet;
 		static SealedHashset SealedHS;
 
 		static SolvedSetContainsBenchmark()
 		{
+
 			IndexCube[] array = SearchingAlgorithms.GenerateSolvedTree(DEPTH).GetArray();
 
-			Console.WriteLine("Created Array");
+			Console.WriteLine("Created Array with depth: " + DEPTH);
+			Console.WriteLine("Length: " + array.Length);
 
-			//HashSet = new HashSet<CubeIndex>();
-			//SetBuckets = new SetBuckets();
-			//foreach (CubeIndex index in array)
-			//{
-			//	//SetBuckets.Add(index);
-			//	//HashSet.Add(index);
-			//}
-
+			HashSet = new HashSet<IndexCube>(array);
 			SealedHS = new SealedHashset(array);
 			Console.WriteLine("Added to other sets");
-			Console.WriteLine(array.Length);
-
 
 			for (int i = 0; i < Cubes.Length / 10; i++)
 			{
@@ -41,10 +33,9 @@ namespace CubeBenchmarks
 			}
 
 			int count = Cubes.Length / 10;
-			foreach (IndexCube index in StickerCube.GetRandomCubesDistinct(7, 9000, rnd))
+			foreach (IndexCube index in SearchingAlgorithms.GenerateRandomCubes(rnd, 9000))
 			{
 				Cubes[count++] = index;
-
 			}
 
 			GC.Collect();
@@ -52,42 +43,15 @@ namespace CubeBenchmarks
 			Console.WriteLine("Finished intializing Sets");
 		}
 
-		//[Benchmark]
-		//public void BenchHashSet()
-		//{
-		//	for (int i = 0; i < Cubes.Length; i++)
-		//	{
-		//		HashSet.Contains(Cubes[i]);
-		//	}
-		//}
+		[Benchmark]
+		public void BenchHashSet()
+		{
+			for (int i = 0; i < Cubes.Length; i++)
+			{
+				HashSet.Contains(Cubes[i]);
+			}
+		}
 
-		//|       Method |     Mean |     Error |    StdDev |
-		//|------------- |---------:|----------:|----------:|
-		//| BenchHashSet | 1.004 ms | 0.0191 ms | 0.0205 ms |
-		//[Benchmark]
-		//public void BenchRadixTreeArray()
-		//{
-		//	for (int i = 0; i < Cubes.Length; i++)
-		//	{
-		//		RadixTreeArray.Contains(Cubes[i]);
-		//	}
-		//}
-		//[Benchmark]
-		//public void BenchRadixTreeDictionary()
-		//{
-		//	for (int i = 0; i < Cubes.Length; i++)
-		//	{
-		//		RadixTreeDic.Contains(Cubes[i]);
-		//	}
-		//}
-		//[Benchmark]
-		//public void BenchRadixTreeIterative()
-		//{
-		//	for (int i = 0; i < Cubes.Length; i++)
-		//	{
-		//		RadixTreeIt.Contains(Cubes[i]);
-		//	}
-		//}
 		[Benchmark]
 		public void BenchSealedHS()
 		{
@@ -96,43 +60,5 @@ namespace CubeBenchmarks
 				SealedHS.Contains(Cubes[i]);
 			}
 		}
-		//[Benchmark]
-		//public void BenchSetBuckets()
-		//{
-		//	for (int i = 0; i < Cubes.Length; i++)
-		//	{
-		//		SetBuckets.Contains(Cubes[i]);
-		//	}
-		//}
-		//[Benchmark]
-		//public void BenchSortedCubeIndices()
-		//{
-		//	for (int i = 0; i < Cubes.Length; i++)
-		//	{
-		//		SortCubeInd.Contains(Cubes[i]);
-		//	}
-		//}
-
-		//[Benchmark]
-		//public void BenchBucketCubeIndices()
-		//{
-		//	for (int i = 0; i < Cubes.Length; i++)
-		//	{
-		//		BucketCubeIndices.Contains(Cubes[i]);
-		//	}
-		//}
 	}
 }
-//7
-//|                 Method |       Mean |     Error |    StdDev |
-//|----------------------- |-----------:|----------:|----------:|
-//|           BenchHashSet |   977.9 us |  12.89 us |  12.66 us |
-//| BenchSortedCubeIndices | 9,285.7 us | 111.95 us | 104.72 us |
-//| BenchBucketCubeIndices | 6,775.8 us |  11.26 us |   9.40 us |
-//6
-//|                 Method |       Mean |    Error |    StdDev |
-//|----------------------- |-----------:|---------:|----------:|
-//|           BenchHashSet |   459.8 us |  0.37 us |   0.33 us |
-//|        BenchSetBuckets |   589.3 us |  1.07 us |   1.00 us |
-//| BenchSortedCubeIndices | 4,787.6 us | 77.49 us | 113.59 us |
-//| BenchBucketCubeIndices | 2,991.7 us | 57.65 us |  53.92 us |

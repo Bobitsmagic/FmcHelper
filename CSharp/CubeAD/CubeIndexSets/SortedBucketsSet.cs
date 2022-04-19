@@ -70,9 +70,6 @@ namespace CubeAD.IndexCubeSets
 			IsDirty = false;
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
 		/// <returns>An array containing all unique elements</returns>
 		public IndexCube[] GetArray()
 		{

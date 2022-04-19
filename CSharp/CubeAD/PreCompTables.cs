@@ -59,6 +59,8 @@ namespace CubeAD
 			{ 1, 3, 5 }
 		};
 
+		//The sizes of each sub array
+		public static int[] NextEdgeSizes = new int[6] { 5940, 840, 119750400, 19958400, 1814400, 181440 };
 		//The difference (mod 12!) from the current edge permutation index ([i][]) to the next index after one clockwise move (L, R, D, U, F, B) on a side ([][j]) 
 		public static uint[][] NextEdgePermDif = new uint[6][]
 		{
@@ -69,8 +71,6 @@ namespace CubeAD
 			new uint[NextEdgeSizes[4]],
 			new uint[NextEdgeSizes[5]]
 		};
-		//The sizes of each sub array
-		public static int[] NextEdgeSizes = new int[6] { 5940, 840, 119750400, 19958400, 1814400, 181440 };
 		//The length of consecutively equal values in the uncompressed NextEdgePermDif array
 		public static int[] EdgeTrackSizes = new int[6] { 40320, 24, 2, 1, 1, 1 };
 
@@ -95,14 +95,6 @@ namespace CubeAD
 			//Whether a edge get flipped by a symmetry transformation
 			public static byte[][] EdgeOrientTransform = new byte[SymmetryElement.ORDER][];
 
-			//The representing element of the group generated with all symmetries (Element with the lowest index)
-			public static ushort[] CornerPermutationRepresentative = new ushort[MAX_CORNER_PERMUTATION];
-			public static uint[] EdgePermutationRepresentative = new uint[MAX_EDGE_PERMUTATION];
-
-			//The symmetry used to get to this element from the representative
-			public static byte[] CornerPermutationSymmetry = new byte[MAX_CORNER_PERMUTATION];
-			public static byte[] EdgePermutationSymmetry = new byte[MAX_EDGE_PERMUTATION];
-			
 			//A bitmask containing information about which self-symmetries apply to a specific permutation index
 			public static BitMap64[] CornerPermMask = new BitMap64[MAX_CORNER_PERMUTATION];
 			public static Dictionary<uint, BitMap64> EdgePermMask = new Dictionary<uint, BitMap64>(); //containing only elements with non-trivial symmetries
@@ -635,82 +627,6 @@ namespace CubeAD
 					}
 				}
 			}
-
-			//Symmetry Corner representator
-			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "symmetry_corner_matrix.bin"), Symmetry.CornerPermutationRepresentative, (ret) =>
-			{
-				ushort[] cast = ret as ushort[];
-
-				Array.Fill(cast, ushort.MaxValue);
-
-				int fac = Factorial(8);
-				int[] inverse = new int[8];
-				int[] perm = new int[8];
-				int[] transformed = new int[8];
-
-				for (int i = 0; i < fac; i++)
-				{
-					if(cast[i] == ushort.MaxValue)
-					{
-						cast[i] = (ushort)i;
-
-						GetIndexedPerm(inverse, i);
-						perm = GetInverse(inverse);
-
-						//Skip identity
-						for(int j = 1; j < 48; j++)
-						{
-							byte[] symmetryTranform = Symmetry.CornerPermTranform[j];
-							
-							for(int k = 0; k < 8; k++)
-							{
-								//symTransfrom[inversePerm[i]] == otherInversePerm[symTransfrom[i]]
-								transformed[symmetryTranform[k]] = symmetryTranform[inverse[k]]; 
-							}
-
-							cast[GetIndex(GetInverse(transformed))] = (ushort)i;							
-						}
-					}
-				}
-			});
-
-			//Symmetry Edge representator
-			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "symmetry_edge_matrix.bin"), Symmetry.EdgePermutationRepresentative, (ret) =>
-			{
-				uint[] cast = ret as uint[];
-
-				Array.Fill(cast, uint.MaxValue);
-
-				int fac = Factorial(12);
-				int[] inverse = new int[12];
-				int[] perm = new int[12];
-				int[] transformed = new int[12];
-
-				for (int i = 0; i < fac; i++)
-				{
-					if (cast[i] == uint.MaxValue)
-					{
-						cast[i] = (uint)i;
-
-						GetIndexedPerm(inverse, i);
-						perm = GetInverse(inverse);
-
-						//Skip identity
-						for (int j = 1; j < 48; j++)
-						{
-							byte[] symmetryTranform = Symmetry.EdgePermTranform[j];
-
-							for (int k = 0; k < 12; k++)
-							{
-								//symTransfrom[inversePerm[i]] == otherInversePerm[symTransfrom[i]]
-								transformed[symmetryTranform[k]] = symmetryTranform[inverse[k]];
-							}
-
-							cast[GetIndex(GetInverse(transformed))] = (uint)i;
-						}
-					}
-				}
-			});
 
 			GC.Collect();
 			Console.WriteLine("TotalRamUsage: " + GC.GetTotalMemory(true).ToString("0 000 000 000"));

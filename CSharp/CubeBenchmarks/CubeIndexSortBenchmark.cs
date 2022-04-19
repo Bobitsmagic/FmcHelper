@@ -11,7 +11,7 @@ namespace CubeBenchmarks
 		const int COUNT = 10_000_000;
 		Random Rnd = new Random(0);
 
-		IndexCube[] Indices = StickerCube.GetRandomCubesDistinct(15, COUNT, new Random(0)).ToArray();
+		IndexCube[] Indices = SearchingAlgorithms.GenerateRandomCubes(new Random(0), COUNT).ToArray();
 		IndexCube[] Buffer = new IndexCube[COUNT];
 
 		[IterationSetup]
@@ -39,7 +39,5 @@ namespace CubeBenchmarks
 		{
 			IndexCube.RadixSortCubeIndices(Indices, Buffer);
 		}
-
-
 	}
 }

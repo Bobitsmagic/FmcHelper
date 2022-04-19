@@ -387,6 +387,8 @@ namespace CubeAD
 		#endregion
 
 		#region Symmetry
+
+		//[TODO] Tests
 		/// <returns>A BitVector containing a 1 for each symmetry that applies to this cube</returns>
 		public BitMap64 GetSymmetryMask()
 		{
@@ -511,10 +513,6 @@ namespace CubeAD
 			}
 
 			return false;
-		}
-		public int GetSymmetryHashCode()
-		{
-			return HashCode.Combine(Symmetry.CornerPermutationRepresentative[CornerPermutationIndex], Symmetry.EdgePermutationRepresentative[EdgePermutationIndex]);
 		}
 		#endregion
 	

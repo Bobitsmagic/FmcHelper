@@ -6,7 +6,7 @@ namespace CubeBenchmarks
 	{
 		static void Main(string[] args)
 		{
-			var summary = BenchmarkRunner.Run<CubeIndexSerilization>();
+			var summary = BenchmarkRunner.Run<SolvedSetAddBenchmark>();
 		}
 	}
 }

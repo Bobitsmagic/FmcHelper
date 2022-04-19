@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30711.63
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NISSHelper", "NISSHelper\NISSHelper.csproj", "{1F85905F-DFC1-4342-AAE5-43BA88102A31}"
 EndProject
@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CubeTester", "CubeTester\Cu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FmcSolver", "FmcSolver\FmcSolver.csproj", "{29ADFDC4-5B8D-4C11-80D0-8B3B23DAEDC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CubeBenchmarks", "CubeBenchmarks\CubeBenchmarks.csproj", "{79687117-CEEA-44C4-948A-2C866BA31303}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CubeBenchmarks", "CubeBenchmarks\CubeBenchmarks.csproj", "{79687117-CEEA-44C4-948A-2C866BA31303}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DerCubeRenderer", "DerCubeRenderer\DerCubeRenderer.csproj", "{C781EB9F-E07C-4C3B-88ED-48954A9F625D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +85,18 @@ Global
 		{79687117-CEEA-44C4-948A-2C866BA31303}.Release|x64.Build.0 = Release|Any CPU
 		{79687117-CEEA-44C4-948A-2C866BA31303}.Release|x86.ActiveCfg = Release|Any CPU
 		{79687117-CEEA-44C4-948A-2C866BA31303}.Release|x86.Build.0 = Release|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Debug|x64.Build.0 = Debug|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Debug|x86.Build.0 = Debug|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Release|x64.ActiveCfg = Release|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Release|x64.Build.0 = Release|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Release|x86.ActiveCfg = Release|Any CPU
+		{C781EB9F-E07C-4C3B-88ED-48954A9F625D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -63,7 +63,6 @@ namespace CubeTester
 				SymmetryElement element = SymmetryElement.Elements[i];
 
 				element.GenerateMultGroup(genGroup);
-				Console.WriteLine(genGroup.Count);
 
 				int hits = 0;
 				foreach (List<SymmetryElement> group in subGroups)

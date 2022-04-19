@@ -496,5 +496,34 @@ namespace CubeAD
 				}
 			}
 		}
+
+		/// <summary>
+		/// Creates <paramref name="count"/> unique IndexCubes
+		/// </summary>
+		public static HashSet<IndexCube> GenerateRandomCubes(Random rnd, int count)
+        {
+			HashSet<IndexCube> set = new HashSet<IndexCube>(count);
+			MoveBlocker mb = new MoveBlocker();
+			IndexCube cube = new IndexCube();
+			List<CubeMove> moves = new List<CubeMove>();
+			for(int i = 0; i < count; i++)
+            {
+				for(int j = 0; j < 20; j++)
+                {
+					mb.InsertPossibleMoves(moves);
+
+					CubeMove m = moves[rnd.Next(moves.Count)];
+					mb.UpdateBlocked(m);
+					cube.MakeMove(m);
+                }
+
+                if (!set.Add(cube))
+                {
+					throw new Exception("This should almost never happen");
+                }
+            }
+
+			return set;
+        }
 	}
 }

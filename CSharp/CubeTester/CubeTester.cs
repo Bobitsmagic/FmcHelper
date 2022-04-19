@@ -69,10 +69,8 @@ namespace CubeTester
 
 					cube.MakeMove(cubeMoves[cubeMoves.Length - 1]);
 					Assert.IsTrue(cube.IsSolved);
-
 				}
 			}
-
 		}
 
 		[Test]
@@ -129,12 +127,13 @@ namespace CubeTester
 		{
 			StickerCube c = new StickerCube();
 
+			//Identity has all Symmetries 
 			foreach (SymmetryElement se in SymmetryElement.Elements)
 			{
 				Assert.True(c.HasSymmetry(se));
 			}
 
-			//Super flip
+			//Super flip has all symmetries
 			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 			foreach (SymmetryElement se in SymmetryElement.Elements)
 			{
@@ -237,74 +236,6 @@ namespace CubeTester
 		}
 
 		[Test]
-		public void CountSquares()
-		{
-			StickerCube cube = new StickerCube();
-
-			Assert.AreEqual(24, cube.CountSquares());
-
-			cube.MakeMove(CubeMove.L);
-			Assert.AreEqual(16, cube.CountSquares());
-
-			cube.MakeMove(CubeMove.R);
-			Assert.AreEqual(8, cube.CountSquares());
-		}
-
-		[Test]
-		public void CheckBlocks()
-		{
-			StickerCube cube = new StickerCube();
-
-			Assert.AreEqual(8, cube.CountBlocks());
-
-			cube.MakeMove(CubeMove.R);
-			Assert.AreEqual(4, cube.CountBlocks());
-
-			cube.MakeMove(CubeMove.L);
-			Assert.AreEqual(0, cube.CountBlocks());
-		}
-
-		[Test]
-		public void CountOrientedEdges()
-		{
-			StickerCube cube = new StickerCube();
-
-			Assert.AreEqual(12, cube.CountOrientedEgdes());
-
-			cube.MakeMove(CubeMove.R);
-			Assert.AreEqual(12, cube.CountOrientedEgdes());
-
-			cube.MakeMove(CubeMove.L);
-			Assert.AreEqual(12, cube.CountOrientedEgdes());
-
-			cube.MakeMove(CubeMove.D);
-			Assert.AreEqual(12, cube.CountOrientedEgdes());
-
-			cube.MakeMove(CubeMove.U);
-			Assert.AreEqual(12, cube.CountOrientedEgdes());
-
-			cube.MakeMove(CubeMove.F);
-			Assert.AreEqual(8, cube.CountOrientedEgdes());
-
-			cube.MakeMove(CubeMove.B);
-			Assert.AreEqual(4, cube.CountOrientedEgdes());
-
-			cube.MakeMove(CubeMove.U);
-			cube.MakeMove(CubeMove.F);
-			Assert.AreEqual(6, cube.CountOrientedEgdes());
-
-			cube.MakeMove(CubeMove.B);
-			Assert.AreEqual(8, cube.CountOrientedEgdes());
-
-			cube.Reset();
-
-			//Super flip
-			cube.ApplyMoveSequenz(MoveSequenz.SuperFlip);
-
-			Assert.AreEqual(cube.CountOrientedEgdes(), 0);
-		}
-
-		[Test]
 		public void SingleEdges()
 		{
 			StickerCube cube = new StickerCube();
@@ -328,15 +259,7 @@ namespace CubeTester
 							counter++;
 					}
 				}
-
-				Assert.AreEqual(cube.CountOrientedEgdes(), counter);
 			}
-		}
-
-		[Test]
-		public void GetSolvedCubeIndice()
-		{
-
 		}
 	}
 }

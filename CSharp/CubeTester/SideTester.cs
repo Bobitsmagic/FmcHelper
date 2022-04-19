@@ -75,9 +75,7 @@ namespace CubeTester
 					StickerSide src = new StickerSide((CubeColor)3);
 					StickerSide dest = new StickerSide((CubeColor)5);
 
-					System.Diagnostics.Debug.Write(dest.ToString() + " -> ");
 					dest.SetStripe(i, src.GetStripe(j));
-					System.Diagnostics.Debug.WriteLine(dest.ToString());
 
 					Assert.AreEqual(dest.GetStripe(i), src.GetStripe(j));
 					for (int k = 0; k < 4; k++)

@@ -390,12 +390,12 @@ namespace CubeAD
 		/// <returns>A BitVector containing a 1 for each symmetry that applies to this cube</returns>
 		public BitMap64 GetSymmetryMask()
 		{
-			if (SymmetryEdgePermMask.ContainsKey(EdgePermutationIndex))
+			if (Symmetry.EdgePermMask.ContainsKey(EdgePermutationIndex))
 			{
-				BitMap64 mask = SymmetryEdgePermMask[EdgePermutationIndex];
+				BitMap64 mask = Symmetry.EdgePermMask[EdgePermutationIndex];
 
-				mask &= SymmetryCornerPermMask[CornerPermutationIndex];
-				mask &= SymmetryEdgePermMask[EdgeOrientationIndex];
+				mask &= Symmetry.CornerPermMask[CornerPermutationIndex];
+				mask &= Symmetry.EdgePermMask[EdgeOrientationIndex];
 
 				return mask;
 			}
@@ -415,8 +415,8 @@ namespace CubeAD
 			int[] inversePerm = GetInverse(perm);
 			int[] orient = GetCornerOrientation();
 
-			byte[] symTransfrom = SymmetryCornerPermutation[se.Index];
-			byte[,,] symCornerOrient = SymmetryCornerOrientation[se.Index];
+			byte[] symTransfrom = Symmetry.CornerPermTranform[se.Index];
+			byte[,,] symCornerOrient = Symmetry.CornerOrientTransform[se.Index];
 
 			for (int i = 0; i < 8; i++)
 			{
@@ -435,8 +435,8 @@ namespace CubeAD
 			int[] inversePerm = GetInverse(perm);
 			int[] orient = GetEdgeOrientation();
 
-			byte[] symTransfrom = SymmetryEdgePermutation[se.Index];
-			byte[] symOrientation = SymmetryEdgeOrientation[se.Index];
+			byte[] symTransfrom = Symmetry.EdgePermTranform[se.Index];
+			byte[] symOrientation = Symmetry.EdgePermTranform[se.Index];
 
 			for (int i = 0; i < 8; i++)
 			{
@@ -463,8 +463,8 @@ namespace CubeAD
 			int[] otherInversePerm = GetInverse(other.GetCornerPermuation());
 			int[] otherOrient = other.GetCornerOrientation();
 
-			byte[] symTransfrom = SymmetryCornerPermutation[se];
-			byte[,,] symCornerOrient = SymmetryCornerOrientation[se];
+			byte[] symTransfrom = Symmetry.CornerPermTranform[se];
+			byte[,,] symCornerOrient = Symmetry.CornerOrientTransform[se];
 
 			for (int i = 0; i < 8; i++)
 			{
@@ -483,8 +483,8 @@ namespace CubeAD
 			otherInversePerm = GetInverse(other.GetEdgePermutation());
 			otherOrient = other.GetEdgeOrientation();
 
-			symTransfrom = SymmetryEdgePermutation[se];
-			byte[] symOrientation = SymmetryEdgeOrientation[se];
+			symTransfrom = Symmetry.EdgePermTranform[se];
+			byte[] symOrientation = Symmetry.EdgeOrientTransform[se];
 
 			for (int i = 0; i < 8; i++)
 			{
@@ -514,7 +514,7 @@ namespace CubeAD
 		}
 		public int GetSymmetryHashCode()
 		{
-			return HashCode.Combine(SymmetryCornerMatrix[CornerPermutationIndex], SymmetryEdgeMatrix[EdgePermutationIndex]);
+			return HashCode.Combine(Symmetry.CornerPermutationRepresentative[CornerPermutationIndex], Symmetry.EdgePermutationRepresentative[EdgePermutationIndex]);
 		}
 		#endregion
 	

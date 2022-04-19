@@ -102,22 +102,22 @@ namespace CubeTester
 		[Test]
 		public void CubeIndexSorting()
 		{
-			HashSet<IndexCube> indices = StickerCube.GetRandomCubesDistinct(10, 1000, new System.Random(0));
+			HashSet<IndexCube> indices = SearchingAlgorithms.GenerateRandomCubes(new Random(0), 1000);
 
-			IndexCube[] array1 = indices.ToArray();
-			IndexCube[] array2 = array1.ToArray();
-			IndexCube[] buffer = new IndexCube[array1.Length];
+			IndexCube[] compSortArray = indices.ToArray();
+			IndexCube[] radixSortArray = compSortArray.ToArray();
+			IndexCube[] buffer = new IndexCube[compSortArray.Length];
 
-			Array.Sort(array1);
+			Array.Sort(compSortArray);
 
-			for (int i = 0; i < array1.Length - 1; i++)
+			for (int i = 0; i < compSortArray.Length - 1; i++)
 			{
-				Assert.IsTrue(array1[i].Index < array1[i + 1].Index);
+				Assert.IsTrue(compSortArray[i].Index < compSortArray[i + 1].Index);
 			}
 
-			IndexCube.RadixSortCubeIndices(array2, buffer);
+			IndexCube.RadixSortCubeIndices(radixSortArray, buffer);
 
-			Assert.IsTrue(array1.SequenceEqual(array2));
+			Assert.IsTrue(compSortArray.SequenceEqual(radixSortArray));
 		}
 
 		[Test]
@@ -130,7 +130,7 @@ namespace CubeTester
 				{
 					if (x / 2 == y / 2) continue;
 
-					System.Diagnostics.Debug.WriteLine(counter + " x " + x + " y " + y);
+					//System.Diagnostics.Debug.WriteLine(counter + " x " + x + " y " + y);
 					Assert.AreEqual(PreCompTables.CubeEdgeColors[counter, 0], x);
 					Assert.AreEqual(PreCompTables.CubeEdgeColors[counter++, 1], y);
 				}
@@ -141,11 +141,24 @@ namespace CubeTester
 		{
 			Random rnd = new Random(0);
 
-			StickerCube c = new StickerCube();
+			//checking f(f^-1(x)) = x
+			StickerCube stickerCube = new StickerCube();
 			for (int i = 0; i < 1000; i++)
 			{
-				c.MakeMove((CubeMove)rnd.Next(18));
-				Assert.AreEqual(c, (new IndexCube(c)).GetCube());
+				stickerCube.MakeMove((CubeMove)rnd.Next(18));
+				Assert.AreEqual(stickerCube, (new IndexCube(stickerCube)).GetCube());
+			}
+
+			stickerCube.Reset();
+			IndexCube indexCube = new IndexCube();
+			for (int i = 0; i < 1000; i++)
+			{
+				CubeMove move = (CubeMove)rnd.Next(18);
+				stickerCube.MakeMove(move);
+				indexCube.MakeMove(move);
+
+				Assert.AreEqual(stickerCube, indexCube.GetCube());
+				Assert.AreEqual(indexCube, new IndexCube(stickerCube));
 			}
 		}
 
@@ -155,12 +168,12 @@ namespace CubeTester
 			Random rnd = new Random(0);
 
 			StickerCube cube = new StickerCube();
-			IndexCube index = new CubeIndex();
+			IndexCube index = new IndexCube();
 			Assert.AreEqual(new IndexCube(cube), index);
 
 			for (int i = 0; i < 18; i++)
 			{
-				index = new CubeIndex();
+				index = new IndexCube();
 				cube.Reset();
 
 				CubeMove m = (CubeMove)i;
@@ -202,7 +215,7 @@ namespace CubeTester
 		[Test]
 		public void HasSymmetry()
 		{
-			IndexCube c = new CubeIndex();
+			IndexCube c = new IndexCube();
 
 			foreach (SymmetryElement se in SymmetryElement.Elements)
 			{
@@ -216,7 +229,7 @@ namespace CubeTester
 				Assert.True(c.HasSymmetry(se));
 			}
 
-			c = new CubeIndex();
+			c = new IndexCube();
 
 			SymmetryElement mirrorX = new SymmetryElement(CubeColor.Red, CubeColor.Yellow, CubeColor.Green);
 
@@ -242,8 +255,8 @@ namespace CubeTester
 		[Test]
 		public void IsEqualWithSymmetry()
 		{
-			IndexCube c1 = new CubeIndex();
-			IndexCube c2 = new CubeIndex();			
+			IndexCube c1 = new IndexCube();
+			IndexCube c2 = new IndexCube();			
 
 			Random rnd = new Random(0);
 			
@@ -275,7 +288,6 @@ namespace CubeTester
 					c2.MakeMove(transformed);
 					Assert.IsTrue(c1.IsEqualWithSymmetry(c2, se));
 				}
-
 			}
 		}
 	}

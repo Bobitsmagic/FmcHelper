@@ -61,7 +61,7 @@ namespace CubeAD
 			}
 		}
 
-		public void AddPossibleMoves(List<CubeMove> list)
+		public void InsertPossibleMoves(List<CubeMove> list)
 		{
 			list.Clear();
 			for (int i = 0; i < 6; i++)

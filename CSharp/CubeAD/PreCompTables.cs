@@ -91,7 +91,7 @@ namespace CubeAD
 			public static byte[][] CornerPermTranform = new byte[SymmetryElement.ORDER][];
 			public static byte[][] EdgePermTranform = new byte[SymmetryElement.ORDER][];
 			//The orientation a corner has after a symmetry transformation
-			public static byte[][,,] CornerOrientTRansform = new byte[SymmetryElement.ORDER][,,]; //color index, position, orient
+			public static byte[][,,] CornerOrientTransform = new byte[SymmetryElement.ORDER][,,]; //color index, position, orient
 			//Whether a edge get flipped by a symmetry transformation
 			public static byte[][] EdgeOrientTransform = new byte[SymmetryElement.ORDER][];
 
@@ -586,7 +586,7 @@ namespace CubeAD
 				IndexCube c2 = new IndexCube();
 
 				var array = new byte[8, 8, 3];
-				Symmetry.CornerOrientTRansform[i] = array;
+				Symmetry.CornerOrientTransform[i] = array;
 
 				ushort[] permutations = new ushort[8];
 				for(int j = 0; j < 8; j++)

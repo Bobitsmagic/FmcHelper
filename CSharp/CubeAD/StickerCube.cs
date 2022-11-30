@@ -107,7 +107,7 @@ namespace CubeAD
 		};
 
 		//SIDE_COUNT Sides of the cube
-		StickerSide[] Sides = new StickerSide[SIDE_COUNT];
+		public StickerSide[] Sides = new StickerSide[SIDE_COUNT];
 
 		/// <summary>
 		/// Creates a solved cube
@@ -607,7 +607,7 @@ namespace CubeAD
 				{
 					if (x / 2 == y / 2) continue;
 
-					permBuffer[counter++] = EdgeIndices[(int)GetEdgeColor(x, y), (int)GetEdgeColor(y, x)];
+					permBuffer[EdgeIndices[(int)GetEdgeColor(x, y), (int)GetEdgeColor(y, x)]] = counter++;
 				}
 			}
 			return (uint)GetIndex(permBuffer);
@@ -631,7 +631,7 @@ namespace CubeAD
 				{
 					for (int z = 4; z < 6; z++)
 					{
-						permBuffer[counter++] = CornerIndices[(int)GetCornerColor(x, y, z), (int)GetCornerColor(y, x, z), (int)GetCornerColor(z, x, y)];
+						permBuffer[CornerIndices[(int)GetCornerColor(x, y, z), (int)GetCornerColor(y, x, z), (int)GetCornerColor(z, x, y)]] = counter++;
 					}
 				}
 			}

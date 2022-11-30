@@ -387,71 +387,6 @@ namespace CubeAD
 		#endregion
 
 		#region Symmetry
-
-		//[TODO] Tests
-		/// <returns>A BitVector containing a 1 for each symmetry that applies to this cube</returns>
-		public BitMap64 GetSymmetryMask()
-		{
-			if (Symmetry.EdgePermMask.ContainsKey(EdgePermutationIndex))
-			{
-				BitMap64 mask = Symmetry.EdgePermMask[EdgePermutationIndex];
-
-				mask &= Symmetry.CornerPermMask[CornerPermutationIndex];
-				mask &= Symmetry.EdgePermMask[EdgeOrientationIndex];
-
-				return mask;
-			}
-
-			//Identity sym
-			return new BitMap64(1);
-		}
-		public bool HasSymmetry(SymmetryElement se)
-		{
-			return CornersHaveSymmetry(se) && EdgesHaveSymmetry(se);
-		}
-
-		//[TODO]
-		public bool CornersHaveSymmetry(SymmetryElement se)
-		{
-			int[] perm = GetCornerPermuation();
-			int[] inversePerm = GetInverse(perm);
-			int[] orient = GetCornerOrientation();
-
-			byte[] symTransfrom = Symmetry.CornerPermTranform[se.Index];
-			byte[,,] symCornerOrient = Symmetry.CornerOrientTransform[se.Index];
-
-			for (int i = 0; i < 8; i++)
-			{
-				if (symTransfrom[inversePerm[i]] != inversePerm[symTransfrom[i]] ||
- 					symCornerOrient[i, inversePerm[i], orient[inversePerm[i]]] != orient[symTransfrom[inversePerm[i]]])
-				{
-					return false;
-				}
-			}
-
-			return true;
-		}
-		public bool EdgesHaveSymmetry(SymmetryElement se)
-		{
-			int[] perm = GetEdgePermutation();
-			int[] inversePerm = GetInverse(perm);
-			int[] orient = GetEdgeOrientation();
-
-			byte[] symTransfrom = Symmetry.EdgePermTranform[se.Index];
-			byte[] symOrientation = Symmetry.EdgePermTranform[se.Index];
-
-			for (int i = 0; i < 8; i++)
-			{
-				if (symTransfrom[inversePerm[i]] != inversePerm[symTransfrom[i]] ||
-					orient[i] != (orient[symTransfrom[i]] ^ symOrientation[i] ^ symOrientation[perm[i]]))
-				{
-					return false;
-				}
-			}
-
-			return true;
-		}
-
 		public bool IsEqualWithSymmetry(IndexCube other, SymmetryElement se)
 		{
 			return IsEqualWithSymmetry(other, se.Index);
@@ -499,12 +434,13 @@ namespace CubeAD
 
 			return true;
 		}
+
 		public bool IsEqualWithSymmetry(IndexCube other)
 		{
 			if (this == other)
 				return true;
 
-			for(int i = 1; i < 48; i++)
+			for (int i = 1; i < 48; i++)
 			{
 				if (IsEqualWithSymmetry(other, i))
 				{
@@ -514,6 +450,25 @@ namespace CubeAD
 
 			return false;
 		}
+
+		//[TODO] Tests
+		/// <returns>A BitVector containing a 1 for each symmetry that applies to this cube</returns>
+		public BitMap64 GetSymmetryMask()
+		{
+			BitMap64 ret = new BitMap64();
+			for(int i = 0; i < SymmetryElement.Elements.Length; i++)
+			{
+				ret[i] = HasSymmetry(SymmetryElement.Elements[i]);	
+			}
+
+			//Identity sym
+			return ret;
+		}
+		public bool HasSymmetry(SymmetryElement se)
+		{
+			return IsEqualWithSymmetry(this, se);
+		}
+
 		#endregion
 	
 		//Sorting

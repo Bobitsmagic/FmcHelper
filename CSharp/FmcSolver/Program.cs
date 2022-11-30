@@ -14,20 +14,18 @@ namespace FmcSolver
 	{
 		static void Main(string[] args)
 		{
-			IndexCube cube = new IndexCube();
-			StickerCube sticker = cube.GetCube();
-			sticker.PrintSideView();
-			sticker.MakeMove(CubeMove.R);
-			sticker.PrintSideView();
-			StickerCube buffer = new StickerCube();
-			SymmetryElement symmetry = new SymmetryElement(CubeColor.Blue, CubeColor.Yellow, CubeColor.Red);
-			sticker.InsertSymmetryTransformation(symmetry, buffer);
+			Random rnd = new Random(0);
 
-			buffer.PrintSideView();
-
-			buffer.MakeMove(symmetry.TransformMove(CubeMove.RP));
-			
-			buffer.PrintSideView();
+			//checking f(f^-1(x)) = x
+			StickerCube stickerCube = new StickerCube();
+			for (int i = 0; i < 1000; i++)
+			{
+				stickerCube.MakeMove((CubeMove)rnd.Next(18));
+				Console.WriteLine("Exptected: ");
+				stickerCube.PrintSideView();
+				Console.WriteLine("Res: ");
+				(new IndexCube(stickerCube)).GetCube().PrintSideView();
+			}
 
 
 			Console.WriteLine("\nDone");

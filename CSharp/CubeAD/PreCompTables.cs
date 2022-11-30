@@ -94,10 +94,6 @@ namespace CubeAD
 			public static byte[][,,] CornerOrientTransform = new byte[SymmetryElement.ORDER][,,]; //color index, position, orient
 			//Whether a edge get flipped by a symmetry transformation
 			public static byte[][] EdgeOrientTransform = new byte[SymmetryElement.ORDER][];
-
-			//A bitmask containing information about which self-symmetries apply to a specific permutation index
-			public static BitMap64[] CornerPermMask = new BitMap64[MAX_CORNER_PERMUTATION];
-			public static Dictionary<uint, BitMap64> EdgePermMask = new Dictionary<uint, BitMap64>(); //containing only elements with non-trivial symmetries
 		} 
 
 		//The hamilton path through all states of corners (ignoering orientation and impossible cases), LDB corner always stays
@@ -392,6 +388,42 @@ namespace CubeAD
 			});
 
 			//Symmetry
+			//Calculating the transformation performed by a symmetry
+			int[] orderTransfrom = new int[6] { 0, 1, 4, 5, 2, 3 };
+			for (int i = 0; i < SymmetryElement.ORDER; i++)
+			{
+				SymmetryElement se = SymmetryElement.Elements[i];
+				Symmetry.EdgePermTranform[i] = new byte[12];
+				Symmetry.CornerPermTranform[i] = new byte[8];
+				Symmetry.EdgeOrientTransform[i] = new byte[12];
+
+				counter = 0;
+				for (int x = 0; x < 6; x++)
+				{
+					for (int y = x + 1; y < 6; y++)
+					{
+						if (x / 2 == y / 2) continue;
+
+						//If the color change results in a change of order colorindices this edge will be flipped
+						Symmetry.EdgeOrientTransform[i][counter] = (byte)((orderTransfrom[x] < orderTransfrom[y] !=
+							orderTransfrom[se.TransformColor(x)] < orderTransfrom[se.TransformColor(y)]) ? 1 : 0);
+						Symmetry.EdgePermTranform[i][counter++] = (byte)EdgeIndices[se.TransformColor(x), se.TransformColor(y)];
+					}
+				}
+
+				counter = 0;
+				for (int x = 0; x < 2; x++)
+				{
+					for (int y = 2; y < 4; y++)
+					{
+						for (int z = 4; z < 6; z++)
+						{
+							Symmetry.CornerPermTranform[i][counter++] = (byte)CornerIndices[se.TransformColor(x), se.TransformColor(y), se.TransformColor(z)];
+						}
+					}
+				}
+			}
+
 			uint[] permsWithSymmetry = new uint[304224];
 			//Symmetry edge permuation mask
 			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "symmetry_edgde_perm_mask.bin"), permsWithSymmetry, (ret) =>
@@ -494,78 +526,7 @@ namespace CubeAD
 					ret[i] = array;
 				}
 			});
-
-			Symmetry.EdgePermMask = new Dictionary<uint, BitMap64>(permsWithSymmetry.Length);
-			for (int i = 0; i < permsWithSymmetry.Length; i++)
-			{
-				Symmetry.EdgePermMask.Add(permsWithSymmetry[i], edgePermMasks[i]);
-			}
-
-			//Symmetry corner permutation mask
-			ReadFromFileOrCreateUnsafeBitArray(Path.Combine(PRE_COMP_PATH, "symmetry_corner_perm_mask.bin"), Symmetry.CornerPermMask, (ret) =>
-			{
-				int min = int.MaxValue, max = int.MinValue, sum = 0, zeroCount = 0;
-				IndexCube cubeIndex = new IndexCube();
-				for (ushort i = 0; i < MAX_CORNER_PERMUTATION; i++)
-				{
-					cubeIndex.CornerPermutationIndex = i;
-					BitMap64 array = new BitMap64();
-					for (int j = 0; j < SymmetryElement.Elements.Length; j++)
-					{
-						SymmetryElement se = SymmetryElement.Elements[j];
-						array[j] = cubeIndex.HasSymmetry(se);
-					}
-
-					min = Math.Min(min, array.BitCount);
-					max = Math.Max(max, array.BitCount);
-					sum += array.BitCount;
-					if (array.BitCount == 0) zeroCount++;
-
-					ret[i] = array;
-				}
-
-				Console.WriteLine("Min: " + min);
-				Console.WriteLine("Max: " + max);
-				Console.WriteLine("Sum: " + sum);
-				Console.WriteLine("ZeroCount: " + zeroCount);
-			});
-
-			//Calculating the transformation performed by a symmetry
-			int[] orderTransfrom = new int[6] { 0, 1, 4, 5, 2, 3 };
-			for (int i = 0; i < SymmetryElement.ORDER; i++)
-			{
-				SymmetryElement se = SymmetryElement.Elements[i];
-				Symmetry.EdgePermTranform[i] = new byte[12];
-				Symmetry.CornerPermTranform[i] = new byte[8];
-				Symmetry.EdgeOrientTransform[i] = new byte[12];
-
-				counter = 0;
-				for (int x = 0; x < 6; x++)
-				{
-					for (int y = x + 1; y < 6; y++)
-					{
-						if (x / 2 == y / 2) continue;
-
-						//If the color change results in a change of order colorindices this edge will be flipped
-						Symmetry.EdgeOrientTransform[i][counter] = (byte)((orderTransfrom[x] < orderTransfrom[y] !=
-							orderTransfrom[se.TransformColor(x)] < orderTransfrom[se.TransformColor(y)]) ? 1 : 0);
-						Symmetry.EdgePermTranform[i][counter++] = (byte)EdgeIndices[se.TransformColor(x), se.TransformColor(y)];
-					}
-				}
-
-				counter = 0;
-				for (int x = 0; x < 2; x++)
-				{
-					for (int y = 2; y < 4; y++)
-					{
-						for (int z = 4; z < 6; z++)
-						{
-							Symmetry.CornerPermTranform[i][counter++] = (byte)CornerIndices[se.TransformColor(x), se.TransformColor(y), se.TransformColor(z)];
-						}
-					}
-				}
-			}
-
+			
 			//Symmetry Corner Orientation
 			//Generates for all corner positions and orientations and symmetries the resulting orientation after a symmetry transformation
 			for (int i = 0; i < 48; i++)

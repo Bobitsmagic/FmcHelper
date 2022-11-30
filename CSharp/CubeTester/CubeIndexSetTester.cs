@@ -15,32 +15,27 @@ namespace CubeTester
 		public void AddOperation()
 		{
 			var hashset = new HashSet<IndexCube>();
-			var radixTreeDic = new RadixTreeDictionary();
-			var radixTreeArray = new RadixTreeArray();
-			var radixTreeIt = new RadixTreeIterative();
 			var sortCubeInd = new SortedListSet();
 			var bucketCubeInd = new SortedBucketsSet();
-			var setBucket = new SetBuckets();
 
-			foreach (IndexCube index in StickerCube.GetRandomCubes(4, 1000, new Random(0)))
+			Random rnd = new Random();
+			List<IndexCube> cubeList = new List<IndexCube>(SearchingAlgorithms.GenerateRandomCubes(rnd, 1000));
+			
+			//adding duplicates
+			for (int i = 0; i < 200; i++)
+				cubeList[rnd.Next(cubeList.Count)] = cubeList[rnd.Next(cubeList.Count)];
+
+			foreach (IndexCube index in cubeList)
 			{
 				hashset.Add(index);
-				radixTreeArray.Add(index);
-				radixTreeDic.Add(index);
-				radixTreeIt.Add(index);
 				sortCubeInd.Add(index);
 				bucketCubeInd.Add(index);
-				setBucket.Add(index);
 
 				sortCubeInd.RemoveDuplicates();
 				bucketCubeInd.RemoveDuplicates();
 
-				Assert.AreEqual(hashset.Count, radixTreeArray.Count);
-				Assert.AreEqual(hashset.Count, radixTreeDic.Count);
-				Assert.AreEqual(hashset.Count, radixTreeIt.Count);
 				Assert.AreEqual(hashset.Count, sortCubeInd.Count);
 				Assert.AreEqual(hashset.Count, bucketCubeInd.Count);
-				Assert.AreEqual(hashset.Count, setBucket.Count);
 			}
 
 			Assert.AreNotEqual(hashset.Count, 1000);
@@ -50,96 +45,60 @@ namespace CubeTester
 		public void ClearOperation()
 		{
 			var hashset = new HashSet<IndexCube>();
-			var radixTreeDic = new RadixTreeDictionary();
-			var radixTreeArray = new RadixTreeArray();
-			var radixTreeIt = new RadixTreeIterative();
 			var sortCubeInd = new SortedListSet();
 			var bucketCubeInd = new SortedBucketsSet();
-			var setBucket = new SetBuckets();
 
-			foreach (IndexCube index in StickerCube.GetRandomCubes(4, 1000, new Random(0)))
+			foreach (IndexCube index in SearchingAlgorithms.GenerateRandomCubes(new Random(), 1000))
 			{
 				hashset.Add(index);
-				radixTreeArray.Add(index);
-				radixTreeDic.Add(index);
-				radixTreeIt.Add(index);
 				sortCubeInd.Add(index);
 				bucketCubeInd.Add(index);
-				setBucket.Add(index);
 			}
 
 			sortCubeInd.RemoveDuplicates();
 			bucketCubeInd.RemoveDuplicates();
 
-			Assert.AreNotEqual(hashset.Count, 1000);
-			Assert.AreEqual(hashset.Count, radixTreeArray.Count);
-			Assert.AreEqual(hashset.Count, radixTreeDic.Count);
-			Assert.AreEqual(hashset.Count, radixTreeIt.Count);
+			Assert.AreEqual(hashset.Count, 1000);
 			Assert.AreEqual(hashset.Count, sortCubeInd.Count);
 			Assert.AreEqual(hashset.Count, bucketCubeInd.Count);
-			Assert.AreEqual(hashset.Count, setBucket.Count);
 
 			hashset.Clear();
-			radixTreeArray.Clear();
-			radixTreeDic.Clear();
-			radixTreeIt.Clear();
 			sortCubeInd.Clear();
 			bucketCubeInd.Clear();
-			setBucket.Clear();
 
 			Assert.AreEqual(0, hashset.Count);
-			Assert.AreEqual(0, radixTreeArray.Count);
-			Assert.AreEqual(0, radixTreeDic.Count);
-			Assert.AreEqual(0, radixTreeIt.Count);
 			Assert.AreEqual(0, sortCubeInd.Count);
 			Assert.AreEqual(0, bucketCubeInd.Count);
-			Assert.AreEqual(0, setBucket.Count);
 
-			foreach (IndexCube index in StickerCube.GetRandomCubes(4, 1000, new Random(0)))
+			foreach (IndexCube index in SearchingAlgorithms.GenerateRandomCubes(new Random(), 1000))
 			{
 				hashset.Add(index);
-				radixTreeArray.Add(index);
-				radixTreeDic.Add(index);
-				radixTreeIt.Add(index);
 				sortCubeInd.Add(index);
 				bucketCubeInd.Add(index);
-				setBucket.Add(index);
 			}
 
 			sortCubeInd.RemoveDuplicates();
 			bucketCubeInd.RemoveDuplicates();
 
-			Assert.AreNotEqual(hashset.Count, 1000);
-			Assert.AreEqual(hashset.Count, radixTreeArray.Count);
-			Assert.AreEqual(hashset.Count, radixTreeDic.Count);
-			Assert.AreEqual(hashset.Count, radixTreeIt.Count);
+			Assert.AreEqual(hashset.Count, 1000);
 			Assert.AreEqual(hashset.Count, sortCubeInd.Count);
 			Assert.AreEqual(hashset.Count, bucketCubeInd.Count);
-			Assert.AreEqual(hashset.Count, setBucket.Count);
 		}
 
 		[Test]
 		public void ContainsOperation()
 		{
 			var hashset = new HashSet<IndexCube>();
-			var radixTreeDic = new RadixTreeDictionary();
-			var radixTreeArray = new RadixTreeArray();
-			var radixTreeIt = new RadixTreeIterative();
 			var sortCubeInd = new SortedListSet();
 			var bucketCubeInd = new SortedBucketsSet();
-			var setBuckets = new SetBuckets();
 
-			List<IndexCube> list = StickerCube.GetRandomCubes(20, 1000, new Random(0));
+			List<IndexCube> list = SearchingAlgorithms.GenerateRandomCubes(new Random(), 1000).ToList();
 			for (int i = 0; i < list.Count; i += 10)
 			{
 				IndexCube index = list[i];
 				hashset.Add(index);
-				radixTreeArray.Add(index);
-				radixTreeDic.Add(index);
-				radixTreeIt.Add(index);
 				sortCubeInd.Add(index);
 				bucketCubeInd.Add(index);
-				setBuckets.Add(index);
 			}
 
 			sortCubeInd.RemoveDuplicates();
@@ -147,17 +106,11 @@ namespace CubeTester
 
 			var sealedHS = new SealedHashset(hashset.ToArray());
 
-
 			foreach (IndexCube index in list)
 			{
-				Assert.AreEqual(hashset.Contains(index), radixTreeArray.Contains(index));
-				Assert.AreEqual(hashset.Contains(index), radixTreeDic.Contains(index));
-				Assert.AreEqual(hashset.Contains(index), radixTreeIt.Contains(index));
 				Assert.AreEqual(hashset.Contains(index), sortCubeInd.Contains(index));
 				Assert.AreEqual(hashset.Contains(index), bucketCubeInd.Contains(index));
-				Assert.AreEqual(hashset.Contains(index), setBuckets.Contains(index));
 				Assert.AreEqual(hashset.Contains(index), sealedHS.Contains(index));
-
 			}
 		}
 	}

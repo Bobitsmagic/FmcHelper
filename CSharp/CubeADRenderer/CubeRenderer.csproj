@@ -16,6 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Shader\color - Kopieren.frag">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Shader\color.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

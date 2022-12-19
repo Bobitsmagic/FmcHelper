@@ -16,7 +16,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Shader\color - Kopieren.frag">
+    <None Update="Shader\quad.frag">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Shader\quad.vert">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Shader\def.vert">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Shader\def.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Shader\color.frag">

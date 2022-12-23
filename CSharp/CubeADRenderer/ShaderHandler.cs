@@ -20,6 +20,7 @@ namespace CubeRenderer
 		#region Locations
 		public static int PVMatrixLocation, ModelMatrixLocation;
 		public static int AmbientLocation;
+		public static int GPos, GNormal, GColorSpec;
 		#endregion
 
 		private static Dictionary<string, int> ProgramPointer = new Dictionary<string, int>();
@@ -125,7 +126,16 @@ namespace CubeRenderer
 			PVMatrixLocation = GL.GetUniformLocation(pointer, "PVMatrix");
 			ModelMatrixLocation = GL.GetUniformLocation(pointer, "ModelMatrix");
 			AmbientLocation = GL.GetUniformLocation(pointer, "AmbientDirection");
-			SetAmbientDirection(new Vector3(1, 4, 2));
+
+			GPos = GL.GetUniformLocation(pointer, "gPosition");
+			GNormal = GL.GetUniformLocation(pointer, "gNormal");
+			GColorSpec = GL.GetUniformLocation(pointer, "gColorSpec");
+
+			GL.Uniform1(GPos, 0);
+			GL.Uniform1(GNormal, 1);
+			GL.Uniform1(GColorSpec, 2);
+
+            SetAmbientDirection(new Vector3(1, 4, 2));
 		}
 
 		public static void SetAmbientDirection(Vector3 dir)
@@ -147,7 +157,7 @@ namespace CubeRenderer
 		public static void SetProjectionViewMatrix(Camera.ProjectionMatrix pm, Camera.ViewMatrix vm)
 		{
 			Matrix4 pMatrix = Matrix4.LookAt(pm.EyePos, pm.LookAt, pm.Up);
-			Matrix4 combined = pMatrix * Matrix4.CreatePerspectiveOffCenter(vm.Left, vm.Right, vm.Bottom, vm.Top, vm.Near, vm.Far);
+            Matrix4 combined = pMatrix * Matrix4.CreatePerspectiveOffCenter(vm.Left, vm.Right, vm.Bottom, vm.Top, vm.Near, vm.Far);
 			GL.UniformMatrix4(PVMatrixLocation, false, ref combined);
 		}
 	}

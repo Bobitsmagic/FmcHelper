@@ -17,10 +17,11 @@ namespace CubeRenderer
 		int FPSCount = 0;
 		double FPSTimeSum = 0;
 		public Vector3 ClearColor = new Vector3(0.5f, 0.5f, 0.5f);
+		DeferredRenderer DR;
 
 		CubeMesh cm;
 
-		public Window3D(string title = "kek", double renderFreq = 1337, int updateFreq = 1337, int width = 1000, int height = 1000) :
+		public Window3D(string title = "kek", double renderFreq = 1337, int updateFreq = 1337, int width = 800, int height = 800) :
 			base(new GameWindowSettings() { RenderFrequency = 60, UpdateFrequency = updateFreq },
 				new NativeWindowSettings() { Title = title, Size = new Vector2i(width, height) })
 		{
@@ -39,12 +40,13 @@ namespace CubeRenderer
 
 			GL.Enable(EnableCap.DepthTest);
 			GL.Disable(EnableCap.CullFace);
-			GL.CullFace(CullFaceMode.Front);
-			GL.FrontFace(FrontFaceDirection.Ccw);
+			//GL.CullFace(CullFaceMode.Front);
+			//GL.FrontFace(FrontFaceDirection.Ccw);
 			VSync = VSyncMode.Off;
 
 
 			cm = new CubeMesh(new CubeAD.StickerCube());
+			DR = new DeferredRenderer(Size.X, Size.Y);
 
 			Console.WriteLine(GL.GetString(StringName.Version));
 			ShaderHandler.LoadProgram("color");
@@ -80,6 +82,7 @@ namespace CubeRenderer
 				FPSTimeSum -= 1;
 			}
 			//26, 26, 52
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 			GL.ClearColor(ClearColor.X, ClearColor.Y, ClearColor.Z, 1);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -87,7 +90,9 @@ namespace CubeRenderer
 			Camera.ApplyMatrices();
 			angle = 1.1f;
 
-			cm.BindAndDraw();
+
+			//cm.BindAndDraw();
+			DR.RenderCube(cm);
 
 			Context.SwapBuffers();
 			base.OnRenderFrame(e);

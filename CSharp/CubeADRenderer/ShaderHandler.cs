@@ -20,7 +20,12 @@ namespace CubeRenderer
 		#region Locations
 		public static int PVMatrixLocation, ModelMatrixLocation;
 		public static int AmbientLocation;
-		public static int GPos, GNormal, GColorSpec;
+		//Textures
+		public static int GPos, GNormal, GColorSpec, DepthMap; 
+
+		public static int CamPositionLocation;
+		public static int LightPosLocation;
+        public static int LightColorLocation;
 		#endregion
 
 		private static Dictionary<string, int> ProgramPointer = new Dictionary<string, int>();
@@ -125,24 +130,48 @@ namespace CubeRenderer
 
 			PVMatrixLocation = GL.GetUniformLocation(pointer, "PVMatrix");
 			ModelMatrixLocation = GL.GetUniformLocation(pointer, "ModelMatrix");
+
 			AmbientLocation = GL.GetUniformLocation(pointer, "AmbientDirection");
 
 			GPos = GL.GetUniformLocation(pointer, "gPosition");
 			GNormal = GL.GetUniformLocation(pointer, "gNormal");
 			GColorSpec = GL.GetUniformLocation(pointer, "gColorSpec");
+			DepthMap = GL.GetUniformLocation(pointer, "DepthMap");
+
+			CamPositionLocation = GL.GetUniformLocation(pointer, "CamPos");
+			LightColorLocation = GL.GetUniformLocation(pointer, "LightColor");
+			LightPosLocation = GL.GetUniformLocation(pointer, "LightPos");
 
 			GL.Uniform1(GPos, 0);
 			GL.Uniform1(GNormal, 1);
 			GL.Uniform1(GColorSpec, 2);
+			GL.Uniform1(DepthMap, 3);
 
             SetAmbientDirection(new Vector3(1, 4, 2));
+
+			SetLightPos(new Vector3(3, 10, 5));
+
+			SetLightColor(new Vector3(1, 1f, 0.9f));
 		}
 
 		public static void SetAmbientDirection(Vector3 dir)
 		{
 			GL.Uniform3(AmbientLocation, Vector3.NormalizeFast(dir));
 		}
-		public static void SetModelMatrix(Camera.ModelMatrix matrix)
+
+		public static void SetCamPos(Vector3 pos)
+		{
+			GL.Uniform3(CamPositionLocation, pos);
+		}
+        public static void SetLightPos(Vector3 pos)
+        {
+            GL.Uniform3(LightPosLocation, pos);
+        }
+        public static void SetLightColor(Vector3 color)
+        {
+            GL.Uniform3(LightColorLocation, color);
+        }
+        public static void SetModelMatrix(Camera.ModelMatrix matrix)
 		{
 			Vector3 nCenter = -new Vector3(matrix.RCenter.X, matrix.RCenter.Y, matrix.RCenter.Z);
 			Matrix4 modelMatrix = Matrix4.CreateTranslation(nCenter);
@@ -153,11 +182,18 @@ namespace CubeRenderer
 			Matrix4.CreateTranslation(sum);
 
 			GL.UniformMatrix4(ModelMatrixLocation, false, ref modelMatrix);
-		}
+		}	
 		public static void SetProjectionViewMatrix(Camera.ProjectionMatrix pm, Camera.ViewMatrix vm)
 		{
 			Matrix4 pMatrix = Matrix4.LookAt(pm.EyePos, pm.LookAt, pm.Up);
             Matrix4 combined = pMatrix * Matrix4.CreatePerspectiveOffCenter(vm.Left, vm.Right, vm.Bottom, vm.Top, vm.Near, vm.Far);
+			GL.UniformMatrix4(PVMatrixLocation, false, ref combined);
+		}
+
+		public static void SetOrtoghonalViewMatrix(Vector3 eyePos, Vector3 lookAt, Vector3 up, float width, float height, float near, float far)
+		{
+			Matrix4 pMatrix = Matrix4.LookAt(eyePos, lookAt, up);
+			Matrix4 combined = pMatrix * Matrix4.CreateOrthographic(width, height, near, far);
 			GL.UniformMatrix4(PVMatrixLocation, false, ref combined);
 		}
 	}

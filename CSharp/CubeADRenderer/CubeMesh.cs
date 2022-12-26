@@ -228,7 +228,7 @@ namespace CubeRenderer
 			if(CurrentMove == CubeMove.None)
 			{
 				Camera.SetModelMatrix(new Vector3());
-				Camera.ApplyMatrices();
+				Camera.ApplyModelMatrix();
 				
 				for (int i = 0; i < CuboidVb.Length; i++)
 					CuboidVb[i].BindAndDrawAll();
@@ -256,20 +256,20 @@ namespace CubeRenderer
 							if(rot)
 							{
 
-								Camera.SetModelMatrix(new Vector3(), ((int)CurrentMove / 3 == 0 || (int)CurrentMove / 3 == 2 ? -1 : 1) * (((int)CurrentMove) % 3 == 0 ? -1 : 1) * Angle, Dimensions[(int)CurrentMove / 6]);
+								Camera.SetModelMatrix(new Vector3(), ((int)CurrentMove / 3 == 5 ? -1 : 1) * ((int)CurrentMove / 3 == 0 || (int)CurrentMove / 3 == 2 ? -1 : 1) * (((int)CurrentMove) % 3 == 0 ? -1 : 1) * Angle, Dimensions[(int)CurrentMove / 6]);
 							}
 							else
 							{
 								Camera.SetModelMatrix(new Vector3());
 							}
-							Camera.ApplyMatrices();
+							Camera.ApplyModelMatrix();
 
 							CuboidVb[index++].BindAndDrawAll();
 						}
 					}
 				}
 
-				Angle += 0.2f;
+				Angle += 0.02f;
 				if (Angle >= (((int)CurrentMove) % 3 == 1 ? 2 : 1) * MathF.PI / 2)
 				{
 					Angle = 0;
@@ -278,11 +278,15 @@ namespace CubeRenderer
 					Update(SC);
 
 					if (MoveIndex == moves.Count)
-						CurrentMove = CubeMove.None;
-					else 
-						CurrentMove = moves.Moves[MoveIndex++];
+					{
+						MoveIndex = 0;	
+					}
+					 
 
 					Console.WriteLine(CurrentMove);
+					//Console.ReadLine();
+
+						CurrentMove = moves.Moves[MoveIndex++];
 				}
 			}
 		}

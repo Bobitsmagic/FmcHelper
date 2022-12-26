@@ -88,7 +88,7 @@ namespace CubeRenderer
 
 			Camera.SetProjectionMatrix(new Vector3(MathF.Cos(angle), 1, MathF.Sin(angle)) * 5, new Vector3(), new Vector3(0, 1, 0));
 			Camera.ApplyMatrices();
-			angle = 1.1f;
+			angle += .01f;
 
 
 			//cm.BindAndDraw();

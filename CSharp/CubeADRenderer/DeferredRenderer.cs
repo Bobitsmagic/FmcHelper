@@ -12,18 +12,20 @@ namespace CubeRenderer
 {
     class DeferredRenderer
     {
-        readonly int Width, Height;
-        readonly int gBuffer;
-        readonly int gPosition, gNormal, gColorSpec;
-        readonly int gDepth;    
+        GBuffer GBuffer;
+        DepthBuffer DepthBuffer;
 
         ColoredNormalVertexBuffer Quad;
-        DrawBuffersEnum[] Attachments;
+        ColoredNormalVertexBuffer Floor;
 
+        readonly int Width, Height;
+        
         public DeferredRenderer(int width, int height)
         {
             Width = width;
             Height = height;
+
+            GBuffer= new GBuffer(width, height);
 
             Quad = new ColoredNormalVertexBuffer(new ColoredNormalVertex[]
             {
@@ -36,70 +38,74 @@ namespace CubeRenderer
                 new ColoredNormalVertex(new Vector3(-1, 1, -1), new Vector3(), new Vector4())
             }, PrimitiveType.Triangles, BufferUsageHint.DynamicDraw);
 
-            gBuffer = GL.GenFramebuffer();
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, gBuffer);
+            Vector4 fColor = new Vector4(1, 1, 1, 1);
+            const float LENGTH = 7;
+            Floor = new ColoredNormalVertexBuffer(new ColoredNormalVertex[]
+            {
+                new ColoredNormalVertex(LENGTH * new Vector3(-1, -1, -1), new Vector3(0, 1, 0), fColor),
+                new ColoredNormalVertex(LENGTH * new Vector3(1, -1, -1), new Vector3(0, 1, 0), fColor),
+                new ColoredNormalVertex(LENGTH * new Vector3(1, -1, 1), new Vector3(0, 1, 0), fColor),
 
-            //Position
-            gPosition = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, gPosition);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba16f, Width, Height, 0, PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, gPosition, 0);
+                new ColoredNormalVertex(LENGTH * new Vector3(-1, -1, -1), new Vector3(0, 1, 0), fColor),
+                new ColoredNormalVertex(LENGTH * new Vector3(1, -1, 1), new Vector3(0, 1, 0), fColor),
+                new ColoredNormalVertex(LENGTH * new Vector3(-1, -1, 1), new Vector3(0, 1, 0), fColor)
+            }, PrimitiveType.Triangles, BufferUsageHint.DynamicDraw);
 
-            //Normal
-            gNormal = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, gNormal);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba16f, Width, Height, 0, PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment1, TextureTarget.Texture2D, gNormal, 0);
-
-            //RGB + Spec
-            gColorSpec = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, gColorSpec);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment2, TextureTarget.Texture2D, gColorSpec, 0);
-
-
-            //Depth
-            gDepth = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, gDepth);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32f, Width, Height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, gDepth, 0);
-            
-            Attachments = new DrawBuffersEnum[3] { DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1, DrawBuffersEnum.ColorAttachment2 };
-            GL.DrawBuffers(Attachments.Length, Attachments);
+            DepthBuffer = new DepthBuffer(1024, 1024);
         }
 
+        float x = 5;
         public void RenderCube(CubeMesh cm)
         {
+            //Shadow pass
+            ShaderHandler.LoadProgram("shadow");
+
+            DepthBuffer.BindAndClear();
+            x += 0.01f;
+            SetShadowCam();
+
+            cm.BindAndDraw();
+            Camera.SetModelMatrix(new Vector3(0, 0, 0));
+            Camera.ApplyModelMatrix();
+            //Camera.ApplyMatrices();
+            Floor.BindAndDrawAll();
+
+            //Def pass 1
             ShaderHandler.LoadProgram("def");
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, gBuffer);
-            GL.ClearColor(0, 0, 0.3f, 1);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            //ShaderHandler.SetOrtoghonalViewMatrix(new Vector3(5, 7, 3), new Vector3(0, 0, 0), new Vector3(0, 0, 1),
+            //    10, 10, 1, 12);
 
             Camera.ApplyMatrices();
+            GBuffer.BindAndClear();
+            GL.Viewport(0, 0, Width, Height);
+
+            //Camera.ApplyMatrices();
             cm.BindAndDraw();
+            Camera.SetModelMatrix(new Vector3(0, 0, 0));
+            Camera.ApplyModelMatrix();
+
+            Floor.BindAndDrawAll();
 
             //Lighting pass
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            GL.ClearColor(0, 0.4f, 0, 0);
+            GL.ClearColor(1, 0, 1, 1);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, gPosition);
-            GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, gNormal);
-            GL.ActiveTexture(TextureUnit.Texture2);
-            GL.BindTexture(TextureTarget.Texture2D, gColorSpec);
+            ShaderHandler.SetCamPos(Camera.EyePos);
+
+            GBuffer.BindAsTextures();
+            DepthBuffer.BindAsTexture();
 
             ShaderHandler.LoadProgram("quad");
-
-            //Console.WriteLine(GL.GetError());
+            ShaderHandler.SetAmbientDirection(-new Vector3(-3, 5, 3));
+            SetShadowCam();
             Quad.BindAndDrawAll();
+        }
+
+        public void SetShadowCam()
+        {
+            ShaderHandler.SetOrtoghonalViewMatrix(new Vector3(-3, 5, 3), new Vector3(0, 0, 0), new Vector3(0, 0, 1),
+                20, 20, 1, 20);
         }
     }
 }

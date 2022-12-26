@@ -118,6 +118,11 @@ namespace CubeRenderer
 			ShaderHandler.SetProjectionViewMatrix(projectionMatrix, viewMatrix);
 		}
 
+		public static void ApplyModelMatrix()
+		{
+			ShaderHandler.SetModelMatrix(modelMatrix);
+		}
+
 		public static void SetModelMatrix(Vector3 offset)
 		{
 			modelMatrix.Offset = offset;

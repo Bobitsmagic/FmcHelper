@@ -802,7 +802,7 @@ namespace CubeAD
 			}
 			Console.WriteLine("Has max track size: " + correct);
 
-			//Checks whether this data set fullfills the mirror proberty (f(i) + f(i - n) = n)
+			//Checks whether this data set fullfills the mirror proberty (f(i) + f(n - i - 1) = n)
 			correct = true;
 			for (int j = 0; j < data.Length; j++)
 			{

@@ -282,49 +282,20 @@ We define the function $P_C: {0, dots, 3^8 - 1} times M -> {0, dots, 3^8 - 1}$. 
 *TODO*: Add extra modell to explain corner orientation function
 
 = Symmetries
-There are $48$ symmetries a $3$ by $3$ cube can have. We 
+There are $48$ symmetries a $3$ by $3$ cube can have. We define the set of faces or colors $F: {O, R, Y, W, B, G}$.
 
-#grid(
-  columns: (1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm), 
-  emptySquare, emptySquare, emptySquare, 
-  tile(w, ""),    tile(w, ""),   tile(w, ""),
-  emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(w, ""),   tile(w, "3"),    tile(w, ""),
-  emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(w, ""),    tile(w, ""),   tile(w, ""),
-  emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare,
-  
-  tile(o, ""),    tile(o, ""),    tile(o, ""),
-  tile(g, ""),    tile(g, ""),    tile(g, ""),
-  tile(r, ""),    tile(r, ""),    tile(r, ""),
-  tile(b, ""),    tile(b, ""),    tile(b, ""),
-  
-  tile(o, ""),    tile(o, "0"),    tile(o, ""),
-  tile(g, ""),    tile(g, "5"),    tile(g, ""),
-  tile(r, ""),    tile(r, "1"),    tile(r, ""),
-  tile(b, ""),    tile(b, "4"),    tile(b, ""),
-  
-  tile(o, ""),    tile(o, ""),   tile(o, ""),
-  tile(g, ""),    tile(g, ""),   tile(g, ""),
-  tile(r, ""),    tile(r, ""),   tile(r, ""),
-  tile(b, ""),    tile(b, ""),   tile(b, ""),
-  
-  emptySquare, emptySquare, emptySquare, 
-  tile(y, ""),    tile(y, ""),   tile(y, ""),
-  emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(y, ""),   tile(y, "2"),    tile(y, ""),
-  emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(y, ""),    tile(y, ""),   tile(y, ""),
-)
-
-Every symmetry is defined as a bijective function $S: {O, R, Y, W, B, G} -> {0, dots, 5}$ that maps faces of to other faces such that $forall i in {0, dots, 5}: f(S(i)) = S(f(i))$ with the flip function $ f: NN -> NN, x |-> cases(
-  x + 1 &"if" x "is even",
-  x - 1 &"if" x "is odd"
+Every symmetry is defined as a bijective function $S_i: F -> F$ for all $i in {0, ..., 47}$ that maps faces of to other faces such that $forall x in F: f(S_i(x)) = S_i(f(x))$ with the flip function $ f: F -> F, x |-> cases(
+  R &"if" x = O,
+  O &"if" x = R,
+  W &"if" x = Y,
+  Y &"if" x = W,
+  G &"if" x = B,
+  B &"if" x = G,
 ) $ that maps opposite sides to each other. 
 
-The amount of symmetries can be calculated counting the amount of possible functions $S$. For $S(0)$ there are $6$ possible sides to choose from. This also sets the value for $S(1)$. For $S(2)$ there are now $4$ sides left to choose from which also sets the value of $S(3)$. For $S(5)$ there are now only $2$ values to choose from such that $S$ keeps its bijectivity. So there are $6 dot.op 4 dot.op 2 = 48$ possible symmetries.
+The amount of symmetries follows from the $24$ orientations a cube can have and a factor of $2$ by adding a reflection to every one of them. 
 
-An example symmetry would be the reflectional symmetry along the X-Z-plane which maps yellow to white and vice versa:
+An example symmetry is the reflectional symmetry along the X-Z-plane which maps yellow to white and vice versa. In the following cube net the symmetry plane is shown.
 
 #let stroke_tile(color) = (
   square(fill: color, stroke: black, size:  1cm)[#line(start: (0%, 50%), end: (100%, 50%))]
@@ -363,13 +334,82 @@ An example symmetry would be the reflectional symmetry along the X-Z-plane which
   tile(y, ""),    tile(y, ""),   tile(y, ""),
 ).
 
-The corresponding function $S$ would be 
-$ S: x |-> cases(
-  3 &"if" x = 2,
-  2 &"if" x = 3,
+The corresponding function $S_2$ would be 
+$ S_2: x |-> cases(
+  W &"if" x = Y,
+  Y &"if" x = W,
   x &"otherwise"
 ) $
 .
+
+Tranforming a cube by a symmetry can be done in 3 diffrent ways.
+
+== Move symmetry
+If the scramble sequence $Q$ to a cube is known then the sequence $Q'$ where every move is transformed by the symmetry should result in the cube transformed by the symmetry.
+
+Every move on the a side $X in F$ gets transformed to a new face by the symmetry function $S_i$ and if the symmetry contains a reflection then the rotation direction is also reversed. 
+
+An example would be the T-perm:
+$ ("R ", "U ", "R'", "U'"), "R'", "F ", "R2", ("U'", "R'", "U'", "R "), "U ", "R'", "F'" $.
+Using the X-Z-plane reflection symmetry we defined before we can tranform  all moves as follows:
+$ ("R'", "D'", "R ", "D "), "R ", "F'", "R2", ("D ", "R ", "D ", "R'"), "D'", "R ", "F " $.
+Note that since we map white to yellow all $"U "$ and $"U'"$ moves are transformed to $"D'"$ and $"D "$ respectively. All other moves just get their rotation direction reversed except for $"R2"$ which stays the same. The following $2$ cube nets show the T-perm and its transformation performed on a solved cube.
+
+#let color_viewer(width, ..elements) = (
+  grid(
+    columns: (width, width, width, width, width, width, width, width, width, width, width, width), 
+    ..elements.pos().map(color => {
+      if color == none {
+        square(fill: none, stroke: none, size: width)
+      } else {
+        square(fill: color, stroke: black, size: width)
+      }
+    })
+  )
+)
+
+
+/* Template
+#color_viewer(0.5cm, 
+n, n, n,  w, w, w,  n, n, n,  n, n, n,
+n, n, n,  w, w, w,  n, n, n,  n, n, n,
+n, n, n,  w, w, w,  n, n, n,  n, n, n,
+o, o, o,  g, g, g,  r, r, r,  b, b, b,
+o, o, o,  g, g, g,  r, r, r,  b, b, b,
+o, o, o,  g, g, g,  r, r, r,  b, b, b,
+n, n, n,  y, y, y,  n, n, n,  n, n, n,
+n, n, n,  y, y, y,  n, n, n,  n, n, n,
+n, n, n,  y, y, y,  n, n, n,  n, n, n,
+)
+*/
+
+#color_viewer(0.6cm, 
+n, n, n,  w, w, w,  n, n, n,  n, n, n,
+n, n, n,  w, w, w,  n, n, n,  n, n, n,
+n, n, n,  w, w, w,  n, n, n,  n, n, n,
+o, r, o,  g, g, r,  b, o, g,  r, b, b,
+o, o, o,  g, g, g,  r, r, r,  b, b, b,
+o, o, o,  g, g, g,  r, r, r,  b, b, b,
+n, n, n,  y, y, y,  n, n, n,  n, n, n,
+n, n, n,  y, y, y,  n, n, n,  n, n, n,
+n, n, n,  y, y, y,  n, n, n,  n, n, n,
+)
+
+
+#color_viewer(0.6cm, 
+n, n, n,  w, w, w,  n, n, n,  n, n, n,
+n, n, n,  w, w, w,  n, n, n,  n, n, n,
+n, n, n,  w, w, w,  n, n, n,  n, n, n,
+o, o, o,  g, g, g,  r, r, r,  b, b, b,
+o, o, o,  g, g, g,  r, r, r,  b, b, b,
+o, r, o,  g, g, r,  b, o, g,  r, b, b,
+n, n, n,  y, y, y,  n, n, n,  n, n, n,
+n, n, n,  y, y, y,  n, n, n,  n, n, n,
+n, n, n,  y, y, y,  n, n, n,  n, n, n,
+)
+
+== Tile symmetry
+When working on a tile/sticker based representation of a cube a symmetry transformation can be performed by copying each tile to its position after applying the symmetry and then
 
 Corner state $P_C$, Symmetryfunction $S_C$:
 
@@ -377,15 +417,4 @@ $ P_C' = S_C^(-1) compose P_C compose S_C $
 
 *TODO* Edges, orientation, Test 
 
-#let color_viewer(..elements) = (
-  grid(
-    columns: (1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm), 
-    ..elements.pos().map(color => {
-      if color == none {
-        rect(fill: none, stroke: none, height: 1cm, width: 1cm)
-      } else {
-        rect(fill: color, stroke: black, height: 1cm, width: 1cm)
-      }
-    })
-  )
-)
+

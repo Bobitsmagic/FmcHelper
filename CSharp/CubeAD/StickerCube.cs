@@ -521,6 +521,75 @@ namespace CubeAD
 
 			return s + "\n";
 		}
+		public string PrintTypstView()
+		{
+			string s = "#grid(\ncolumns:(";
+			for (int i = 0; i < 11; i++)
+				s += "1cm, ";
+			s += "1cm)\n";
+
+            for (int y = 0; y < 3; y++)
+            {
+				for (int i = 0; i < 3; i++)
+					s += "n, ";
+				
+                for (int x = 0; x < 3; x++)
+                {
+                    if (x == 1 && y == 1)
+                        s += "w";
+                    else
+                        s += Sides[BACK][x, y].ToString()[0];
+
+                    s += x == 2 ? "|" : " ";
+                }
+
+                s += "\n";
+            }
+
+            s += new string('-', (3 * 2) * 4) + "\n";
+            int[] Indices = { 0, 3, 1, 2 };
+            for (int y = 0; y < 3; y++)
+            {
+                for (int i = 0; i < Indices.Length; i++)
+                {
+                    for (int x = 0; x < 3; x++)
+                    {
+                        if (x == 1 && y == 1)
+                            s += ((CubeColor)Indices[i]).ToString()[0];
+                        else
+                            s += Sides[Indices[i]][x, y].ToString()[0];
+
+                        s += x == 2 ? "|" : " ";
+                    }
+
+
+                }
+
+                s += "\n";
+            }
+            s += new string('-', (3 * 2) * 4) + "\n";
+
+            for (int y = 0; y < 3; y++)
+            {
+                s += new string(' ', 3 * 2 - 1) + "|";
+                for (int x = 0; x < 3; x++)
+                {
+                    if (x == 1 && y == 1)
+                        s += CubeColor.Green.ToString()[0];
+                    else
+                        s += Sides[FRONT][x, y].ToString()[0];
+
+                    s += x == 2 ? "|" : " ";
+                }
+
+                s += "\n";
+            }
+            s += new string(' ', 3 * 2 - 1) + new string('-', 3 * 2 + 1);
+
+            s += ")";
+
+			return s;
+		}
 
 		/// <summary>
 		/// Prints a colored side view of this <see cref="StickerCube"/> to the console

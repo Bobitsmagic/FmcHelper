@@ -24,82 +24,39 @@ namespace FmcSolver
 //17025
 		static void Main(string[] args)
 		{
-            Console.WriteLine(SymmetryElement.Elements[0].ToString());
+			ArrayCube cube = new ArrayCube();
+			ArrayCube superFLip = new ArrayCube();
+			foreach(var move in MoveSequenz.SuperFlip.Moves)
+			{
+				superFLip.MakeMove(move);
+			}
+			
+            for(int x = 0; x < 6; x++)
+			{
+				for(int y = 0; y < 6; y++)
+				{
+					if (x / 2 == y / 2)
+						continue;
 
-            List<MoveSequenz> visited = new List<MoveSequenz>();
+					if (cube.GetEdgeColor(x, y) != (CubeColor)x)
+                        Console.WriteLine("Alarm");
 
-            visited.Add(new MoveSequenz(0));
+                    if (superFLip.GetEdgeColor(x, y) != (CubeColor)y)
+                        Console.WriteLine("Superflip Alarm");
 
-            List<MoveSequenz> openlist = new List<MoveSequenz>() { new MoveSequenz(0) };
-            List<MoveSequenz> nextList = new List<MoveSequenz>();
-            MoveSequenz list = new MoveSequenz();
-
-            for(int i = 0; i < 5; i++)
-            {
-                Console.WriteLine(string.Join("\n", openlist.Count));
-                nextList.Clear();
-
-                int counter = 0;
-                foreach(var ms in openlist)
-                {
-                    MoveBlocker mb = new MoveBlocker();
-                    foreach (CubeMove cm in ms.Moves)
-                        mb.UpdateBlockedSoft(cm);
-
-                    if(counter++ % 100 == 0)
-                    {
-                        Console.WriteLine(counter);
-                    }
-                    for (int m = 0; m < 18; m++)
-                    {
-                        if (mb[(CubeMove)m])
-                            continue;
-                        list.Moves.Clear();
-                        list.Moves.AddRange(ms.Moves);
-                        list.Moves.Add((CubeMove)m);
-                        int count = list.Count;
-                        list.Reduce();
-                        if (list.Count < count) continue;
-
-                        bool res = true;
-                        foreach(var seq in visited)
-                        {
-                            if (list.EqualOverSymmetry(seq))
-                            {
-                                res = false;
-                                break;
-                            }
+					for(int z = 0; z < 6; z++)
+					{
+						if (x / 2 == z / 2 || y / 2 == z / 2)
+							continue;
+						if (superFLip.GetCornerColor(x, y, z) != (CubeColor)x)
+						{
+                            Console.WriteLine("Corner Alarm");
                         }
 
-                        if(res)
-                        {
-                            visited.Add(new MoveSequenz(list));
-                            nextList.Add(new MoveSequenz(list));
-                        }
+					}
 
-                    }    
                 }
-
-                (nextList, openlist) = (openlist, nextList);
-
-                Console.WriteLine( "######################");
-            }
-            Console.WriteLine(string.Join("\n", openlist.Count));
-
-
-            //Random rnd = new Random(0);
-
-            //checking f(f^-1(x)) = x
-            //StickerCube stickerCube = new StickerCube();
-            //for (int i = 0; i < 1000; i++)
-            //{
-            //	stickerCube.MakeMove((CubeMove)rnd.Next(18));
-            //	Console.WriteLine("Exptected: ");
-            //	stickerCube.PrintSideView();
-            //	Console.WriteLine("Res: ");
-            //	(new IndexCube(stickerCube)).GetCube().PrintSideView();
-            //}
-
+			}
 
             Console.WriteLine("\nDone");
 			Console.ReadLine();

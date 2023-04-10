@@ -4,7 +4,7 @@
 	{
 		Orange, Red,
 		Yellow, White,
-		Green, Blue,
+		Blue, Green,
 		None
 	}
 
@@ -17,8 +17,8 @@
 		R, R2, RP,
 		D, D2, DP,
 		U, U2, UP,
-		F, F2, FP,
 		B, B2, BP,
+		F, F2, FP,
 		None
 	}
 }

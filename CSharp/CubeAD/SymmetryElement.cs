@@ -128,10 +128,10 @@ namespace CubeAD
 				}
 			}
 
-			for (int i = 0; i < ORDER; i++)
-			{
-				MultGroupIndices[i] = Elements[i].GenerateMultGroup().Select(x => x.Index).ToArray();
-			}
+			//for (int i = 0; i < ORDER; i++)
+			//{
+			//	MultGroupIndices[i] = Elements[i].GenerateMultGroup().Select(x => x.Index).ToArray();
+			//}
 		}
 
 		public CubeColor this[int i]
@@ -142,7 +142,7 @@ namespace CubeAD
 				{
 					0 => Orange,
 					1 => Yellow,
-					2 => Green,
+					2 => Blue,
 					_ => CubeColor.None,
 				};
 			}
@@ -152,12 +152,12 @@ namespace CubeAD
 				{
 					case 0: Orange = value; break;
 					case 1: Yellow = value; break;
-					case 2: Green = value; break;
+					case 2: Blue = value; break;
 				}
 			}
 		}
 
-		public bool IsIdentity => Orange == CubeColor.Orange && Yellow == CubeColor.Yellow && Green == CubeColor.Green;
+		public bool IsIdentity => Orange == CubeColor.Orange && Yellow == CubeColor.Yellow && Blue == CubeColor.Blue;
 
 		public int Index
 		{
@@ -169,7 +169,7 @@ namespace CubeAD
 						: ((int)Orange < 4
 							? ((int)Yellow >> 1) | ((int)Yellow & 1)
 							: (int)Yellow)) * 2 +
-					((int)Green & 1);
+					((int)Blue & 1);
 			}
 		}
 
@@ -184,13 +184,13 @@ namespace CubeAD
 			}
 		}
 
-		public CubeColor Orange, Yellow, Green;
+		public CubeColor Orange, Yellow, Blue;
 
 		public SymmetryElement(CubeColor orange, CubeColor yellow, CubeColor green)
 		{
 			Orange = orange;
 			Yellow = yellow;
-			Green = green;
+			Blue = green;
 		}
 
 		public CubeColor TransformColor(CubeColor c)
@@ -257,7 +257,7 @@ namespace CubeAD
 
 		public static SymmetryElement operator *(SymmetryElement a, SymmetryElement b)
 		{
-			return new SymmetryElement(b.TransformColor(a.Orange), b.TransformColor(a.Yellow), b.TransformColor(a.Green));
+			return new SymmetryElement(b.TransformColor(a.Orange), b.TransformColor(a.Yellow), b.TransformColor(a.Blue));
 		}
 
 		public static bool operator ==(SymmetryElement a, SymmetryElement b)
@@ -274,12 +274,12 @@ namespace CubeAD
 			return obj is SymmetryElement element &&
 				   Orange == element.Orange &&
 				   Yellow == element.Yellow &&
-				   Green == element.Green;
+				   Blue == element.Blue;
 		}
 
 		public override int GetHashCode()
 		{
-			return HashCode.Combine(Orange, Yellow, Green);
+			return HashCode.Combine(Orange, Yellow, Blue);
 		}
 
 		public int CompareTo([AllowNull] SymmetryElement other)
@@ -290,12 +290,12 @@ namespace CubeAD
 			if (Yellow != other.Yellow)
 				return Yellow.CompareTo(other.Yellow);
 
-			return Green.CompareTo(other.Green);
+			return Blue.CompareTo(other.Blue);
 		}
 
 		public override string ToString()
 		{
-			return Orange + " " + Yellow + " " + Green;
+			return Orange + " " + Yellow + " " + Blue;
 		}
 	}
 }

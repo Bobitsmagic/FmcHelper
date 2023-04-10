@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 
 namespace CubeAD
 {
@@ -38,6 +39,10 @@ namespace CubeAD
 		public MoveSequenz(params CubeMove[] cm)
 		{
 			Moves = cm.ToList();
+		}
+		public MoveSequenz(MoveSequenz src)
+		{
+			Moves = src.Moves.ToList();
 		}
 
 		/// <summary>
@@ -114,6 +119,7 @@ namespace CubeAD
 
 			do
 			{
+				reduced = false;
 				for(int i = 0; i < Moves.Count - 1; i++)
 				{
 					int v1 = (int)Moves[i];
@@ -121,15 +127,17 @@ namespace CubeAD
 
 					if (v1 / 3 == v2 / 3)
 					{
-						if((v1 % 3) + (v2 % 3) == 4)
+						if((v1 % 3) + (v2 % 3) == 2)
 						{
 							Moves.RemoveRange(i, 2);
+							reduced = true;
 							break;
 						}
 						else
 						{
 							Moves.RemoveAt(i);
 							Moves[i] = (CubeMove)((v1 % 3) + (v2 % 3) + (v1 / 3));
+							reduced = true;
 						}
 					}
 				}
@@ -147,6 +155,31 @@ namespace CubeAD
 		{
 			int val = (int)m;
 			return (CubeMove)(val - val % 3 + (2 * val + 2) % 3); 
+		}
+
+		public bool EqualOverSymmetry(MoveSequenz other)
+		{
+			if (Count != other.Count)
+				return false;
+
+			foreach(var se in SymmetryElement.Elements)
+			{
+				MoveSequenz c = other.Rotate(se);
+
+				bool res = true;
+				for(int i = 0; i < Count; i++)
+				{
+					if (Moves[i] != c.Moves[i])
+					{
+						res = false;
+						break;
+					}
+				}
+
+				if (res) return true;
+			}
+
+			return false;
 		}
 
 		public override string ToString()

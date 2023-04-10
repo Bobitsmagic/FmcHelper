@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,6 +58,7 @@ namespace CubeAD
                 }
 
                 int[] buffer = template.ToArray();
+
                 MoveArray[side * 3 + 0] = template.ToArray();
 
                 for (int i = 0; i < template.Length; i++)
@@ -86,9 +88,10 @@ namespace CubeAD
             Array.Copy(Data, ArrayBuffer, TILE_COUNT);
 
             int[] move = MoveArray[(int)cm];
+
             for(int i = 0; i < TILE_COUNT; i++)
             {
-                Data[i] = ArrayBuffer[move[i]];
+                Data[move[i]] = ArrayBuffer[i];
             }
         }
 
@@ -102,7 +105,7 @@ namespace CubeAD
 
             string s = "#color_viewer(0.6cm,\n";
             
-            for (int y = 0; y < 3; y++)
+            for (int y = 3 - 1; y >= 0; y--)
             {
                 for (int i = 0; i < 3; i++)
                     s += "n, ";
@@ -117,7 +120,7 @@ namespace CubeAD
 
                 s += "\n";
             }
-            for(int y = 0; y < 3; y++)
+            for(int y = 3 - 1; y >= 0; y--)
             {
                 for(int i = 0; i < sides.Length; i++)
                 {
@@ -130,7 +133,7 @@ namespace CubeAD
                 s += "\n";
             }
 
-            for (int y = 0; y < 3; y++)
+            for (int y = 3 - 1; y >= 0; y--)
             {
                 for (int i = 0; i < 3; i++)
                     s += "n, ";

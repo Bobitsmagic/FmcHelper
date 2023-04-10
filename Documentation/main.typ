@@ -20,6 +20,19 @@
   square(fill: color, stroke: black, size:  1cm)[#set align(center); #set align(horizon); #text]
 )
 
+#let color_viewer(width, ..elements) = (
+  grid(
+    columns: (width, width, width, width, width, width, width, width, width, width, width, width), 
+    ..elements.pos().map(color => {
+      if color == none {
+        square(fill: none, stroke: none, size: width)
+      } else {
+        square(fill: color, stroke: black, size: width)
+      }
+    })
+  )
+)
+
 = Faces
 We define the set of faces or colors $cal(F): {O, R, Y, W, B, G}$.
 
@@ -72,10 +85,17 @@ Flip function $ f: F -> F, x |-> cases(
 ).
 
 = Sticker cube
-We use 2 functions to store the state of a cube. The first function stores the state of all edges and the second function the state of all corners. First we define the set of edges $cal(E) subset F^2$. There are $12$ pairs in $F^2$ that are not valid edges. Those edges either have the form  $(X, X), X in F$ or $(X, f(X)), X in F$ where $X$ and $Y$ are opposite faces. The set of corners is defined es $cal(C) subset F^3$. All edges that contain the same color multiple times or colors of opposite sides are not valid. For every state $i in {0, dots, 2^12 dot.op 12! dot.op 3^8 dot.op 8! - 1}$ of the cube we define the bijective function 
-$ f_i: cal(E) union cal(C) -> cal(E) union cal(E) $
-that maps faces to faces.
+We use 2 functions to store the state of a cube. The first function stores the state of all edges and the second function the state of all corners. First we define the set of edges $cal(E) subset F^2$. There are $12$ pairs in $F^2$ that are not valid edges. Those edges either have the form  $(X, X), X in F$ or $(X, f(X)), X in F$ where $X$ and $Y$ are opposite faces. The set of corners is defined es $cal(C) subset F^3$. All edges that contain the same color multiple times or colors of opposite sides are not valid. For every state $i in {0, dots, 2^12 dot.op 12! dot.op 3^8 dot.op 8! - 1}$ of the cube we define the function 
+$ f_i: cal(E) union cal(C) -> F $
+that return the colors on a specific edge or corner. Now there are a few restrictions that this function has to follow: 
+*TODO* add is edge contraint, is corner constraint, permut corner constraint
+- $forall (a, b), in cal(E): (a, b) |-> f  (b, a) |-> (y, x)$
+- $forall (a, b, c),  (x, y, z) in cal(C): (a, b, c) |-> (x, y, z) <=> 
+(a, c, b) |-> (x, z, y) <=> dots $ for all 6 permuations 
+. In a solved cube the function $f_0$ would be defined as follows $f_0: (a, b) |-> a, (a, b, c) |-> a$ for all $a, b, c in F$ 
 
+
+the identity function. 
 
 = IndexCube
 We are in need of class that represents a 3 by 3 rubiks cube. The IndexCube stores the permuation and orientation state of the corners and edges seperately.
@@ -89,7 +109,6 @@ $ mat(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11;
 x_0, x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9, x_10, x_11) $. 
 
 Every edge has to correspond to an index between 0 and 11 now. We sort the edges by their X, Y and Z components on a right handed coordinate system with the green facing towards positive Z and white facing towards positive Y. In the following cube net the resulting indices can be seen. 
-
 
 //Solved edges with indices
 #grid(
@@ -213,7 +232,7 @@ We can now define
 
 $ f_"X ": i |->  cases(
   12! - f_"X "(12! - i - 1) &"if" i >= frac(12!, 2),
-  g_"X "(floor(frac(i, T_"X ")) mod L_"X ")) &"otherwise"
+  g_"X "(floor(frac(i mod L_"X ", T_"X "))) &"otherwise"
 ) $ 
 
 where for all $i in {0, dots, 12! - 1}$
@@ -400,18 +419,7 @@ Using the X-Z-plane reflection symmetry we defined before we can tranform  all m
 $ "F'", "R'", "D'", "R ", "D ", "F " $.
 Note that since we map white to yellow all $"U "$ and $"U'"$ moves are transformed to $"D'"$ and $"D "$ respectively. All other moves just get their rotation direction reversed except for $"R2"$ which stays the same. The following $2$ cube nets show the OLL-45 algorithm and its transformed version performed on a solved cube.
 
-#let color_viewer(width, ..elements) = (
-  grid(
-    columns: (width, width, width, width, width, width, width, width, width, width, width, width), 
-    ..elements.pos().map(color => {
-      if color == none {
-        square(fill: none, stroke: none, size: width)
-      } else {
-        square(fill: color, stroke: black, size: width)
-      }
-    })
-  )
-)
+
 
 
 /* Template
@@ -453,268 +461,21 @@ n, n, n,  y, y, g,  n, n, n,  n, n, n,
 n, n, n,  y, y, o,  n, n, n,  n, n, n,
 )
 
-== Tile symmetry
-When working on a tile/sticker based representation of a cube a symmetry transformation can be performed by copying each tile to its position after applying the symmetry and then applying the symmetry function $S_i$ on its color.
+== Sticker symmetry
+When working on a sticker based representation of a cube, a symmetry transformation can be performed by copying each tile to its position after applying the symmetry and then applying the symmetry function $S_i$ on its color.
 
-In the previous example we can see that in the top cube the blue-white edge at position $(W, G)$ or index $7$ gets transformed to the position $(S_2(W), S_2(G)) = (Y, G)$ with index $5$ and after its colors $(B, W)$ are transformed as well $(S_2(B), S_2(W)) = (B, Y)$. This has to be done for tile. 
+In the previous example we can see that in the top cube the blue-white edge at position $(W, G)$ gets transformed to the position $(S_2(W), S_2(G)) = (Y, G)$ and after its colors $(B, W)$ are transformed as well $(S_2(B), S_2(W)) = (B, Y)$. This has to be done for tile. Formaly this can be written by using the function $f$ defining the state of a sticker cube.
+The new state $f_s$ of the cube after applying the symmetry $S_i$ on the state $f_j$ is defined as follows:
+$ f_s: (S_i(a), S_i(b)) |-> (S_i(f_j(a, b)), S_i(f_j(b, a))) $
+$ f_s: (S_i(x), S_i(y), S_i(z)) |-> (S_i(f_j(x, y, z)), S_i(f_j(y, x, z)), S_i(f_j(z, x, y))) $
+for all $(a, b) in cal(E)$ and $(x, y, z) in cal(C)$. 
 
-Corner state $P_C$, Symmetryfunction $S_C$:
+\* Magic proof that shows that both definitions of a symmetry transformation are equivalent \*
 
-$ P_C' = S_C^(-1) compose P_C compose S_C $
+== Index symmetry
+When working with a IndexCube representation the symmetry transformation is diffrent for permutation and orientation state.
 
 *TODO* Edges, orientation, Test 
-*TODO* Sticker cube defined by colors $F^2 -> F^2$ for edges and $F^3 -> F^3$ for corners. Distinguish pos and color by $(,,)$ and $[,,]$
 
-#pagebreak()
-
-#color_viewer(0.6cm,
-n, n, n, w, w, w, n, n, n, n, n, n,
-n, n, n, w, w, w, n, n, n, n, n, n,
-n, n, n, w, w, w, n, n, n, n, n, n,
-o, o, o, g, g, g, r, r, r, b, b, b,
-o, o, o, g, g, g, r, r, r, b, b, b,
-o, o, o, g, g, g, r, r, r, b, b, b,
-n, n, n, y, y, y, n, n, n, n, n, n,
-n, n, n, y, y, y, n, n, n, n, n, n,
-n, n, n, y, y, y, n, n, n, n, n, n,
-)
-U
-#color_viewer(0.6cm,
-n, n, n, w, w, w, n, n, n, n, n, n,
-n, n, n, w, w, w, n, n, n, n, n, n,
-n, n, n, w, w, w, n, n, n, n, n, n,
-g, g, g, r, r, r, b, b, b, o, o, o,
-o, o, o, g, g, g, r, r, r, b, b, b,
-o, o, o, g, g, g, r, r, r, b, b, b,
-n, n, n, y, y, y, n, n, n, n, n, n,
-n, n, n, y, y, y, n, n, n, n, n, n,
-n, n, n, y, y, y, n, n, n, n, n, n,
-)
-R2
-#color_viewer(0.6cm,
-n, n, n, w, w, y, n, n, n, n, n, n,
-n, n, n, w, w, y, n, n, n, n, n, n,
-n, n, n, w, w, y, n, n, n, n, n, n,
-g, g, g, r, r, b, r, r, r, g, o, o,
-o, o, o, g, g, b, r, r, r, g, b, b,
-o, o, o, g, g, o, b, b, b, r, b, b,
-n, n, n, y, y, w, n, n, n, n, n, n,
-n, n, n, y, y, w, n, n, n, n, n, n,
-n, n, n, y, y, w, n, n, n, n, n, n,
-)
-F
-#color_viewer(0.6cm,
-n, n, n, b, r, r, n, n, n, n, n, n,
-n, n, n, w, w, y, n, n, n, n, n, n,
-n, n, n, w, w, y, n, n, n, n, n, n,
-g, g, w, g, g, r, y, r, r, g, o, o,
-o, o, w, g, g, r, y, r, r, g, b, b,
-o, o, y, o, b, b, w, b, b, r, b, b,
-n, n, n, y, y, w, n, n, n, n, n, n,
-n, n, n, y, y, w, n, n, n, n, n, n,
-n, n, n, o, o, g, n, n, n, n, n, n,
-)
-B
-#color_viewer(0.6cm,
-n, n, n, b, r, r, n, n, n, n, n, n,
-n, n, n, w, w, y, n, n, n, n, n, n,
-n, n, n, g, o, o, n, n, n, n, n, n,
-w, g, w, g, g, r, y, r, y, r, g, g,
-y, o, w, g, g, r, y, r, w, b, b, o,
-y, o, y, o, b, b, w, b, w, b, b, o,
-n, n, n, r, r, b, n, n, n, n, n, n,
-n, n, n, y, y, w, n, n, n, n, n, n,
-n, n, n, o, o, g, n, n, n, n, n, n,
-)
-R
-#color_viewer(0.6cm,
-n, n, n, b, r, b, n, n, n, n, n, n,
-n, n, n, w, w, b, n, n, n, n, n, n,
-n, n, n, g, o, r, n, n, n, n, n, n,
-w, g, w, g, g, r, w, y, y, g, g, g,
-y, o, w, g, g, y, b, r, r, w, b, o,
-y, o, y, o, b, o, w, w, y, b, b, o,
-n, n, n, r, r, r, n, n, n, n, n, n,
-n, n, n, y, y, r, n, n, n, n, n, n,
-n, n, n, o, o, b, n, n, n, n, n, n,
-)
-B2
-#color_viewer(0.6cm,
-n, n, n, b, r, b, n, n, n, n, n, n,
-n, n, n, w, w, b, n, n, n, n, n, n,
-n, n, n, r, r, r, n, n, n, n, n, n,
-y, g, w, g, g, r, w, y, y, o, b, b,
-r, o, w, g, g, y, b, r, y, o, b, w,
-y, o, y, o, b, o, w, w, w, g, g, g,
-n, n, n, r, o, g, n, n, n, n, n, n,
-n, n, n, y, y, r, n, n, n, n, n, n,
-n, n, n, o, o, b, n, n, n, n, n, n,
-)
-R
-#color_viewer(0.6cm,
-n, n, n, b, r, g, n, n, n, n, n, n,
-n, n, n, w, w, o, n, n, n, n, n, n,
-n, n, n, r, r, o, n, n, n, n, n, n,
-y, g, w, g, g, b, w, b, w, b, b, b,
-r, o, w, g, g, b, w, r, y, r, b, w,
-y, o, y, o, b, r, w, y, y, g, g, g,
-n, n, n, r, o, r, n, n, n, n, n, n,
-n, n, n, y, y, y, n, n, n, n, n, n,
-n, n, n, o, o, o, n, n, n, n, n, n,
-)
-U2
-#color_viewer(0.6cm,
-n, n, n, b, r, g, n, n, n, n, n, n,
-n, n, n, w, w, o, n, n, n, n, n, n,
-n, n, n, r, r, o, n, n, n, n, n, n,
-w, b, w, b, b, b, y, g, w, g, g, b,
-r, o, w, g, g, b, w, r, y, r, b, w,
-y, o, y, o, b, r, w, y, y, g, g, g,
-n, n, n, o, o, o, n, n, n, n, n, n,
-n, n, n, y, y, y, n, n, n, n, n, n,
-n, n, n, r, o, r, n, n, n, n, n, n,
-)
-L
-#color_viewer(0.6cm,
-n, n, n, b, r, g, n, n, n, n, n, n,
-n, n, n, g, w, o, n, n, n, n, n, n,
-n, n, n, o, r, o, n, n, n, n, n, n,
-y, r, w, o, b, b, y, g, w, g, g, r,
-o, o, b, y, g, b, w, r, y, r, b, w,
-y, w, w, r, b, r, w, y, y, g, g, b,
-n, n, n, g, o, o, n, n, n, n, n, n,
-n, n, n, w, y, y, n, n, n, n, n, n,
-n, n, n, b, o, r, n, n, n, n, n, n,
-)
-B2
-#color_viewer(0.6cm,
-n, n, n, b, r, g, n, n, n, n, n, n,
-n, n, n, g, w, o, n, n, n, n, n, n,
-n, n, n, o, o, g, n, n, n, n, n, n,
-y, r, w, o, b, b, y, g, y, b, g, g,
-y, o, b, y, g, b, w, r, o, w, b, r,
-w, w, w, r, b, r, w, y, y, r, g, g,
-n, n, n, o, r, o, n, n, n, n, n, n,
-n, n, n, w, y, y, n, n, n, n, n, n,
-n, n, n, b, o, r, n, n, n, n, n, n,
-)
-R
-#color_viewer(0.6cm,
-n, n, n, b, r, r, n, n, n, n, n, n,
-n, n, n, g, w, w, n, n, n, n, n, n,
-n, n, n, o, o, b, n, n, n, n, n, n,
-y, r, w, o, b, g, w, w, y, r, g, g,
-y, o, b, y, g, o, y, r, g, y, b, r,
-w, w, w, r, b, g, y, o, y, o, g, g,
-n, n, n, o, r, b, n, n, n, n, n, n,
-n, n, n, w, y, b, n, n, n, n, n, n,
-n, n, n, b, o, r, n, n, n, n, n, n,
-)
-UP
-#color_viewer(0.6cm,
-n, n, n, b, r, r, n, n, n, n, n, n,
-n, n, n, g, w, w, n, n, n, n, n, n,
-n, n, n, o, o, b, n, n, n, n, n, n,
-r, g, g, y, r, w, o, b, g, w, w, y,
-y, o, b, y, g, o, y, r, g, y, b, r,
-w, w, w, r, b, g, y, o, y, o, g, g,
-n, n, n, b, b, r, n, n, n, n, n, n,
-n, n, n, r, y, o, n, n, n, n, n, n,
-n, n, n, o, w, b, n, n, n, n, n, n,
-)
-DP
-#color_viewer(0.6cm,
-n, n, n, r, w, b, n, n, n, n, n, n,
-n, n, n, r, w, o, n, n, n, n, n, n,
-n, n, n, b, g, o, n, n, n, n, n, n,
-r, g, g, y, r, w, o, b, g, w, w, y,
-y, o, b, y, g, o, y, r, g, y, b, r,
-r, b, g, y, o, y, o, g, g, w, w, w,
-n, n, n, b, b, r, n, n, n, n, n, n,
-n, n, n, r, y, o, n, n, n, n, n, n,
-n, n, n, o, w, b, n, n, n, n, n, n,
-)
-R2
-#color_viewer(0.6cm,
-n, n, n, r, w, r, n, n, n, n, n, n,
-n, n, n, r, w, o, n, n, n, n, n, n,
-n, n, n, b, g, b, n, n, n, n, n, n,
-r, g, g, y, r, w, g, g, o, y, w, y,
-y, o, b, y, g, y, g, r, y, o, b, r,
-r, b, g, y, o, w, g, b, o, w, w, w,
-n, n, n, b, b, b, n, n, n, n, n, n,
-n, n, n, r, y, o, n, n, n, n, n, n,
-n, n, n, o, w, o, n, n, n, n, n, n,
-)
-F
-#color_viewer(0.6cm,
-n, n, n, g, g, g, n, n, n, n, n, n,
-n, n, n, r, w, o, n, n, n, n, n, n,
-n, n, n, b, g, b, n, n, n, n, n, n,
-r, g, r, y, y, y, o, g, o, y, w, y,
-y, o, w, o, g, r, w, r, y, o, b, r,
-r, b, r, w, y, w, o, b, o, w, w, w,
-n, n, n, b, b, b, n, n, n, n, n, n,
-n, n, n, r, y, o, n, n, n, n, n, n,
-n, n, n, g, b, g, n, n, n, n, n, n,
-)
-RP
-#color_viewer(0.6cm,
-n, n, n, g, g, y, n, n, n, n, n, n,
-n, n, n, r, w, r, n, n, n, n, n, n,
-n, n, n, b, g, w, n, n, n, n, n, n,
-r, g, r, y, y, b, o, y, o, b, w, y,
-y, o, w, o, g, o, g, r, b, o, b, r,
-r, b, r, w, y, g, o, w, o, g, w, w,
-n, n, n, b, b, w, n, n, n, n, n, n,
-n, n, n, r, y, o, n, n, n, n, n, n,
-n, n, n, g, b, y, n, n, n, n, n, n,
-)
-L
-#color_viewer(0.6cm,
-n, n, n, y, g, y, n, n, n, n, n, n,
-n, n, n, o, w, r, n, n, n, n, n, n,
-n, n, n, w, g, w, n, n, n, n, n, n,
-r, y, r, b, y, b, o, y, o, b, w, b,
-b, o, g, r, g, o, g, r, b, o, b, r,
-r, w, r, g, y, g, o, w, o, g, w, g,
-n, n, n, w, b, w, n, n, n, n, n, n,
-n, n, n, r, y, o, n, n, n, n, n, n,
-n, n, n, y, b, y, n, n, n, n, n, n,
-)
-B2
-#color_viewer(0.6cm,
-n, n, n, y, g, y, n, n, n, n, n, n,
-n, n, n, o, w, r, n, n, n, n, n, n,
-n, n, n, w, b, w, n, n, n, n, n, n,
-o, y, r, b, y, b, o, y, r, g, w, g,
-b, o, g, r, g, o, g, r, b, r, b, o,
-o, w, r, g, y, g, o, w, r, b, w, b,
-n, n, n, w, g, w, n, n, n, n, n, n,
-n, n, n, r, y, o, n, n, n, n, n, n,
-n, n, n, y, b, y, n, n, n, n, n, n,
-)
-U2
-#color_viewer(0.6cm,
-n, n, n, y, g, y, n, n, n, n, n, n,
-n, n, n, o, w, r, n, n, n, n, n, n,
-n, n, n, w, b, w, n, n, n, n, n, n,
-o, y, r, g, w, g, o, y, r, b, y, b,
-b, o, g, r, g, o, g, r, b, r, b, o,
-o, w, r, g, y, g, o, w, r, b, w, b,
-n, n, n, y, b, y, n, n, n, n, n, n,
-n, n, n, o, y, r, n, n, n, n, n, n,
-n, n, n, w, g, w, n, n, n, n, n, n,
-)
-F2
-#color_viewer(0.6cm,
-n, n, n, w, g, w, n, n, n, n, n, n,
-n, n, n, o, w, r, n, n, n, n, n, n,
-n, n, n, w, b, w, n, n, n, n, n, n,
-o, y, o, g, y, g, r, y, r, b, y, b,
-b, o, g, o, g, r, g, r, b, r, b, o,
-o, w, o, g, w, g, r, w, r, b, w, b,
-n, n, n, y, b, y, n, n, n, n, n, n,
-n, n, n, o, y, r, n, n, n, n, n, n,
-n, n, n, y, g, y, n, n, n, n, n, n,
-)
+Corner state $P_C$, Symmetryfunction $S_C$:
+$ P_C' = S_C^(-1) compose P_C compose S_C $

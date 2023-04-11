@@ -22,7 +22,7 @@
 
 #let color_viewer(width, ..elements) = (
   grid(
-    columns: (width, width, width, width, width, width, width, width, width, width, width, width), 
+    columns: (width, width, width + 0.1cm, width, width, width + 0.1cm, width, width, width + 0.1cm, width, width, width), 
     ..elements.pos().map(color => {
       if color == none {
         square(fill: none, stroke: none, size: width)
@@ -480,26 +480,45 @@ When working with a IndexCube representation the symmetry transformation is diff
 Corner state $P_C$, Symmetryfunction $S_C$:
 $ P_C' = S_C^(-1) compose P_C compose S_C $
 
+#pagebreak()
+
+U2 R' B2 D2 U2 F2 L' U2 L2 R F' L' U' B U2 F D' F R B'
+0 1 2 3 4 5 6 7 8 9 10 11
+1 9 3 10 7 5 11 2 0 4 6 8
+8 0 7 2 9 5 10 4 11 1 3 6
 #color_viewer(0.6cm,
-n, n, n, b, w, w, n, n, n, n, n, n,
-n, n, n, b, w, w, n, n, n, n, n, n,
-n, n, n, b, w, w, n, n, n, n, n, n,
-o, o, o, w, g, g, r, r, r, b, b, y,
-o, o, o, w, g, g, r, r, r, b, b, y,
-o, o, o, w, g, g, r, r, r, b, b, y,
-n, n, n, g, y, y, n, n, n, n, n, n,
-n, n, n, g, y, y, n, n, n, n, n, n,
-n, n, n, g, y, y, n, n, n, n, n, n,
+n, n, n, g, g, o, n, n, n, n, n, n,
+n, n, n, o, w, w, n, n, n, n, n, n,
+n, n, n, g, r, y, n, n, n, n, n, n,
+w, y, o, y, b, r, g, r, g, w, o, r,
+g, o, b, o, g, r, y, r, b, w, b, r,
+b, b, o, b, w, y, r, y, w, b, w, y,
+n, n, n, w, o, b, n, n, n, n, n, n,
+n, n, n, y, y, g, n, n, n, n, n, n,
+n, n, n, o, g, r, n, n, n, n, n, n,
 )
-Sym:
+B R' F' D F' U2 B' U L F R' L2 U2 L F2 U2 D2 B2 R U2
+8 0 7 2 9 5 10 4 11 1 3 6
 #color_viewer(0.6cm,
+n, n, n, y, b, r, n, n, n, n, n, n,
 n, n, n, g, w, w, n, n, n, n, n, n,
-n, n, n, g, w, w, n, n, n, n, n, n,
-n, n, n, g, w, w, n, n, n, n, n, n,
-o, o, o, y, g, g, r, r, r, b, b, w,
-o, o, o, y, g, g, r, r, r, b, b, w,
-o, o, o, y, g, g, r, r, r, b, b, w,
-n, n, n, b, y, y, n, n, n, n, n, n,
-n, n, n, b, y, y, n, n, n, n, n, n,
-n, n, n, b, y, y, n, n, n, n, n, n,
+n, n, n, b, b, o, n, n, n, n, n, n,
+o, y, w, r, y, w, b, r, y, b, r, g,
+g, o, b, w, g, o, b, r, w, g, b, o,
+y, w, o, w, y, r, g, g, r, y, o, o,
+n, n, n, g, r, w, n, n, n, n, n, n,
+n, n, n, o, y, r, n, n, n, n, n, n,
+n, n, n, b, y, g, n, n, n, n, n, n,
+)
+1 9 3 10 7 5 11 2 0 4 6 8
+#color_viewer(0.6cm,
+n, n, n, g, g, o, n, n, n, n, n, n,
+n, n, n, o, w, w, n, n, n, n, n, n,
+n, n, n, g, r, y, n, n, n, n, n, n,
+w, y, o, y, b, r, g, r, g, w, o, r,
+g, o, b, o, g, r, y, r, b, w, b, r,
+b, b, o, b, w, y, r, y, w, b, w, y,
+n, n, n, w, o, b, n, n, n, n, n, n,
+n, n, n, y, y, g, n, n, n, n, n, n,
+n, n, n, o, g, r, n, n, n, n, n, n,
 )

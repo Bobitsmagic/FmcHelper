@@ -53,7 +53,7 @@ namespace CubeAD
 		public CubeMove LastMove;
 
 		#region Constructors
-		public IndexCube(uint edgePermutation, ushort cornerPermutation, ushort edgeOrientation, ushort cornerOrientation, CubeMove move = CubeMove.None)
+		public IndexCube(uint edgePermutation, ushort cornerPermutation, ushort edgeOrientation, ushort cornerOrientation, CubeMove lastMove = CubeMove.None)
 		{
 			if (edgePermutation >= MAX_EDGE_PERMUTATION ||
 				cornerPermutation >= MAX_CORNER_PERMUTATION ||
@@ -65,7 +65,7 @@ namespace CubeAD
 			CornerPermutationIndex = cornerPermutation;
 			EdgeOrientationIndex = edgeOrientation;
 			CornerOrientationIndex = cornerOrientation;
-			LastMove = move;
+			LastMove = lastMove;
 		}
 		public IndexCube(Random rnd)
 		{
@@ -434,7 +434,6 @@ namespace CubeAD
 
 			return true;
 		}
-
 		public bool IsEqualWithSymmetry(IndexCube other)
 		{
 			if (this == other)

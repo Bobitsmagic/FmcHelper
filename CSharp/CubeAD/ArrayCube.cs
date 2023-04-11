@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,6 +39,8 @@ namespace CubeAD
             {45, 51, 47, 53}
         };
         static CubeColor[] ArrayBuffer = new CubeColor[TILE_COUNT];
+
+        static int[][] SymmetryArrays = new int[48][];
 
         CubeColor[] Data = new CubeColor[TILE_COUNT];
         static int GetTileIndex(int side, int x, int y)
@@ -96,7 +99,41 @@ namespace CubeAD
                     template[i] = buffer[buffer[buffer[i]]];
                 MoveArray[side * 3 + 2] = template.ToArray();
             }
-        }
+
+            //Symmetry
+            for(int i = 0; i < 48; i++)
+            {
+                SymmetryElement se = SymmetryElement.Elements[i];
+				int[] array = Enumerable.Range(0, TILE_COUNT).ToArray();
+
+				for (int x = 0; x < 6; x++)
+			    {
+                    array[x * 9 + 4] = se.TransformColor(x) * 9 + 4;
+
+				    for (int y = 0; y < 6; y++)
+				    {
+					    if (x / 2 == y / 2)
+						    continue;
+                        array[GetEdgeColorIndex(x, y)] = GetEdgeColorIndex(se.TransformColor(x), se.TransformColor(y));
+
+
+					    for (int z = 0; z < 6; z++)
+					    {
+						    if (x / 2 == z / 2 || y / 2 == z / 2)
+							    continue;
+
+                            array[GetCornerColorIndex(x, y, z)] = GetCornerColorIndex(se.TransformColor(x), se.TransformColor(y), se.TransformColor(z));
+					    }
+				    }
+			    }
+
+
+
+                SymmetryArrays[se.Index] = array; 
+                
+            }
+
+		}
 
         public ArrayCube()
         {
@@ -115,7 +152,13 @@ namespace CubeAD
             Array.Copy(src.Data, Data, TILE_COUNT);
         }
 
-        public void MakeMove(CubeMove cm)
+		public ArrayCube(ArrayCube src, CubeMove cm)
+		{
+			Array.Copy(src.Data, Data, TILE_COUNT);
+            MakeMove(cm);
+		}
+
+		public void MakeMove(CubeMove cm)
         {
             Array.Copy(Data, ArrayBuffer, TILE_COUNT);
 
@@ -141,27 +184,13 @@ namespace CubeAD
 
         public ArrayCube TransformSymmetry(SymmetryElement se)
         {
+
             ArrayCube ret = new ArrayCube();
+            int[] perm = SymmetryArrays[se.Index];
 
-            for (int x = 0; x < 6; x++)
+            for(int i = 0; i < TILE_COUNT; i++)
             {
-                for (int y = 0; y < 6; y++)
-                {
-                    if (x / 2 == y / 2)
-                        continue;
-
-                    ret.Data[GetEdgeColorIndex(se.TransformColor(x), se.TransformColor(y))] =
-                        se.TransformColor(Data[GetEdgeColorIndex(x, y)]);
-
-                    for (int z = 0; z < 6; z++)
-                    {
-                        if (x / 2 == z / 2 || y / 2 == z / 2)
-                            continue;
-
-                        ret.Data[GetCornerColorIndex(se.TransformColor(x), se.TransformColor(y), se.TransformColor(z))] =
-                            se.TransformColor(Data[GetCornerColorIndex(x, y, z)]);
-                    }
-                }
+                ret.Data[perm[i]] = se.TransformColor(Data[i]);
             }
 
             return ret;
@@ -172,16 +201,23 @@ namespace CubeAD
             
             foreach(var se in SymmetryElement.Elements)
             {
-                ArrayCube buffer = this.TransformSymmetry(se);
+                ArrayCube buffer = TransformSymmetry(se);
 
-                if (buffer.CompareTo(this) < 0)
+                if (buffer.CompareTo(best) < 0)
                 {
                     best = buffer;
+
+                    //Console.WriteLine("Found new best\n");
+                    //Console.WriteLine(se);
+                    //Console.WriteLine(buffer.GetSideView());
+                    //Console.WriteLine(buffer);
                 }
             }
 
             return best;
         }
+
+
 
         public string GetSideView()
         {
@@ -241,8 +277,25 @@ namespace CubeAD
             return s + ")";
 
         }
+		public int CompareTo(ArrayCube other)
+		{
+			for (int i = 0; i < TILE_COUNT; i++)
+			{
+				if (Data[i] != other.Data[i])
+				{
+					return Data[i].CompareTo(other.Data[i]);
+				}
+			}
 
-        public override string ToString()
+			return 0;
+		}
+
+
+		public override int GetHashCode()
+		{
+			return HashCode.Combine(Data[0], Data[46], Data[9], Data[37], Data[33], Data[23]);
+		}
+		public override string ToString()
         {
             int index = 0;
             string s = "";
@@ -250,7 +303,7 @@ namespace CubeAD
             {
                 for(int i = 0; i < 9; i++)
                 {
-                    s += Data[index++].ToString()[0] + " ";
+                    s += (int)Data[index++] + " ";
                 }
                 s += "\n";
             }
@@ -258,18 +311,10 @@ namespace CubeAD
             return s;
         }
 
-        override 
-        public int CompareTo(ArrayCube other)
-        {
-            for(int i = 0; i < TILE_COUNT; i++)
-            {
-                if (Data[i] != other.Data[i])
-                {
-                    return Data[i].CompareTo(other.Data[i]);
-                }
-            }
-
-            return 0;
-        }
-    }
+		public override bool Equals(object obj)
+		{
+			return obj is ArrayCube cube &&
+				   Enumerable.SequenceEqual(Data, cube.Data);
+		}
+	}
 }

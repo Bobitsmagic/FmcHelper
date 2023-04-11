@@ -479,3 +479,27 @@ When working with a IndexCube representation the symmetry transformation is diff
 
 Corner state $P_C$, Symmetryfunction $S_C$:
 $ P_C' = S_C^(-1) compose P_C compose S_C $
+
+#color_viewer(0.6cm,
+n, n, n, b, w, w, n, n, n, n, n, n,
+n, n, n, b, w, w, n, n, n, n, n, n,
+n, n, n, b, w, w, n, n, n, n, n, n,
+o, o, o, w, g, g, r, r, r, b, b, y,
+o, o, o, w, g, g, r, r, r, b, b, y,
+o, o, o, w, g, g, r, r, r, b, b, y,
+n, n, n, g, y, y, n, n, n, n, n, n,
+n, n, n, g, y, y, n, n, n, n, n, n,
+n, n, n, g, y, y, n, n, n, n, n, n,
+)
+Sym:
+#color_viewer(0.6cm,
+n, n, n, g, w, w, n, n, n, n, n, n,
+n, n, n, g, w, w, n, n, n, n, n, n,
+n, n, n, g, w, w, n, n, n, n, n, n,
+o, o, o, y, g, g, r, r, r, b, b, w,
+o, o, o, y, g, g, r, r, r, b, b, w,
+o, o, o, y, g, g, r, r, r, b, b, w,
+n, n, n, b, y, y, n, n, n, n, n, n,
+n, n, n, b, y, y, n, n, n, n, n, n,
+n, n, n, b, y, y, n, n, n, n, n, n,
+)

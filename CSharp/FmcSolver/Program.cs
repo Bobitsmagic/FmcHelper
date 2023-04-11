@@ -1,65 +1,59 @@
 ﻿using CubeAD;
-using CubeAD.IndexCubeSets;
-using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace FmcSolver
+ArrayCube cube = new ArrayCube();
+
+//MoveSequenz ms = new MoveSequenz();
+//ms.ReRoll(20);
+
+//foreach(var move in ms.Moves)
+//	cube.MakeMove(move);
+
+//Console.WriteLine(ms);
+
+Console.WriteLine(cube.GetSideView());
+cube = cube.FindLowestSymmetry();
+
+HashSet<ArrayCube> visited = new HashSet<ArrayCube>() { cube };
+
+List<ArrayCube> openlist = new List<ArrayCube>() { cube };
+List<ArrayCube> nextList = new List<ArrayCube>();
+Stopwatch sw = Stopwatch.StartNew();	
+for (int i = 0; i < 8; i++)
 {
-	class Program
-    {
+	Console.WriteLine("OpenListCount: " + openlist.Count);
+	nextList.Clear();
+	int counter = 0;
+	foreach (var c in openlist)
+	{
+		if(++counter % 10000 == 0)
+            Console.WriteLine(counter.ToString("000 000 000"));
 
-
-//1
-//2
-//10
-//83
-//1180
-//17025
-		static void Main(string[] args)
+		ArrayCube buffer = new ArrayCube(c);
+        for (int m = 0; m < 18; m++)
 		{
-			ArrayCube cube = new ArrayCube();
-			ArrayCube superFLip = new ArrayCube();
-			foreach(var move in MoveSequenz.SuperFlip.Moves)
+			buffer.MakeMove((CubeMove)m);
+
+			ArrayCube lowSym = buffer.FindLowestSymmetry();
+			if (visited.Add(lowSym))
 			{
-				superFLip.MakeMove(move);
+				nextList.Add(lowSym);
 			}
 			
-            for(int x = 0; x < 6; x++)
-			{
-				for(int y = 0; y < 6; y++)
-				{
-					if (x / 2 == y / 2)
-						continue;
-
-					if (cube.GetEdgeColor(x, y) != (CubeColor)x)
-                        Console.WriteLine("Alarm");
-
-                    if (superFLip.GetEdgeColor(x, y) != (CubeColor)y)
-                        Console.WriteLine("Superflip Alarm");
-
-					for(int z = 0; z < 6; z++)
-					{
-						if (x / 2 == z / 2 || y / 2 == z / 2)
-							continue;
-						if (superFLip.GetCornerColor(x, y, z) != (CubeColor)x)
-						{
-                            Console.WriteLine("Corner Alarm");
-                        }
-
-					}
-
-                }
-			}
-
-            Console.WriteLine("\nDone");
-			Console.ReadLine();
+			buffer.MakeMove(MoveSequenz.ReverseMove((CubeMove)m));
 		}
 	}
+
+    Console.WriteLine(sw.ElapsedMilliseconds + " ms");
+	sw.Restart();
+    (nextList, openlist) = (openlist, nextList);
 }
+Console.WriteLine("Last list count: " + openlist.Count);
+
+Console.WriteLine("\nDone");
+Console.ReadLine();
+
+//1.5 sec, 20 sec
+//0.35 sec, 5.3 sec, 272 sec, 36120 sec

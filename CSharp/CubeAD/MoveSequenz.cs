@@ -11,7 +11,7 @@ namespace CubeAD
 	/// </summary>
 	public class MoveSequenz
 	{
-		public static Random Rnd = new Random();
+		public static Random Rnd = new Random(0);
 
 		public static readonly MoveSequenz SuperFlip = new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2");
 		public static readonly MoveSequenz CheckerBoard = new MoveSequenz("L2 R2 D2 U2 F2 B2");

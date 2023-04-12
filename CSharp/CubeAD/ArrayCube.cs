@@ -215,7 +215,7 @@ namespace CubeAD
         {
             return new Corner(Data[GetCornerColorIndex(side1, side2, side3)],
                 Data[GetCornerColorIndex(side2, side1, side3)],
-            Data[GetCornerColorIndex(side3, side1, side2)]);
+                Data[GetCornerColorIndex(side3, side1, side2)]);
 
         }
 
@@ -236,7 +236,105 @@ namespace CubeAD
             return ret;
 		}
 
-        public ArrayCube TransformSymmetry(SymmetryElement se)
+		public int[] GetCornerPerm()
+		{
+			int[] ret = new int[8];
+
+			int index = 0;
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = x + 1; y < 6; y++)
+				{
+					if (y / 2 == x / 2) continue;
+
+                    for(int z = y + 1; z < 6; z++)
+                    {
+						if (z / 2 == x / 2 || z / 2 == y / 2) continue;
+
+					    ret[new SortedCorner(
+                            Data[GetCornerColorIndex(x, y, z)],
+							Data[GetCornerColorIndex(y, x, z)],
+							Data[GetCornerColorIndex(z, x, y)]
+							).GetIndex] = index++;
+					}
+				}
+			}
+
+			return ret;
+		}
+
+        //Oriented green in front white on top
+		public bool EdgeIsOriented(int side1, int side2)
+		{
+			if (side2 < side1)
+				(side1, side2) = (side2, side1);
+
+			int c1 = (int)Data[GetEdgeColorIndex(side1, side2)];
+			int c2 = (int)Data[GetEdgeColorIndex(side2, side1)];
+
+
+			//if contains white or yellow
+			if (c1 / 2 == 1 || c2 / 2 == 1)
+			{
+				if (side1 / 2 == 0)
+					return c2 / 2 == 1;
+				else
+					return c1 / 2 == 1;
+			}
+			else
+			{
+				if (side1 / 2 == 0)
+					return c2 / 2 == 2;
+				else
+					return c1 / 2 == 2;
+			}
+		}
+		public ushort FindEdgeOrientationIndex()
+		{
+			int ret = 0;
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = x + 1; y < 6; y++)
+				{
+					if (x / 2 == y / 2) continue;
+
+					ret = (ret << 1) | (EdgeIsOriented(x, y) ? 0 : 1);
+				}
+			}
+
+			return (ushort)ret;
+		}
+		public int CornerOrientaion(int side1, int side2, int side3)
+		{
+			if (!(side1 < side2 && side2 < side3))
+				throw new ArgumentException("Sides need to be in ascending order");
+
+			if ((int)Data[GetCornerColorIndex(side1, side2, side3)] / 2 == 0)
+				return 0;
+
+			if ((int)Data[GetCornerColorIndex(side2, side1, side3)] / 2 == 0)
+				return 1;
+
+			return 2;
+		}
+		public ushort FindCornerOrientationIndex()
+		{
+			int ret = 0;
+			for (int x = 0; x < 2; x++)
+			{
+				for (int y = 2; y < 4; y++)
+				{
+					for (int z = 4; z < 6; z++)
+					{
+						ret = (ret * 3) + CornerOrientaion(x, y, z);
+					}
+				}
+			}
+
+			return (ushort)ret;
+		}
+
+		public ArrayCube TransformSymmetry(SymmetryElement se)
         {
 
             ArrayCube ret = new ArrayCube();
@@ -266,7 +364,34 @@ namespace CubeAD
             return best;
         }
 
-        public ArrayCube GetInverse()
+		public ArrayCube FindLowestSymmetryInverse()
+		{
+			ArrayCube best = new ArrayCube(this);
+
+			foreach (var se in SymmetryElement.Elements)
+			{
+				ArrayCube buffer = TransformSymmetry(se);
+
+				if (buffer.CompareTo(best) < 0)
+				{
+					best = buffer;
+				}
+			}
+
+			foreach (var se in SymmetryElement.Elements)
+			{
+				ArrayCube buffer = GetInverse().TransformSymmetry(se);
+
+				if (buffer.CompareTo(best) < 0)
+				{
+					best = buffer;
+				}
+			}
+
+			return best;
+		}
+
+		public ArrayCube GetInverse()
         {
             ArrayCube ret = new ArrayCube(this);
 
@@ -291,7 +416,6 @@ namespace CubeAD
 
             return ret;
 		}
-
 
         public string GetSideView()
         {
@@ -363,7 +487,6 @@ namespace CubeAD
 
 			return 0;
 		}
-
 
 		public override int GetHashCode()
 		{

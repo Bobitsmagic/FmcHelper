@@ -102,46 +102,46 @@ We are in need of class that represents a 3 by 3 rubiks cube. The IndexCube stor
 
 == Edge Permuation
 
-The position of all edges is a permuation of 12 elements. Instead of using 12 integer to store the position of every edge we use one integer that stores the lexicographic index of the permuation. There are $ceil(log_2(12!)) = 29$ bits needed to store all possible indices and we use a 32 bit or 4 byte integer to store this value. We use the family of bijective functions $E_i: {0, 1, dots, 11} arrow {0, 1, dots, 11}$ where $i in {0, 1, dots, 12! - 1}$ is the 0-based lexicographic index of the permuation that $E_i$ represents. 
+The position of all edges is a permuation of 12 elements. Instead of using 12 integer to store the position of every edge we use one integer that stores the lexicographic index of the permuation. There are $ceil(log_2(12!)) = 29$ bits needed to store all possible indices and we use a 32 bit or 4 byte integer to store this value. We define the family of bijective functions $E_i: {0, 1, dots, 11} arrow {0, 1, dots, 11}$ where $i in {0, 1, dots, 12! - 1}$ is the 0-based lexicographic index of the permuation that $E_i$ represents. 
 
 A 12 element permuation will be represented by the following 2 row matrix:
 $ mat(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11;
 x_0, x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9, x_10, x_11) $. 
 
-Every edge has to correspond to an index between 0 and 11 now. We sort the edges by their X, Y and Z components on a right handed coordinate system with the green facing towards positive Z and white facing towards positive Y. In the following cube net the resulting indices can be seen. 
+Every edge has to correspond to an index between 0 and 11 now. 
 
 //Solved edges with indices
 #grid(
   columns: (1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm), 
   emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(w, "6"),   tile(c, ""),
+  tile(c, ""),    tile(w, "10"),   tile(c, ""),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(w, "3"),   tile(w, ""),    tile(w, "11"),
+  tile(w, "1"),   tile(w, ""),    tile(w, "5"),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(w, "7"),   tile(c, ""),
+  tile(c, ""),    tile(w, "11"),   tile(c, ""),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare,
   
-  tile(c, ""),    tile(o, "3"),   tile(c, ""),
-  tile(c, ""),    tile(g, "7"),   tile(c, ""),
-  tile(c, ""),    tile(r, "11"),  tile(c, ""),
+  tile(c, ""),    tile(o, "1"),   tile(c, ""),
+  tile(c, ""),    tile(g, "11"),   tile(c, ""),
+  tile(c, ""),    tile(r, "5"),  tile(c, ""),
   tile(c, ""),    tile(b, "6"),   tile(c, ""),
   
-  tile(o, "1"),   tile(o, ""),    tile(o, "2"),
-  tile(g, "2"),   tile(g, ""),    tile(g, "10"),
-  tile(r, "10"),  tile(r, ""),    tile(r, "9"),
+  tile(o, "2"),   tile(o, ""),    tile(o, "3"),
+  tile(g, "3"),   tile(g, ""),    tile(g, "7"),
+  tile(r, "7"),   tile(r, ""),    tile(r, "6"),
   tile(b, "9"),   tile(b, ""),    tile(b, "1"),
   
   tile(c, ""),    tile(o, "0"),   tile(c, ""),
-  tile(c, ""),    tile(g, "5"),   tile(c, ""),
-  tile(c, ""),    tile(r, "8"),   tile(c, ""),
+  tile(c, ""),    tile(g, "9"),   tile(c, ""),
+  tile(c, ""),    tile(r, "4"),   tile(c, ""),
   tile(c, ""),    tile(b, "4"),   tile(c, ""),
   
   emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(y, "5"),   tile(c, ""),
+  tile(c, ""),    tile(y, "9"),   tile(c, ""),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(y, "0"),   tile(y, ""),    tile(y, "8"),
+  tile(y, "0"),   tile(y, ""),    tile(y, "4"),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(y, "4"),   tile(c, ""),
+  tile(c, ""),    tile(y, "8"),   tile(c, ""),
 )
  
 The specific selection of indices will reduce the amount of space needed to store a matrix in discussed in section *KEK*.
@@ -480,45 +480,5 @@ When working with a IndexCube representation the symmetry transformation is diff
 Corner state $P_C$, Symmetryfunction $S_C$:
 $ P_C' = S_C^(-1) compose P_C compose S_C $
 
-#pagebreak()
-
-U2 R' B2 D2 U2 F2 L' U2 L2 R F' L' U' B U2 F D' F R B'
-0 1 2 3 4 5 6 7 8 9 10 11
-1 9 3 10 7 5 11 2 0 4 6 8
-8 0 7 2 9 5 10 4 11 1 3 6
-#color_viewer(0.6cm,
-n, n, n, g, g, o, n, n, n, n, n, n,
-n, n, n, o, w, w, n, n, n, n, n, n,
-n, n, n, g, r, y, n, n, n, n, n, n,
-w, y, o, y, b, r, g, r, g, w, o, r,
-g, o, b, o, g, r, y, r, b, w, b, r,
-b, b, o, b, w, y, r, y, w, b, w, y,
-n, n, n, w, o, b, n, n, n, n, n, n,
-n, n, n, y, y, g, n, n, n, n, n, n,
-n, n, n, o, g, r, n, n, n, n, n, n,
-)
-B R' F' D F' U2 B' U L F R' L2 U2 L F2 U2 D2 B2 R U2
-8 0 7 2 9 5 10 4 11 1 3 6
-#color_viewer(0.6cm,
-n, n, n, y, b, r, n, n, n, n, n, n,
-n, n, n, g, w, w, n, n, n, n, n, n,
-n, n, n, b, b, o, n, n, n, n, n, n,
-o, y, w, r, y, w, b, r, y, b, r, g,
-g, o, b, w, g, o, b, r, w, g, b, o,
-y, w, o, w, y, r, g, g, r, y, o, o,
-n, n, n, g, r, w, n, n, n, n, n, n,
-n, n, n, o, y, r, n, n, n, n, n, n,
-n, n, n, b, y, g, n, n, n, n, n, n,
-)
-1 9 3 10 7 5 11 2 0 4 6 8
-#color_viewer(0.6cm,
-n, n, n, g, g, o, n, n, n, n, n, n,
-n, n, n, o, w, w, n, n, n, n, n, n,
-n, n, n, g, r, y, n, n, n, n, n, n,
-w, y, o, y, b, r, g, r, g, w, o, r,
-g, o, b, o, g, r, y, r, b, w, b, r,
-b, b, o, b, w, y, r, y, w, b, w, y,
-n, n, n, w, o, b, n, n, n, n, n, n,
-n, n, n, y, y, g, n, n, n, n, n, n,
-n, n, n, o, g, r, n, n, n, n, n, n,
-)
+= Inverse Symmetry
+2 cubes are symmetric over inverse symmetry when the inverse of the solution to one cube solves the other. The inverse $X^(-1)$ of a sequence $X$ of moves is the sequence in reversed order and every rotation direction getting reversed as well. In the following example we consider move sequences. $X = ["L2", "D "]$ and $Y = ["D'"  "L2"]$. Now the cubes that these 2 scrambles generate are not symmetric under any previously defined symmetry but they are inversely symmetric since $X^(-1) = Y$ or equivalent $X = Y^(-1)$. 

@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CubeAD.CubeRepresentation;
 
 namespace CubeAD.IndexCubeSets
 {
-	/// <summary>
-	/// An add-only set class for <see cref="IndexCube"/>, optimized for add operations and space efficiency
-	/// </summary>
-	public class SortedBucketsSet
+    /// <summary>
+    /// An add-only set class for <see cref="IndexCube"/>, optimized for add operations and space efficiency
+    /// </summary>
+    public class SortedBucketsSet
 	{
 		public int Count
 		{

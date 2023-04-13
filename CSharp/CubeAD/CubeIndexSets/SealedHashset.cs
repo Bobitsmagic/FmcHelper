@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CubeAD.CubeRepresentation;
 
 namespace CubeAD.IndexCubeSets
 {
-	/// <summary>
-	/// A read-only hash-based set class for CubeIndex with all elements in consecutive memory,
-	/// optimized for contains calls and space-efficiency
-	/// </summary>
-	public class SealedHashset
+    /// <summary>
+    /// A read-only hash-based set class for CubeIndex with all elements in consecutive memory,
+    /// optimized for contains calls and space-efficiency
+    /// </summary>
+    public class SealedHashset
 	{
 		const int BUCKET_COUNT = (int)IndexCube.MAX_EDGE_PERMUTATION;
 		

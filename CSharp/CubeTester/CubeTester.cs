@@ -1,10 +1,11 @@
 ﻿using CubeAD;
+using CubeAD.CubeRepresentation;
 using NUnit.Framework;
 using System;
 
 namespace CubeTester
 {
-	class CubeTester
+    class CubeTester
 	{
 		[Test]
 		public void RotateSingleSide()

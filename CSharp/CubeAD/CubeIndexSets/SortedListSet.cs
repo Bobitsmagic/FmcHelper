@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using CubeAD.CubeRepresentation;
 
 namespace CubeAD.IndexCubeSets
 {
-	/// <summary>
-	/// An add-only set class for <see cref="IndexCube"/>, optimized for add operations and space efficiency
-	/// </summary>
-	public class SortedListSet
+    /// <summary>
+    /// An add-only set class for <see cref="IndexCube"/>, optimized for add operations and space efficiency
+    /// </summary>
+    public class SortedListSet
 	{
 		public static List<IndexCube> CubeIndexBuffer = new List<IndexCube>();
 

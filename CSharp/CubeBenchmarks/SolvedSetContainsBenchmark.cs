@@ -1,12 +1,13 @@
 ﻿using BenchmarkDotNet.Attributes;
 using CubeAD;
+using CubeAD.CubeRepresentation;
 using CubeAD.IndexCubeSets;
 using System;
 using System.Collections.Generic;
 
 namespace CubeBenchmarks
 {
-	public class SolvedSetContainsBenchmark
+    public class SolvedSetContainsBenchmark
 	{
 		const int DEPTH = 7;
 		static Random rnd = new Random(0);

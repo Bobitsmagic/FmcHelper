@@ -1,4 +1,5 @@
-﻿using CubeAD.IndexCubeSets;
+﻿using CubeAD.CubeRepresentation;
+using CubeAD.IndexCubeSets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,10 @@ using static CubeAD.PreCompTables;
 
 namespace CubeAD
 {
-	/// <summary>
-	/// Provides algorithms for searching through diffrent sets of cubes
-	/// </summary>
-	public static class SearchingAlgorithms
+    /// <summary>
+    /// Provides algorithms for searching through diffrent sets of cubes
+    /// </summary>
+    public static class SearchingAlgorithms
 	{
 		/// <returns> All shortest <see cref="MoveSequenz"/> to orient all edges </returns>
 		public static List<MoveSequenz> FindEdgeOrientationMoves(ushort edgeOrientation)

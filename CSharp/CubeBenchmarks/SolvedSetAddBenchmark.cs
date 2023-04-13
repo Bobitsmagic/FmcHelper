@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using CubeAD;
+using CubeAD.CubeRepresentation;
 using CubeAD.IndexCubeSets;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Linq;
 
 namespace CubeBenchmarks
 {
-	[MemoryDiagnoser]
+    [MemoryDiagnoser]
 	public class SolvedSetAddBenchmark
 	{
 		static Random rnd = new Random(0);

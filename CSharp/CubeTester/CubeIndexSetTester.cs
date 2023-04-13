@@ -1,4 +1,5 @@
 ﻿using CubeAD;
+using CubeAD.CubeRepresentation;
 using CubeAD.IndexCubeSets;
 using NUnit.Framework;
 using System;
@@ -9,7 +10,7 @@ using System.Linq;
 
 namespace CubeTester
 {
-	class CubeIndexSetTester
+    class CubeIndexSetTester
 	{
 		[Test]
 		public void AddOperation()

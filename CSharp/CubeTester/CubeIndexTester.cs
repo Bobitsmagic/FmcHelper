@@ -1,4 +1,5 @@
 ﻿using CubeAD;
+using CubeAD.CubeRepresentation;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 
 namespace CubeTester
 {
-	class CubeIndexTester
+    class CubeIndexTester
 	{
 		[Test]
 		public void EdgePermutationIndex()

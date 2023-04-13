@@ -209,7 +209,7 @@ We declare a helper function $f_"X ": {0, dots, 12! - 1} arrow {0, dots, 12! - 1
 This helper function can be compressed in 3 diffrent ways. 
 
 === Flip at half
-The equation $f_"X "(i) + f_"X "(12! - i - 1) = 12!$ holds for all moves $ "X " in { "L ", "R ", "D ", "U ", "B ", "F " }$. Proof (?)
+The equation $f_"X "(i) + f_"X "(12! - i - 1) = 12!$ holds for all moves. Proof (?) Permuations (?)
 
 Therefore we can reduce the amount of space needed by a factor of $2$ by defining $f_"X ": i |-> 12! - f_" X"(12! - i - 1)$ for all $i >= frac(12!, 2)$
 
@@ -241,7 +241,24 @@ $ g_"X ": {0, dots, frac(C_"X ", 2 dot.op T_"X ")} -> {0, dots, 12! - 1} $
 
 are all values we need to store. 
 
-*TODO*: Final values of reduction
+#table(
+  columns: (auto, auto, auto, auto), 
+  align: right,
+  [*Moves*], [Cycle length], [Track length], [Reduced length],
+  [$"L ", "L'"$], [$479 001 600$], [$40 320$], [$5 940$],
+  [$"L2"$], [$43 545 600$], [$40 320$], [$540$],
+
+  [$"R ", "R2", "R'"$], [$40 320$], [$24$], [$840$],
+
+  [$"D ", "D2", "D'"$], [$479 001 600$], [$2$], [$119 750 400$],
+  [$"U ", "U2", "U'"$], [$39 916 800$], [$1$], [$19 958 400$],
+  [$"B ", "B2", "B'"$], [$3 628 800$], [$1$], [$1 814 400$],
+  [$"F ", "F2", "F'"$], [$362 880$], [$1$], [$181 440$]
+)
+
+The sum of all reduced lengths of the moves ${ "L ", "R ", "D ", "U ", "B ", "F " }$ is $141 711 420$. So all values of $g_x$can be stored by using $141711420 dot.op 4 "byte" approx 142 "megabyte"$.
+
+*TODO*: Perfomance comparison for full table and only base moves table
 
 == Edge orientation
 Every edge has 2 possible orientations. To represent all edge orientations, 12 bits are needed which are stored into a single 16 bit integer. To make the edge orientation independent from the edge permuation state the $i$-th value in the bit vector corresponds to the orientation of the edge at position $i$. We write an edge orientation similar to a permuation with a 2 row matrix. 

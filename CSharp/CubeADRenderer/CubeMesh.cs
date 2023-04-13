@@ -9,10 +9,11 @@ using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 using System.Xml.Serialization;
 using System.Runtime.CompilerServices;
+using CubeAD.CubeRepresentation;
 
 namespace CubeRenderer
 {
-	class CubeMesh
+    class CubeMesh
 	{
 		private static Vector4[] CubeColors =
 		{

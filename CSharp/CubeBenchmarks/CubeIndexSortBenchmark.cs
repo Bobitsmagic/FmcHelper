@@ -1,11 +1,12 @@
 ﻿using BenchmarkDotNet.Attributes;
 using CubeAD;
+using CubeAD.CubeRepresentation;
 using System;
 using System.Linq;
 
 namespace CubeBenchmarks
 {
-	[MemoryDiagnoser]
+    [MemoryDiagnoser]
 	public class CubeIndexSortBenchmark
 	{
 		const int COUNT = 10_000_000;

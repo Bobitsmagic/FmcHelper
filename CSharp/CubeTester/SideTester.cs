@@ -1,10 +1,11 @@
 using CubeAD;
+using CubeAD.CubeRepresentation;
 using NUnit.Framework;
 
 
 namespace CubeTester
 {
-	public class SideTester
+    public class SideTester
 	{
 		[Test]
 		public void InitialValueTest()

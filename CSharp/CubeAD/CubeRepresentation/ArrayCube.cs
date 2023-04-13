@@ -8,8 +8,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
+using CubeAD.Pieces;
 
-namespace CubeAD
+namespace CubeAD.CubeRepresentation
 {
     public class ArrayCube : IComparable<ArrayCube>
     {
@@ -33,10 +34,10 @@ namespace CubeAD
         {
             {0, 2, 6, 8 },
             {11, 9, 17, 15},
-            
+
             {18, 24, 20, 26},
             {33, 27, 35, 29},
-            
+
             {38, 44, 36, 42},
             {45, 51, 47, 53}
         };
@@ -79,12 +80,12 @@ namespace CubeAD
             {
                 int[] template = Enumerable.Range(0, TILE_COUNT).ToArray();
 
-                for(int i = 0; i < 9; i++)
+                for (int i = 0; i < 9; i++)
                 {
                     template[side * 9 + i] = RotationArray[0][i] + side * 9;
                 }
 
-                for(int i = 0; i < 12; i++)
+                for (int i = 0; i < 12; i++)
                 {
                     template[affectedTiles[side, i]] = affectedTiles[side, (i + 3) % 12];
                 }
@@ -103,39 +104,39 @@ namespace CubeAD
             }
 
             //Symmetry
-            for(int i = 0; i < 48; i++)
+            for (int i = 0; i < 48; i++)
             {
                 SymmetryElement se = SymmetryElement.Elements[i];
-				int[] array = Enumerable.Range(0, TILE_COUNT).ToArray();
+                int[] array = Enumerable.Range(0, TILE_COUNT).ToArray();
 
-				for (int x = 0; x < 6; x++)
-			    {
+                for (int x = 0; x < 6; x++)
+                {
                     array[x * 9 + 4] = se.TransformColor(x) * 9 + 4;
 
-				    for (int y = 0; y < 6; y++)
-				    {
-					    if (x / 2 == y / 2)
-						    continue;
+                    for (int y = 0; y < 6; y++)
+                    {
+                        if (x / 2 == y / 2)
+                            continue;
                         array[GetEdgeColorIndex(x, y)] = GetEdgeColorIndex(se.TransformColor(x), se.TransformColor(y));
 
 
-					    for (int z = 0; z < 6; z++)
-					    {
-						    if (x / 2 == z / 2 || y / 2 == z / 2)
-							    continue;
+                        for (int z = 0; z < 6; z++)
+                        {
+                            if (x / 2 == z / 2 || y / 2 == z / 2)
+                                continue;
 
                             array[GetCornerColorIndex(x, y, z)] = GetCornerColorIndex(se.TransformColor(x), se.TransformColor(y), se.TransformColor(z));
-					    }
-				    }
-			    }
+                        }
+                    }
+                }
 
 
 
-                SymmetryArrays[se.Index] = array; 
-                
+                SymmetryArrays[se.Index] = array;
+
             }
 
-		}
+        }
 
         public ArrayCube()
         {
@@ -144,41 +145,41 @@ namespace CubeAD
 
         public void Reset()
         {
-			int index = 0;
-			for (int i = 0; i < 6; i++)
-			{
-				for (int j = 0; j < 9; j++)
-				{
-					Data[index++] = (CubeColor)i;
-				}
-			}
-		}
+            int index = 0;
+            for (int i = 0; i < 6; i++)
+            {
+                for (int j = 0; j < 9; j++)
+                {
+                    Data[index++] = (CubeColor)i;
+                }
+            }
+        }
 
         public ArrayCube(ArrayCube src)
         {
             Array.Copy(src.Data, Data, TILE_COUNT);
         }
 
-		public ArrayCube(ArrayCube src, CubeMove cm)
-		{
-			Array.Copy(src.Data, Data, TILE_COUNT);
+        public ArrayCube(ArrayCube src, CubeMove cm)
+        {
+            Array.Copy(src.Data, Data, TILE_COUNT);
             MakeMove(cm);
-		}
+        }
 
-		public void MakeMove(CubeMove cm)
+        public void MakeMove(CubeMove cm)
         {
             Array.Copy(Data, ArrayBuffer, TILE_COUNT);
 
             int[] move = MoveArray[(int)cm];
 
-            for(int i = 0; i < TILE_COUNT; i++)
+            for (int i = 0; i < TILE_COUNT; i++)
             {
                 Data[move[i]] = ArrayBuffer[i];
             }
         }
         public void ApplySequence(List<CubeMove> list)
         {
-            foreach(CubeMove cm in list)
+            foreach (CubeMove cm in list)
             {
                 MakeMove(cm);
             }
@@ -189,24 +190,24 @@ namespace CubeAD
         {
             return DualSideToIndex[side1, side2];
         }
-		public static int GetEdgeColorIndex(Edge edge)
-		{
-			return DualSideToIndex[(int)edge.A, (int)edge.B];
-		}
-		public static int GetCornerColorIndex(int side1, int side2, int side3)
+        public static int GetEdgeColorIndex(Edge edge)
+        {
+            return DualSideToIndex[(int)edge.A, (int)edge.B];
+        }
+        public static int GetCornerColorIndex(int side1, int side2, int side3)
         {
             if (side2 > side3)
                 (side2, side3) = (side3, side2);
-            int index = (side2 % 2) * 2 + (side3 % 2);
+            int index = side2 % 2 * 2 + side3 % 2;
             return CornerIndices[side1, index];
         }
 
-		public static int GetCornerColorIndex(Corner corner)
-		{
+        public static int GetCornerColorIndex(Corner corner)
+        {
             return GetCornerColorIndex((int)corner.A, (int)corner.B, (int)corner.C);
-		}
+        }
 
-		public Edge GetEdge(int side1, int side2)
+        public Edge GetEdge(int side1, int side2)
         {
             return new Edge(Data[GetEdgeColorIndex(side1, side2)], Data[GetEdgeColorIndex(side2, side1)]);
         }
@@ -224,123 +225,123 @@ namespace CubeAD
             int[] ret = new int[12];
 
             int index = 0;
-            for(int x = 0; x < 6; x++)
+            for (int x = 0; x < 6; x++)
             {
-                for(int y = x + 1; y < 6; y++)
+                for (int y = x + 1; y < 6; y++)
                 {
-					if (y / 2 == x / 2) continue;
-                    ret[new SortedEdge(Data[GetEdgeColorIndex(x, y)], Data[GetEdgeColorIndex(y, x)]).GetIndex] = index++;  
-				}
-			}
+                    if (y / 2 == x / 2) continue;
+                    ret[new SortedEdge(Data[GetEdgeColorIndex(x, y)], Data[GetEdgeColorIndex(y, x)]).GetIndex] = index++;
+                }
+            }
 
             return ret;
-		}
+        }
 
-		public int[] GetCornerPerm()
-		{
-			int[] ret = new int[8];
+        public int[] GetCornerPerm()
+        {
+            int[] ret = new int[8];
 
-			int index = 0;
-			for (int x = 0; x < 6; x++)
-			{
-				for (int y = x + 1; y < 6; y++)
-				{
-					if (y / 2 == x / 2) continue;
+            int index = 0;
+            for (int x = 0; x < 6; x++)
+            {
+                for (int y = x + 1; y < 6; y++)
+                {
+                    if (y / 2 == x / 2) continue;
 
-                    for(int z = y + 1; z < 6; z++)
+                    for (int z = y + 1; z < 6; z++)
                     {
-						if (z / 2 == x / 2 || z / 2 == y / 2) continue;
+                        if (z / 2 == x / 2 || z / 2 == y / 2) continue;
 
-					    ret[new SortedCorner(
+                        ret[new SortedCorner(
                             Data[GetCornerColorIndex(x, y, z)],
-							Data[GetCornerColorIndex(y, x, z)],
-							Data[GetCornerColorIndex(z, x, y)]
-							).GetIndex] = index++;
-					}
-				}
-			}
+                            Data[GetCornerColorIndex(y, x, z)],
+                            Data[GetCornerColorIndex(z, x, y)]
+                            ).GetIndex] = index++;
+                    }
+                }
+            }
 
-			return ret;
-		}
+            return ret;
+        }
 
         //Oriented green in front white on top
-		public bool EdgeIsOriented(int side1, int side2)
-		{
-			if (side2 < side1)
-				(side1, side2) = (side2, side1);
+        public bool EdgeIsOriented(int side1, int side2)
+        {
+            if (side2 < side1)
+                (side1, side2) = (side2, side1);
 
-			int c1 = (int)Data[GetEdgeColorIndex(side1, side2)];
-			int c2 = (int)Data[GetEdgeColorIndex(side2, side1)];
+            int c1 = (int)Data[GetEdgeColorIndex(side1, side2)];
+            int c2 = (int)Data[GetEdgeColorIndex(side2, side1)];
 
 
-			//if contains white or yellow
-			if (c1 / 2 == 1 || c2 / 2 == 1)
-			{
-				if (side1 / 2 == 0)
-					return c2 / 2 == 1;
-				else
-					return c1 / 2 == 1;
-			}
-			else
-			{
-				if (side1 / 2 == 0)
-					return c2 / 2 == 2;
-				else
-					return c1 / 2 == 2;
-			}
-		}
-		public ushort FindEdgeOrientationIndex()
-		{
-			int ret = 0;
-			for (int x = 0; x < 6; x++)
-			{
-				for (int y = x + 1; y < 6; y++)
-				{
-					if (x / 2 == y / 2) continue;
+            //if contains white or yellow
+            if (c1 / 2 == 1 || c2 / 2 == 1)
+            {
+                if (side1 / 2 == 0)
+                    return c2 / 2 == 1;
+                else
+                    return c1 / 2 == 1;
+            }
+            else
+            {
+                if (side1 / 2 == 0)
+                    return c2 / 2 == 2;
+                else
+                    return c1 / 2 == 2;
+            }
+        }
+        public ushort FindEdgeOrientationIndex()
+        {
+            int ret = 0;
+            for (int x = 0; x < 6; x++)
+            {
+                for (int y = x + 1; y < 6; y++)
+                {
+                    if (x / 2 == y / 2) continue;
 
-					ret = (ret << 1) | (EdgeIsOriented(x, y) ? 0 : 1);
-				}
-			}
+                    ret = ret << 1 | (EdgeIsOriented(x, y) ? 0 : 1);
+                }
+            }
 
-			return (ushort)ret;
-		}
-		public int CornerOrientaion(int side1, int side2, int side3)
-		{
-			if (!(side1 < side2 && side2 < side3))
-				throw new ArgumentException("Sides need to be in ascending order");
+            return (ushort)ret;
+        }
+        public int CornerOrientaion(int side1, int side2, int side3)
+        {
+            if (!(side1 < side2 && side2 < side3))
+                throw new ArgumentException("Sides need to be in ascending order");
 
-			if ((int)Data[GetCornerColorIndex(side1, side2, side3)] / 2 == 0)
-				return 0;
+            if ((int)Data[GetCornerColorIndex(side1, side2, side3)] / 2 == 0)
+                return 0;
 
-			if ((int)Data[GetCornerColorIndex(side2, side1, side3)] / 2 == 0)
-				return 1;
+            if ((int)Data[GetCornerColorIndex(side2, side1, side3)] / 2 == 0)
+                return 1;
 
-			return 2;
-		}
-		public ushort FindCornerOrientationIndex()
-		{
-			int ret = 0;
-			for (int x = 0; x < 2; x++)
-			{
-				for (int y = 2; y < 4; y++)
-				{
-					for (int z = 4; z < 6; z++)
-					{
-						ret = (ret * 3) + CornerOrientaion(x, y, z);
-					}
-				}
-			}
+            return 2;
+        }
+        public ushort FindCornerOrientationIndex()
+        {
+            int ret = 0;
+            for (int x = 0; x < 2; x++)
+            {
+                for (int y = 2; y < 4; y++)
+                {
+                    for (int z = 4; z < 6; z++)
+                    {
+                        ret = ret * 3 + CornerOrientaion(x, y, z);
+                    }
+                }
+            }
 
-			return (ushort)ret;
-		}
+            return (ushort)ret;
+        }
 
-		public ArrayCube TransformSymmetry(SymmetryElement se)
+        public ArrayCube TransformSymmetry(SymmetryElement se)
         {
 
             ArrayCube ret = new ArrayCube();
             int[] perm = SymmetryArrays[se.Index];
 
-            for(int i = 0; i < TILE_COUNT; i++)
+            for (int i = 0; i < TILE_COUNT; i++)
             {
                 ret.Data[perm[i]] = se.TransformColor(Data[i]);
             }
@@ -350,8 +351,8 @@ namespace CubeAD
         public ArrayCube FindLowestSymmetry()
         {
             ArrayCube best = new ArrayCube(this);
-            
-            foreach(var se in SymmetryElement.Elements)
+
+            foreach (var se in SymmetryElement.Elements)
             {
                 ArrayCube buffer = TransformSymmetry(se);
 
@@ -364,69 +365,69 @@ namespace CubeAD
             return best;
         }
 
-		public ArrayCube FindLowestSymmetryInverse()
-		{
-			ArrayCube best = new ArrayCube(this);
+        public ArrayCube FindLowestSymmetryInverse()
+        {
+            ArrayCube best = new ArrayCube(this);
 
-			foreach (var se in SymmetryElement.Elements)
-			{
-				ArrayCube buffer = TransformSymmetry(se);
+            foreach (var se in SymmetryElement.Elements)
+            {
+                ArrayCube buffer = TransformSymmetry(se);
 
-				if (buffer.CompareTo(best) < 0)
-				{
-					best = buffer;
-				}
-			}
+                if (buffer.CompareTo(best) < 0)
+                {
+                    best = buffer;
+                }
+            }
 
-			foreach (var se in SymmetryElement.Elements)
-			{
-				ArrayCube buffer = GetInverse().TransformSymmetry(se);
+            foreach (var se in SymmetryElement.Elements)
+            {
+                ArrayCube buffer = GetInverse().TransformSymmetry(se);
 
-				if (buffer.CompareTo(best) < 0)
-				{
-					best = buffer;
-				}
-			}
+                if (buffer.CompareTo(best) < 0)
+                {
+                    best = buffer;
+                }
+            }
 
-			return best;
-		}
+            return best;
+        }
 
-		public ArrayCube GetInverse()
+        public ArrayCube GetInverse()
         {
             ArrayCube ret = new ArrayCube(this);
 
-			for (int x = 0; x < 6; x++)
-			{
-				for (int y = 0; y < 6; y++)
-				{
-					if (y / 2 == x / 2) continue;
+            for (int x = 0; x < 6; x++)
+            {
+                for (int y = 0; y < 6; y++)
+                {
+                    if (y / 2 == x / 2) continue;
 
                     ret.Data[GetEdgeColorIndex(GetEdge(x, y))] = (CubeColor)x;
 
-                    for(int z = 0; z < 6; z++)
+                    for (int z = 0; z < 6; z++)
                     {
                         if (z / 2 == x / 2 || z / 2 == y / 2)
                             continue;
 
 
-						ret.Data[GetCornerColorIndex(GetCorner(x, y, z))] = (CubeColor)x;
-					}
-				}
-			}
+                        ret.Data[GetCornerColorIndex(GetCorner(x, y, z))] = (CubeColor)x;
+                    }
+                }
+            }
 
             return ret;
-		}
+        }
 
         public string GetSideView()
         {
-            int[] sides = new int[]{ 0, 5, 1, 4 };
+            int[] sides = new int[] { 0, 5, 1, 4 };
             string[] tiles = new string[]
             {
                 "o", "r", "y", "w", "b", "g"
             };
 
             string s = "#color_viewer(0.6cm,\n";
-            
+
             for (int y = 3 - 1; y >= 0; y--)
             {
                 for (int i = 0; i < 3; i++)
@@ -442,11 +443,11 @@ namespace CubeAD
 
                 s += "\n";
             }
-            for(int y = 3 - 1; y >= 0; y--)
+            for (int y = 3 - 1; y >= 0; y--)
             {
-                for(int i = 0; i < sides.Length; i++)
+                for (int i = 0; i < sides.Length; i++)
                 {
-                    for(int x = 0; x < 3; x++)
+                    for (int x = 0; x < 3; x++)
                     {
                         s += tiles[(int)Data[GetTileIndex(sides[i], x, y)]] + ", ";
                     }
@@ -475,30 +476,30 @@ namespace CubeAD
             return s + ")";
 
         }
-		public int CompareTo(ArrayCube other)
-		{
-			for (int i = 0; i < TILE_COUNT; i++)
-			{
-				if (Data[i] != other.Data[i])
-				{
-					return Data[i].CompareTo(other.Data[i]);
-				}
-			}
+        public int CompareTo(ArrayCube other)
+        {
+            for (int i = 0; i < TILE_COUNT; i++)
+            {
+                if (Data[i] != other.Data[i])
+                {
+                    return Data[i].CompareTo(other.Data[i]);
+                }
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
-		public override int GetHashCode()
-		{
-			return HashCode.Combine(Data[0], Data[46], Data[9], Data[37], Data[33], Data[23]);
-		}
-		public override string ToString()
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Data[0], Data[46], Data[9], Data[37], Data[33], Data[23]);
+        }
+        public override string ToString()
         {
             int index = 0;
             string s = "";
-            for(int side = 0; side < 6; side++)
+            for (int side = 0; side < 6; side++)
             {
-                for(int i = 0; i < 9; i++)
+                for (int i = 0; i < 9; i++)
                 {
                     s += (int)Data[index++] + " ";
                 }
@@ -508,10 +509,10 @@ namespace CubeAD
             return s;
         }
 
-		public override bool Equals(object obj)
-		{
-			return obj is ArrayCube cube &&
-				   Enumerable.SequenceEqual(Data, cube.Data);
-		}
-	}
+        public override bool Equals(object obj)
+        {
+            return obj is ArrayCube cube &&
+                   Data.SequenceEqual(cube.Data);
+        }
+    }
 }

@@ -35,7 +35,7 @@
 
 = Faces
 We define the set of faces or colors $cal(F): {O, R, Y, W, B, G}$.
-
+Order: $O < R < Y < W < B < G$
 = Move definitions Vocabulary
 $M = { "L ", "L2 ", "L' ", "R ", "R2 ", "R' ", 
        "D ", "D2 ", "D' ", "U ", "U2 ", "U' ",
@@ -98,7 +98,7 @@ that return the colors on a specific edge or corner. Now there are a few restric
 the identity function. 
 
 = IndexCube
-We are in need of class that represents a 3 by 3 rubiks cube. The IndexCube stores the permuation and orientation state of the corners and edges seperately.
+The IndexCube stores the permuation and orientation state of the corners and edges seperately.
 
 == Edge Permuation
 
@@ -110,6 +110,7 @@ x_0, x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9, x_10, x_11) $.
 
 Every edge has to correspond to an index between 0 and 11 now. 
 
+*TODO* Define order
 //Solved edges with indices
 #grid(
   columns: (1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm), 
@@ -144,43 +145,42 @@ Every edge has to correspond to an index between 0 and 11 now.
   tile(c, ""),    tile(y, "8"),   tile(c, ""),
 )
  
-The specific selection of indices will reduce the amount of space needed to store a matrix in discussed in section *KEK*.
 After the move $"L "$ (90° clockwise rotation of the orange side) the permuation matrix has the following values:
 $ mat(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11;
-#text(red)[1], #text(red)[3], #text(red)[0], #text(red)[2], 4, 5, 6, 7, 8, 9, 10, 11) $. 
+#text(red)[2], #text(red)[3], #text(red)[1], #text(red)[0], 4, 5, 6, 7, 8, 9, 10, 11) $. 
 
 //Edge Indices after L move
 #grid(
   columns: (1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm), 
   emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),  tile(w, "6"), tile(c, ""),
+  tile(c, ""),    tile(w, "10"),   tile(c, ""),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(b, "1"), tile(w, ""),  tile(w, "11"),
+  tile(b, "2"),   tile(w, ""),    tile(w, "5"),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),  tile(w, "7"), tile(c, ""),
+  tile(c, ""),    tile(w, "11"),   tile(c, ""),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare,
   
-  tile(c, ""),  tile(o, "1"),   tile(c, ""),    
-  tile(c, ""),  tile(g, "7"),   tile(c, ""),
-  tile(c, ""),  tile(r, "11"),  tile(c, ""),
-  tile(c, ""),  tile(b, "6"),   tile(c, ""),
+  tile(c, ""),    tile(o, "2"),   tile(c, ""),
+  tile(c, ""),    tile(g, "11"),   tile(c, ""),
+  tile(c, ""),    tile(r, "5"),  tile(c, ""),
+  tile(c, ""),    tile(b, "6"),   tile(c, ""),
   
-  tile(o, "0"), tile(o, ""),    tile(o, "3"),
-  tile(w, "3"), tile(g, ""),    tile(g, "10"),
-  tile(r, "10"),tile(r, ""),    tile(r, "9"),
-  tile(b, "9"), tile(b, ""),    tile(y, "0"),
+  tile(o, "0"),   tile(o, ""),    tile(o, "1"),
+  tile(w, "1"),   tile(g, ""),    tile(g, "7"),
+  tile(r, "7"),   tile(r, ""),    tile(r, "6"),
+  tile(b, "9"),   tile(b, ""),    tile(y, "0"),
   
-  tile(c, ""),  tile(o, "2"),   tile(c, ""),
-  tile(c, ""),  tile(g, "5"),   tile(c, ""),
-  tile(c, ""),  tile(r, "8"),   tile(c, ""),
-  tile(c, ""),  tile(b, "4"),   tile(c, ""),
+  tile(c, ""),    tile(o, "3"),   tile(c, ""),
+  tile(c, ""),    tile(g, "9"),   tile(c, ""),
+  tile(c, ""),    tile(r, "4"),   tile(c, ""),
+  tile(c, ""),    tile(b, "4"),   tile(c, ""),
   
   emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),  tile(y, "5"),   tile(c, ""),
+  tile(c, ""),    tile(y, "9"),   tile(c, ""),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(g, "2"), tile(y, ""),    tile(y, "8"),
+  tile(g, "3"),   tile(y, ""),    tile(y, "4"),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),  tile(y, "4"),   tile(c, ""),
+  tile(c, ""),    tile(y, "8"),   tile(c, ""),
 )
 
 There are 2 ways to define the relation of the state of the cube and the permutation matrix. The matrix above describes the new position of each edge. The edge 0 (orange-yellow) is now at postion 1, where the orange-blue edge belongs. The edge 1 is now positoned where edge 3 would be in a solved cube. 
@@ -188,7 +188,7 @@ There are 2 ways to define the relation of the state of the cube and the permuta
 The other interpretation would be the inverse of this Permuation. 
 
 $ mat(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11;
-#text(red)[2], #text(red)[0], #text(red)[3], #text(red)[1], 4, 5, 6, 7, 8, 9, 10, 11) $. 
+#text(red)[3], #text(red)[2], #text(red)[0], #text(red)[1], 4, 5, 6, 7, 8, 9, 10, 11) $. 
 
 Here the bottom row describes which edge is now at this position. So At position 0 there is edge 2, at position 1 there is edge 0. We will use the first interpretation as it makes composition of functions more intuitive. 
 
@@ -275,34 +275,34 @@ $ mat(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11;
 #grid(
   columns: (1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm), 
   emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(b, "6"),   tile(c, ""),
+  tile(c, ""),    tile(b, "10"),   tile(c, ""),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(o, "3"),   tile(w, ""),    tile(r, "11"),
+  tile(o, "1"),   tile(w, ""),    tile(r, "5"),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(g, "7"),   tile(c, ""),
+  tile(c, ""),    tile(g, "11"),   tile(c, ""),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare,
   
-  tile(c, ""),    tile(w, "3"),   tile(c, ""),
-  tile(c, ""),    tile(w, "7"),   tile(c, ""),
-  tile(c, ""),    tile(w, "11"),  tile(c, ""),
+  tile(c, ""),    tile(w, "1"),   tile(c, ""),
+  tile(c, ""),    tile(w, "11"),   tile(c, ""),
+  tile(c, ""),    tile(w, "5"),  tile(c, ""),
   tile(c, ""),    tile(w, "6"),   tile(c, ""),
   
-  tile(b, "1"),   tile(o, ""),    tile(g, "2"),
-  tile(o, "2"),   tile(g, ""),    tile(r, "10"),
-  tile(g, "10"),  tile(r, ""),    tile(b, "9"),
+  tile(b, "2"),   tile(o, ""),    tile(g, "3"),
+  tile(o, "3"),   tile(g, ""),    tile(r, "7"),
+  tile(g, "7"),   tile(r, ""),    tile(b, "6"),
   tile(r, "9"),   tile(b, ""),    tile(o, "1"),
   
   tile(c, ""),    tile(y, "0"),   tile(c, ""),
-  tile(c, ""),    tile(y, "5"),   tile(c, ""),
-  tile(c, ""),    tile(y, "8"),   tile(c, ""),
+  tile(c, ""),    tile(y, "9"),   tile(c, ""),
+  tile(c, ""),    tile(y, "4"),   tile(c, ""),
   tile(c, ""),    tile(y, "4"),   tile(c, ""),
   
   emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(g, "5"),   tile(c, ""),
+  tile(c, ""),    tile(g, "9"),   tile(c, ""),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(o, "0"),   tile(y, ""),    tile(r, "8"),
+  tile(o, "0"),   tile(y, ""),    tile(r, "4"),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(b, "4"),   tile(c, ""),
+  tile(c, ""),    tile(b, "8"),   tile(c, ""),
 )
 
 It is trivial to check whether an edge is oriented or not if it is at the original position. In any other position we have to define a logic that determines whether the edge is oriented or flipped. We choose one of the 3 main axis we base our orientation on. If we choose the Z-axis we can define the orientation of an edge as follows:
@@ -315,39 +315,39 @@ In practice this can be checked faster by choosing a tile for a certain edge and
 We define the function $O_E: {0, dots, 2^12 - 1} times M -> {0, dots, 2^12 - 1}$. The space needed to store this function is $2^12 dot.op 18 dot.op 2 "byte" approx 147 "kb"$. Similar to the edge permuation function this can be calculated for every move seperately. The new orientation state after applying a move can be calculated by applying the permuation of that move on the orientation state. For the moves ${"F ", "F' ", "B ", "B' "}$ all edges affected by that move have their orientation flipped after the permuation was applied. 
 
 == Corner permuation
-The position of all corners is a permuation of 8 elements. We need $ceil(log_2(8!)) = 16$ bits to store the lexicographic index of a corner permuation. Similar to the edges we use the family of bijective functions $C_i: {0, 1, dots, 7} arrow {0, 1, dots, 7}$ where $i in {0, 1, dots, 7! - 1}$ is the $0$-based lexicographic index of the permuation that $C_i$ represents. Every corner and every position corrosponds to an index between $0$ and $7$ now. All corners are sorted by their X, Y and Z coordinates as seen in the following cube net.
+The position of all corners is a permuation of 8 elements. We need $ceil(log_2(8!)) = 16$ bits to store the lexicographic index of a corner permuation. Similar to the edges we use the family of bijective functions $C_i: {0, 1, dots, 7} arrow {0, 1, dots, 7}$ where $i in {0, 1, dots, 7! - 1}$ is the $0$-based lexicographic index of the permuation that $C_i$ represents. Every corner and every position corrosponds to an index between $0$ and $7$ now. All corners are lexicographicaly sorted by their unique tuple $(x, y, z) in {O, R} times {Y, W} times {B, G}$. 
 
 #grid(
   columns: (1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm), 
   emptySquare, emptySquare, emptySquare, 
-  tile(w, "3"),    tile(c, ""),   tile(w, "7"),
+  tile(w, "2"),    tile(c, ""),   tile(w, "6"),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
   tile(c, ""),   tile(w, ""),    tile(c, ""),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(w, "2"),    tile(c, ""),   tile(w, "6"),
+  tile(w, "3"),    tile(c, ""),   tile(w, "7"),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare,
   
-  tile(o, "3"),    tile(c, ""),   tile(o, "2"),
-  tile(g, "2"),    tile(c, ""),   tile(g, "6"),
-  tile(r, "6"),    tile(c, ""),  tile(r, "7"),
-  tile(b, "7"),    tile(c, ""),   tile(b, "3"),
+  tile(o, "2"),    tile(c, ""),   tile(o, "3"),
+  tile(g, "3"),    tile(c, ""),   tile(g, "7"),
+  tile(r, "7"),    tile(c, ""),  tile(r, "6"),
+  tile(b, "6"),    tile(c, ""),   tile(b, "2"),
   
   tile(c, ""),    tile(o, ""),    tile(c, ""),
   tile(c, ""),    tile(g, ""),    tile(c, ""),
   tile(c, ""),    tile(r, ""),    tile(c, ""),
   tile(c, ""),    tile(b, ""),    tile(c, ""),
   
-  tile(o, "1"),    tile(c, ""),   tile(o, "0"),
-  tile(g, "0"),    tile(c, ""),   tile(g, "4"),
-  tile(r, "4"),    tile(c, ""),   tile(r, "5"),
-  tile(b, "5"),    tile(c, ""),   tile(b, "1"),
+  tile(o, "0"),    tile(c, ""),   tile(o, "1"),
+  tile(g, "1"),    tile(c, ""),   tile(g, "5"),
+  tile(r, "5"),    tile(c, ""),   tile(r, "4"),
+  tile(b, "4"),    tile(c, ""),   tile(b, "0"),
   
   emptySquare, emptySquare, emptySquare, 
-  tile(y, "0"),    tile(c, ""),   tile(y, "4"),
+  tile(y, "1"),    tile(c, ""),   tile(y, "5"),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
   tile(c, ""),   tile(y, ""),    tile(c, ""),
   emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(y, "1"),    tile(c, ""),   tile(y, "5"),
+  tile(y, "0"),    tile(c, ""),   tile(y, "4"),
 )
 
 As with the edges the $i$-th entry in the permutation matrix describes the position to which the $i$-th corner went.

@@ -125,17 +125,17 @@ Every edge has to correspond to an index between 0 and 11 now.
   tile(c, ""),    tile(o, "1"),   tile(c, ""),
   tile(c, ""),    tile(g, "11"),   tile(c, ""),
   tile(c, ""),    tile(r, "5"),  tile(c, ""),
-  tile(c, ""),    tile(b, "6"),   tile(c, ""),
+  tile(c, ""),    tile(b, "10"),   tile(c, ""),
   
   tile(o, "2"),   tile(o, ""),    tile(o, "3"),
   tile(g, "3"),   tile(g, ""),    tile(g, "7"),
   tile(r, "7"),   tile(r, ""),    tile(r, "6"),
-  tile(b, "9"),   tile(b, ""),    tile(b, "1"),
+  tile(b, "6"),   tile(b, ""),    tile(b, "2"),
   
   tile(c, ""),    tile(o, "0"),   tile(c, ""),
   tile(c, ""),    tile(g, "9"),   tile(c, ""),
   tile(c, ""),    tile(r, "4"),   tile(c, ""),
-  tile(c, ""),    tile(b, "4"),   tile(c, ""),
+  tile(c, ""),    tile(b, "8"),   tile(c, ""),
   
   emptySquare, emptySquare, emptySquare, 
   tile(c, ""),    tile(y, "9"),   tile(c, ""),
@@ -256,7 +256,7 @@ are all values we need to store.
   [$"F ", "F2", "F'"$], [$362 880$], [$1$], [$181 440$]
 )
 
-The sum of all reduced lengths of the moves ${ "L ", "R ", "D ", "U ", "B ", "F " }$ is $141 711 420$. So all values of $g_x$can be stored by using $141711420 dot.op 4 "byte" approx 142 "megabyte"$.
+The sum of all reduced lengths of the moves ${ "L ", "R ", "D ", "U ", "B ", "F " }$ is $141 711 420$. So all values of $g_x$can be stored by using $141711420 dot.op 4 "byte" approx 567 "megabyte"$.
 
 *TODO*: Perfomance comparison for full table and only base moves table
 
@@ -369,7 +369,7 @@ We define the function $P_C: {0, dots, 3^8 - 1} times M -> {0, dots, 3^8 - 1}$. 
 
 *TODO*: Add extra modell to explain corner orientation function
 
-= Symmetries
+= Geometric Symmetries
 There are $48$ symmetries a $3$ by $3$ cube can have. 
 
 Every symmetry is defined as a bijective function $S_i: F -> F$ for all $i in {0, ..., 47}$ that maps faces of to other faces such that $forall x in F: f(S_i(x)) = S_i(f(x))$ with the flip function $f$ that maps opposite sides to each other. 
@@ -492,10 +492,22 @@ for all $(a, b) in cal(E)$ and $(x, y, z) in cal(C)$.
 == Index symmetry
 When working with a IndexCube representation the symmetry transformation is diffrent for permutation and orientation state.
 
-*TODO* Edges, orientation, Test 
+*Idea*: Convert edge, corner orientation into permuation space instead of position space
+
+*TODO*: Edges, orientation, Test 
 
 Corner state $P_C$, Symmetryfunction $S_C$:
 $ P_C' = S_C^(-1) compose P_C compose S_C $
 
 = Inverse Symmetry
 2 cubes are symmetric over inverse symmetry when the inverse of the solution to one cube solves the other. The inverse $X^(-1)$ of a sequence $X$ of moves is the sequence in reversed order and every rotation direction getting reversed as well. In the following example we consider move sequences. $X = ["L2", "D "]$ and $Y = ["D'"  "L2"]$. Now the cubes that these 2 scrambles generate are not symmetric under any previously defined symmetry but they are inversely symmetric since $X^(-1) = Y$ or equivalent $X = Y^(-1)$. 
+
+= Symmetry hashing
+Since we store a set of cubes where the shortest solution is known, a hashing algorithm is needed to efficiently search in that set. Since we store only one representative of all symmetries a specific state can have searching a random cube in that set can get tricky. It is possible to transform the cube by every symmetry and then check whether it is in our set, resulting in $48$ contain checks in our set. The following chapters talk about faster methods to achive this. 
+
+
+== Lowest symmetry
+A solution is to define an total order over all cubes and then only store the smallest representative of all symmetric states a cube can have. When searching for a specific cube in our set we can transform its state by all symmetries and check which one is smallest in the sense of the defined order. This lowest symmetry state is then looked up in our set.
+
+== Symmetry resistent properties
+Some properties are the same for all symmetries of a specific cube. The amount of correctly placed edges and corners is such a property. Since the can only be $8 * 12$ diffrent values for the amount of solved edges and corners this is not sufficient as a hashing function. 

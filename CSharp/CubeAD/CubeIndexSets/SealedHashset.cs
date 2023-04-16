@@ -37,7 +37,7 @@ namespace CubeAD.IndexCubeSets
 
 			//Count cubes for each bucket
 			for (int i = 0; i < cubes.Length; i++)
-				StartIndex[cubes[i].EdgePermutationIndex]++;
+				StartIndex[cubes[i].InverseEdgePermutationIndex]++;
 
 			//Calculate distribution metrics
 			double Mean = (double)cubes.Length / BUCKET_COUNT;
@@ -88,7 +88,7 @@ namespace CubeAD.IndexCubeSets
 
 			//Count cubes for each bucket
 			for (int i = 0; i < Data.Length; i++)
-				StartIndex[Data[i].EdgePermutationIndex]++;
+				StartIndex[Data[i].InverseEdgePermutationIndex]++;
 			//Sum up the first i cubes (prefix sum)
 			for (int i = 1; i < StartIndex.Length; i++)
 				StartIndex[i] += StartIndex[i - 1];
@@ -127,8 +127,8 @@ namespace CubeAD.IndexCubeSets
 		public bool Contains(IndexCube index)
 		{
 			//Find start and end of corresbonding bucket
-			int start = StartIndex[index.EdgePermutationIndex];
-			int end = StartIndex[index.EdgePermutationIndex + 1];
+			int start = StartIndex[index.InverseEdgePermutationIndex];
+			int end = StartIndex[index.InverseEdgePermutationIndex + 1];
 
 			for (int i = start; i < end; i++)
 			{
@@ -141,8 +141,8 @@ namespace CubeAD.IndexCubeSets
 
 		public bool TryGetValue(IndexCube index, out IndexCube actual)
 		{
-			int start = StartIndex[index.EdgePermutationIndex];
-			int end = StartIndex[index.EdgePermutationIndex + 1];
+			int start = StartIndex[index.InverseEdgePermutationIndex];
+			int end = StartIndex[index.InverseEdgePermutationIndex + 1];
 
 			for (int i = start; i < end; i++)
 			{

@@ -24,7 +24,7 @@ namespace CubeAD.CubeRepresentation
         public const ushort MAX_EDGE_ORIENTATION = 4096;        //2^12
         public const ushort MAX_CORNER_ORIENTATION = 6561;      //3^8
 
-        public bool IsSovled => EdgeOrientationIndex == 0 && EdgePermutationIndex == 0 && CornerOrientationIndex == 0 && CornerPermutationIndex == 0;
+        public bool IsSovled => EdgeOrientationIndex == 0 && InverseEdgePermutationIndex == 0 && CornerOrientationIndex == 0 && CornerPermutationIndex == 0;
 
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace CubeAD.CubeRepresentation
         {
             get
             {
-                BigInteger ret = EdgePermutationIndex;
+                BigInteger ret = InverseEdgePermutationIndex;
                 ret *= MAX_CORNER_PERMUTATION;
                 ret += CornerPermutationIndex;
                 ret *= MAX_EDGE_ORIENTATION;
@@ -46,7 +46,7 @@ namespace CubeAD.CubeRepresentation
             }
         }
 
-        public uint EdgePermutationIndex;
+        public uint InverseEdgePermutationIndex;
         public ushort CornerPermutationIndex;
         public ushort EdgeOrientationIndex;
         public ushort CornerOrientationIndex;
@@ -61,7 +61,7 @@ namespace CubeAD.CubeRepresentation
                 cornerOrientation >= MAX_CORNER_ORIENTATION)
                 throw new ArgumentException("Indices must be smaller than their respected maximum value");
 
-            EdgePermutationIndex = edgePermutation;
+            InverseEdgePermutationIndex = edgePermutation;
             CornerPermutationIndex = cornerPermutation;
             EdgeOrientationIndex = edgeOrientation;
             CornerOrientationIndex = cornerOrientation;
@@ -69,7 +69,7 @@ namespace CubeAD.CubeRepresentation
         }
         public IndexCube(Random rnd)
         {
-            EdgePermutationIndex = (uint)rnd.Next((int)MAX_EDGE_PERMUTATION);
+            InverseEdgePermutationIndex = (uint)rnd.Next((int)MAX_EDGE_PERMUTATION);
             CornerPermutationIndex = (ushort)rnd.Next(MAX_CORNER_PERMUTATION);
             EdgeOrientationIndex = (ushort)rnd.Next(MAX_EDGE_ORIENTATION);
             CornerOrientationIndex = (ushort)rnd.Next(MAX_CORNER_ORIENTATION);
@@ -81,7 +81,7 @@ namespace CubeAD.CubeRepresentation
         /// </summary>
         public IndexCube(IndexCube old, CubeMove m)
         {
-            EdgePermutationIndex = old.EdgePermutationIndex;
+            InverseEdgePermutationIndex = old.InverseEdgePermutationIndex;
             CornerPermutationIndex = old.CornerPermutationIndex;
             EdgeOrientationIndex = old.EdgeOrientationIndex;
             CornerOrientationIndex = old.CornerOrientationIndex;
@@ -95,7 +95,7 @@ namespace CubeAD.CubeRepresentation
         /// </summary>
         public void Reset()
         {
-            EdgePermutationIndex = 0;
+            InverseEdgePermutationIndex = 0;
             EdgeOrientationIndex = 0;
             CornerPermutationIndex = 0;
             CornerOrientationIndex = 0;
@@ -108,7 +108,7 @@ namespace CubeAD.CubeRepresentation
         /// <param name="ms"></param>
         public IndexCube(MoveSequenz ms)
         {
-            EdgePermutationIndex = 0;
+            InverseEdgePermutationIndex = 0;
             CornerPermutationIndex = 0;
             EdgeOrientationIndex = 0;
             CornerOrientationIndex = 0;
@@ -123,7 +123,7 @@ namespace CubeAD.CubeRepresentation
         /// <param name="br"></param>
         public IndexCube(BinaryReader br)
         {
-            EdgePermutationIndex = br.ReadUInt32();
+            InverseEdgePermutationIndex = br.ReadUInt32();
             CornerPermutationIndex = br.ReadUInt16();
             EdgeOrientationIndex = br.ReadUInt16();
             CornerOrientationIndex = br.ReadUInt16();
@@ -139,7 +139,7 @@ namespace CubeAD.CubeRepresentation
         /// </summary>
         public void Write(BinaryWriter bw)
         {
-            bw.Write(EdgePermutationIndex);
+            bw.Write(InverseEdgePermutationIndex);
             bw.Write(CornerPermutationIndex);
             bw.Write(EdgeOrientationIndex);
             bw.Write(CornerOrientationIndex);
@@ -148,7 +148,7 @@ namespace CubeAD.CubeRepresentation
 
         public void CopyValuesFrom(IndexCube index)
         {
-            EdgePermutationIndex = index.EdgePermutationIndex;
+            InverseEdgePermutationIndex = index.InverseEdgePermutationIndex;
             CornerPermutationIndex = index.CornerPermutationIndex;
             EdgeOrientationIndex = index.EdgeOrientationIndex;
             CornerOrientationIndex = index.CornerOrientationIndex;
@@ -169,13 +169,13 @@ namespace CubeAD.CubeRepresentation
             if (index < 6)
                 return (byte)(CornerPermutationIndex >> (index - 4) * 8);
 
-            return (byte)(EdgePermutationIndex >> (index - 6) * 8);
+            return (byte)(InverseEdgePermutationIndex >> (index - 6) * 8);
         }
 
         /// <returns>An array representing the permutation of edges</returns>
         public int[] GetEdgePermutation()
         {
-            return GetIndexedPerm(12, (int)EdgePermutationIndex);
+            return GetIndexedPerm(12, (int)InverseEdgePermutationIndex);
         }
         /// <returns>An array representing the orientation of edges</returns>
         public int[] GetEdgeOrientation()
@@ -223,16 +223,16 @@ namespace CubeAD.CubeRepresentation
 
             for (int i = 0; i < count; i++)
             {
-                int index = (int)EdgePermutationIndex / trackLength % array.Length;
+                int index = (int)InverseEdgePermutationIndex / trackLength % array.Length;
 
-                if ((int)EdgePermutationIndex / trackLength / array.Length % 2 == 0)
+                if ((int)InverseEdgePermutationIndex / trackLength / array.Length % 2 == 0)
                 {
-                    EdgePermutationIndex = (EdgePermutationIndex + array[index]) % MAX_EDGE_PERMUTATION;
+                    InverseEdgePermutationIndex = (InverseEdgePermutationIndex + array[index]) % MAX_EDGE_PERMUTATION;
                 }
                 else
                 {
                     index = array.Length - index - 1;
-                    EdgePermutationIndex = (EdgePermutationIndex + MAX_EDGE_PERMUTATION - array[index]) % MAX_EDGE_PERMUTATION;
+                    InverseEdgePermutationIndex = (InverseEdgePermutationIndex + MAX_EDGE_PERMUTATION - array[index]) % MAX_EDGE_PERMUTATION;
                 }
             }
 
@@ -464,7 +464,7 @@ namespace CubeAD.CubeRepresentation
         //Operator
         public static bool operator ==(IndexCube a, IndexCube b)
         {
-            return a.EdgePermutationIndex == b.EdgePermutationIndex &&
+            return a.InverseEdgePermutationIndex == b.InverseEdgePermutationIndex &&
                 a.EdgeOrientationIndex == b.EdgeOrientationIndex &&
                 a.CornerPermutationIndex == b.CornerPermutationIndex &&
                 a.CornerOrientationIndex == b.CornerOrientationIndex;
@@ -475,7 +475,7 @@ namespace CubeAD.CubeRepresentation
         }
         public static bool operator <(IndexCube a, IndexCube b)
         {
-            if (a.EdgePermutationIndex != b.EdgePermutationIndex) return a.EdgePermutationIndex < b.EdgePermutationIndex;
+            if (a.InverseEdgePermutationIndex != b.InverseEdgePermutationIndex) return a.InverseEdgePermutationIndex < b.InverseEdgePermutationIndex;
             if (a.CornerPermutationIndex != b.CornerPermutationIndex) return a.CornerPermutationIndex < b.CornerPermutationIndex;
             if (a.EdgeOrientationIndex != b.EdgeOrientationIndex) return a.EdgeOrientationIndex < b.EdgeOrientationIndex;
 
@@ -483,7 +483,7 @@ namespace CubeAD.CubeRepresentation
         }
         public static bool operator >(IndexCube a, IndexCube b)
         {
-            if (a.EdgePermutationIndex != b.EdgePermutationIndex) return a.EdgePermutationIndex > b.EdgePermutationIndex;
+            if (a.InverseEdgePermutationIndex != b.InverseEdgePermutationIndex) return a.InverseEdgePermutationIndex > b.InverseEdgePermutationIndex;
             if (a.CornerPermutationIndex != b.CornerPermutationIndex) return a.CornerPermutationIndex > b.CornerPermutationIndex;
             if (a.EdgeOrientationIndex != b.EdgeOrientationIndex) return a.EdgeOrientationIndex > b.EdgeOrientationIndex;
 
@@ -509,7 +509,7 @@ namespace CubeAD.CubeRepresentation
         }
         public override int GetHashCode()
         {
-            return HashCode.Combine(EdgePermutationIndex, CornerPermutationIndex, EdgeOrientationIndex, CornerOrientationIndex);
+            return HashCode.Combine(InverseEdgePermutationIndex, CornerPermutationIndex, EdgeOrientationIndex, CornerOrientationIndex);
         }
 
         public int CompareTo(IndexCube other)

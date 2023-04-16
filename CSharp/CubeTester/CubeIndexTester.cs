@@ -15,18 +15,18 @@ namespace CubeTester
 			StickerCube c = new StickerCube();
 			IndexCube index = new IndexCube(c);
 
-			Assert.AreEqual(0, index.EdgePermutationIndex);
+			Assert.AreEqual(0, index.InverseEdgePermutationIndex);
 
 			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
 
 			index = new IndexCube(c);
-			Assert.AreEqual(0, index.EdgePermutationIndex);
+			Assert.AreEqual(0, index.InverseEdgePermutationIndex);
 
 			c.ApplyMoveSequenz(MoveSequenz.CheckerBoard);
 			index = new IndexCube(c);
 
 			//index of permutation 5 4 7 6 1 0 3 2 11 10 9 8
-			Assert.AreEqual(216080063, index.EdgePermutationIndex);
+			Assert.AreEqual(216080063, index.InverseEdgePermutationIndex);
 		}
 
 		[Test]
@@ -186,7 +186,7 @@ namespace CubeTester
 				Assert.AreEqual(buffer.CornerOrientationIndex, index.CornerOrientationIndex);
 				Assert.AreEqual(buffer.CornerPermutationIndex, index.CornerPermutationIndex);
 				Assert.AreEqual(buffer.EdgeOrientationIndex, index.EdgeOrientationIndex);
-				Assert.AreEqual(buffer.EdgePermutationIndex, index.EdgePermutationIndex);
+				Assert.AreEqual(buffer.InverseEdgePermutationIndex, index.InverseEdgePermutationIndex);
 
 				Assert.AreEqual(buffer, index);
 			}
@@ -207,7 +207,7 @@ namespace CubeTester
 				Assert.AreEqual(buffer.CornerOrientationIndex, index.CornerOrientationIndex);
 				Assert.AreEqual(buffer.CornerPermutationIndex, index.CornerPermutationIndex);
 				Assert.AreEqual(buffer.EdgeOrientationIndex, index.EdgeOrientationIndex);
-				Assert.AreEqual(buffer.EdgePermutationIndex, index.EdgePermutationIndex);
+				Assert.AreEqual(buffer.InverseEdgePermutationIndex, index.InverseEdgePermutationIndex);
 
 				Assert.AreEqual(buffer, index);
 			}

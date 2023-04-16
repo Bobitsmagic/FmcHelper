@@ -14,7 +14,7 @@ namespace CubeAD.CubeRepresentation
 {
     public class ArrayCube : IComparable<ArrayCube>
     {
-        const int TILE_COUNT = 6 * 9;
+        public const int TILE_COUNT = 6 * 9;
         static int[,] DualSideToIndex = new int[6, 6]
         {
             //Orange
@@ -51,6 +51,54 @@ namespace CubeAD.CubeRepresentation
             return side * 9 + x + 3 * y;
         }
         static int[][] MoveArray = new int[18][];
+        static int[][] NonIdMoves = new int[18][];
+        static int[][][] MoveCycles = new int[18][][];
+
+        static readonly CubeColor[] SolvedArray = new CubeColor[TILE_COUNT];
+
+        public static List<ArrayCube> GetAllCubes(int maxDepth)
+        {
+            List<ArrayCube> list = new List<ArrayCube>();
+
+            Backtrack(GetSolved(), 0);
+
+            return list;
+
+            void Backtrack(ArrayCube cube, int depth)
+            {
+                list.Add(cube);
+
+                if (depth == maxDepth)
+                    return;
+
+                for(int i = 0; i < 18; i++)
+                {
+                    Backtrack(new ArrayCube(cube, (CubeMove)i), depth + 1);
+                }
+            }
+        }
+        public static HashSet<ArrayCube> GetUniqueCubes(int maxDepth)
+        {
+            HashSet<ArrayCube> list = new HashSet<ArrayCube>();
+
+            Backtrack(GetSolved(), 0);
+
+            return list;
+
+            void Backtrack(ArrayCube cube, int depth)
+            {
+                if (!list.Add(cube))
+                    return;
+
+                if (depth == maxDepth)
+                    return;
+
+                for (int i = 0; i < 18; i++)
+                {
+                    Backtrack(new ArrayCube(cube, (CubeMove)i), depth + 1);
+                }
+            }
+        }
 
         static ArrayCube()
         {                               //6, 12
@@ -76,6 +124,7 @@ namespace CubeAD.CubeRepresentation
                 new int[9]{8, 7, 6, 5, 4, 3, 2, 1, 0},
             };
 
+            //Moves
             for (int side = 0; side < 6; side++)
             {
                 int[] template = Enumerable.Range(0, TILE_COUNT).ToArray();
@@ -101,6 +150,51 @@ namespace CubeAD.CubeRepresentation
                 for (int i = 0; i < template.Length; i++)
                     template[i] = buffer[buffer[buffer[i]]];
                 MoveArray[side * 3 + 2] = template.ToArray();
+            }
+
+            //Move shortcuts
+            for (int m = 0; m < 18; m++)
+            {
+                List<int> list = new List<int>();
+
+                for(int i = 0; i < TILE_COUNT; i++)
+                {
+                    if (MoveArray[m][i] != i)
+                    {
+                        list.Add(i);
+                    }
+                }
+                NonIdMoves[m] = list.ToArray();
+
+                List<int[]> foundCycle = new List<int[]>();
+                bool[] visited = new bool[TILE_COUNT];
+                for (int i = 0; i < TILE_COUNT; i++)
+                {
+                    if (!visited[i])
+                    {
+
+                        list.Clear();
+                        int start = i;
+                        int current = MoveArray[m][start];
+                        list.Add(start);
+
+                        while(start != current)
+                        {
+                            list.Add(current);
+                            current = MoveArray[m][current];
+                        }
+
+                        foreach(int idx in list)
+                            visited[idx] = true;
+
+                        if(list.Count > 1)
+                        {
+                            foundCycle.Add(list.ToArray());
+                        }
+                    }
+
+                    MoveCycles[m] = foundCycle.ToArray();
+                }
             }
 
             //Symmetry
@@ -136,23 +230,32 @@ namespace CubeAD.CubeRepresentation
 
             }
 
-        }
-
-        public ArrayCube()
-        {
-            Reset();
-        }
-
-        public void Reset()
-        {
+            //Solved array
             int index = 0;
             for (int i = 0; i < 6; i++)
             {
                 for (int j = 0; j < 9; j++)
                 {
-                    Data[index++] = (CubeColor)i;
+                    SolvedArray[index++] = (CubeColor)i;
                 }
             }
+        }
+
+        private ArrayCube()
+        {
+            
+        }
+
+        public static ArrayCube GetSolved()
+        {
+            ArrayCube ret = new();
+            ret.Reset();
+            return ret;
+        }
+
+        public void Reset()
+        {
+            Array.Copy(SolvedArray, Data, TILE_COUNT);
         }
 
         public ArrayCube(ArrayCube src)
@@ -162,8 +265,12 @@ namespace CubeAD.CubeRepresentation
 
         public ArrayCube(ArrayCube src, CubeMove cm)
         {
-            Array.Copy(src.Data, Data, TILE_COUNT);
-            MakeMove(cm);
+            int[] move = MoveArray[(int)cm];
+
+            for (int i = 0; i < TILE_COUNT; i++)
+            {
+                Data[move[i]] = src.Data[i];
+            }
         }
 
         public void MakeMove(CubeMove cm)
@@ -172,11 +279,13 @@ namespace CubeAD.CubeRepresentation
 
             int[] move = MoveArray[(int)cm];
 
-            for (int i = 0; i < TILE_COUNT; i++)
+            //Applies movement only to tiles that actually move f(x) != x
+            foreach(int i in NonIdMoves[(int)cm])
             {
                 Data[move[i]] = ArrayBuffer[i];
             }
         }
+   
         public void ApplySequence(List<CubeMove> list)
         {
             foreach (CubeMove cm in list)
@@ -185,7 +294,7 @@ namespace CubeAD.CubeRepresentation
             }
         }
 
-
+        #region Get Edge/Corner, Permutation
         public static int GetEdgeColorIndex(int side1, int side2)
         {
             return DualSideToIndex[side1, side2];
@@ -299,7 +408,7 @@ namespace CubeAD.CubeRepresentation
                 {
                     if (x / 2 == y / 2) continue;
 
-                    ret = ret << 1 | (EdgeIsOriented(x, y) ? 0 : 1);
+                    ret = ret << 1 | (EdgeIsOriented(y, x) ? 0 : 1);
                 }
             }
 
@@ -335,30 +444,29 @@ namespace CubeAD.CubeRepresentation
             return (ushort)ret;
         }
 
-        public ArrayCube TransformSymmetry(SymmetryElement se)
+        #endregion
+        
+        public void TransformSymmetry(SymmetryElement se, ArrayCube ret)
         {
-
-            ArrayCube ret = new ArrayCube();
             int[] perm = SymmetryArrays[se.Index];
 
             for (int i = 0; i < TILE_COUNT; i++)
             {
                 ret.Data[perm[i]] = se.TransformColor(Data[i]);
             }
-
-            return ret;
         }
         public ArrayCube FindLowestSymmetry()
         {
             ArrayCube best = new ArrayCube(this);
+            ArrayCube buffer = new ArrayCube();
 
             foreach (var se in SymmetryElement.Elements)
             {
-                ArrayCube buffer = TransformSymmetry(se);
+                TransformSymmetry(se, buffer);
 
                 if (buffer.CompareTo(best) < 0)
                 {
-                    best = buffer;
+                    best = new ArrayCube(buffer);
                 }
             }
 
@@ -367,21 +475,13 @@ namespace CubeAD.CubeRepresentation
 
         public ArrayCube FindLowestSymmetryInverse()
         {
-            ArrayCube best = new ArrayCube(this);
+            ArrayCube best = FindLowestSymmetry();
 
+            ArrayCube inverse = GetInverse();
+            ArrayCube buffer = new ArrayCube();
             foreach (var se in SymmetryElement.Elements)
             {
-                ArrayCube buffer = TransformSymmetry(se);
-
-                if (buffer.CompareTo(best) < 0)
-                {
-                    best = buffer;
-                }
-            }
-
-            foreach (var se in SymmetryElement.Elements)
-            {
-                ArrayCube buffer = GetInverse().TransformSymmetry(se);
+                inverse.TransformSymmetry(se, buffer);
 
                 if (buffer.CompareTo(best) < 0)
                 {
@@ -418,7 +518,7 @@ namespace CubeAD.CubeRepresentation
             return ret;
         }
 
-        public string GetSideView()
+        public string SideView()
         {
             int[] sides = new int[] { 0, 5, 1, 4 };
             string[] tiles = new string[]
@@ -476,8 +576,19 @@ namespace CubeAD.CubeRepresentation
             return s + ")";
 
         }
+
+        public static bool operator ==(ArrayCube a, ArrayCube b)
+        {
+            return a.Data.AsSpan().SequenceEqual(b.Data);
+        }
+        public static bool operator !=(ArrayCube a, ArrayCube b)
+        {
+            return !(a == b);
+        }
         public int CompareTo(ArrayCube other)
         {
+            if (this == other) return 0;
+
             for (int i = 0; i < TILE_COUNT; i++)
             {
                 if (Data[i] != other.Data[i])
@@ -511,8 +622,7 @@ namespace CubeAD.CubeRepresentation
 
         public override bool Equals(object obj)
         {
-            return obj is ArrayCube cube &&
-                   Data.SequenceEqual(cube.Data);
+            return this == (ArrayCube)obj;
         }
     }
 }

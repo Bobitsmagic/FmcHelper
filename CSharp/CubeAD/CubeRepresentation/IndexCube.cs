@@ -131,7 +131,6 @@ namespace CubeAD.CubeRepresentation
         }
         #endregion
 
-
         #region Functions
 
         /// <summary>

@@ -23,7 +23,7 @@ namespace CubeAD
 		public const int MAX_MOVE_DEPTH = 7;
 
 		//public static readonly string PRE_COMP_PATH = @"C:\Users\hmart\source\repos\FmcHelper\Files";
-        public static readonly string PRE_COMP_PATH = @"C:\Users\hmart\source\repos\BwInf40Runde1\FmcHelper\Files";
+        public static readonly string PRE_COMP_PATH = @"C:\Users\Martin\source\repos\FmcHelper\Files";
 
         public const string MOVE_TREE_PREFIX = "solved_tree_";
 

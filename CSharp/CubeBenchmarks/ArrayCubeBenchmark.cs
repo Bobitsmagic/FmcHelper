@@ -18,6 +18,8 @@ namespace CubeBenchmarks
         static List<ArrayCube> cubes = ArrayCube.GetAllCubes(3);
         static List<ArrayCube> uniqueCubes = ArrayCube.GetUniqueCubes(4).ToList();
         static HashSet<ArrayCube> hashset = new HashSet<ArrayCube>(uniqueCubes);
+		bool f = false;
+		bool t = true;
 
         public ArrayCubeBenchmark()
         {
@@ -28,93 +30,130 @@ namespace CubeBenchmarks
             }
         }
 
-        #region Symmetry
+		#region Conversion
+		[Benchmark(Baseline = true)]
+		public void FindCornerOrientationIndex()
+		{
+			foreach (ArrayCube cube in uniqueCubes)
+				cube.FindCornerOrientationIndex();
+		}
+		[Benchmark]
+		public void FindCornerOrientationIndexFast()
+		{
+			foreach (ArrayCube cube in uniqueCubes)
+				cube.FindCornerOrientationIndexFast();
+		}
 
-        [Benchmark]
-        public void LowestSym()
-        {
-            foreach (ArrayCube cube in uniqueCubes)
-                cube.FindLowestSymmetry();
-        }
-        
+		//[Benchmark]
+		//public void FindEdgeOrientationIndex()
+		//{
+		//	foreach (ArrayCube cube in uniqueCubes)
+		//		cube.FindEdgeOrientationIndex();
+		//}
 
-        #endregion
-        #region IsSolved
-        //|        Method |      Mean |     Error |    StdDev |
-        //|-------------- |----------:|----------:|----------:|
-        //|   NormalEqual | 50.220 ns | 0.8045 ns | 0.7131 ns |
-        //|   NoCondJumps | 59.609 ns | 0.8384 ns | 0.7432 ns |
-        //| SequenceEqual | 30.805 ns | 0.4298 ns | 0.3810 ns |
-        //|     SpanEqual |  9.199 ns | 0.0975 ns | 0.0912 ns |
+		//[Benchmark]
+		//public void EdgePermIndex()
+		//{
+		//	foreach (ArrayCube cube in uniqueCubes)
+		//		cube.GetEdgePermIndex();
+		//}
 
-        //        [Benchmark]
-        //        public bool NormalEqual()
-        //        {
-        //            for (int i = 0; i < TILE_COUNT; i++)
-        //                if (Data[i] != Solved[i]) return false;
+		//[Benchmark]
+		//public void CornerPermIndex()
+		//{
+		//	foreach (ArrayCube cube in uniqueCubes)
+		//		cube.GetCornerPermIndex();
+		//}
 
-        //            return true;
-        //        }
+		#endregion
 
-        //        [Benchmark]
-        //        public bool NoCondJumps()
-        //        {
-        //            bool res = true;
-        //            for (int i = 0; i < TILE_COUNT; i++)
-        //                res &= Data[i] == Solved[i];
+		#region Symmetry
 
-        //            return res;
-        //        }
+		//[Benchmark]
+		//public void LowestSym()
+		//{
+		//    foreach (ArrayCube cube in uniqueCubes)
+		//        cube.FindLowestSymmetry();
+		//}
 
-        //        [Benchmark]
-        //        public bool SequenceEqual()
-        //        {
-        //            return Enumerable.SequenceEqual(Data, Solved);
-        //        }
 
-        //        [Benchmark]
-        //        public bool SpanEqual()
-        //        {
-        //            return Data.AsSpan().SequenceEqual(Solved.AsSpan());
-        //        }
+		#endregion
+		#region IsSolved
+		//|        Method |      Mean |     Error |    StdDev |
+		//|-------------- |----------:|----------:|----------:|
+		//|   NormalEqual | 50.220 ns | 0.8045 ns | 0.7131 ns |
+		//|   NoCondJumps | 59.609 ns | 0.8384 ns | 0.7432 ns |
+		//| SequenceEqual | 30.805 ns | 0.4298 ns | 0.3810 ns |
+		//|     SpanEqual |  9.199 ns | 0.0975 ns | 0.0912 ns |
 
-        #endregion
+		//[Benchmark]
+		//public bool NormalEqual()
+		//{
+		//    for (int i = 0; i < TILE_COUNT; i++)
+		//        if (Data[i] != Solved[i]) return false;
 
-        #region Constructor/Reset
-        //|       Method |      Mean |     Error |    StdDev |
-        //|------------- |----------:|----------:|----------:|
-        //|   DoubleLoop | 45.641 ns | 0.9484 ns | 1.4195 ns |
-        //| DivisionLoop | 70.911 ns | 1.4318 ns | 1.9598 ns |
-        //|    ArrayCopy |  6.290 ns | 0.1214 ns | 0.1076 ns |
-        //[Benchmark]
-        //public void DoubleLoop()
-        //{
-        //    int index = 0;
-        //    for(int i = 0; i < 6; i++)
-        //    {
-        //        for(int j = 0; j < 9; j++)
-        //        {
-        //            Data[index++] = (CubeMove)i;
-        //        }
-        //    }
-        //}
+		//    return true;
+		//}
 
-        //[Benchmark]
-        //public void DivisionLoop()
-        //{
-        //    for (int i = 0; i < TILE_COUNT; i++)
-        //    {
-        //        Data[i] = (CubeMove)(i / 9);
-        //    }
-        //}
+		//[Benchmark]
+		//public bool NoCondJumps()
+		//{
+		//    bool res = true;
+		//    for (int i = 0; i < TILE_COUNT; i++)
+		//        res &= Data[i] == Solved[i];
 
-        //[Benchmark]
-        //public void ArrayCopy()
-        //{
-        //    Array.Copy(Solved, 0, Data, 0, TILE_COUNT); 
-        //}
+		//    return res;
+		//}
 
-        #endregion
+		//[Benchmark]
+		//public bool SequenceEqual()
+		//{
+		//    return Enumerable.SequenceEqual(Data, Solved);
+		//}
 
-    }
+		//[Benchmark]
+		//public bool SpanEqual()
+		//{
+		//    return Data.AsSpan().SequenceEqual(Solved.AsSpan());
+		//}
+
+		#endregion
+
+		#region Constructor/Reset
+		//|       Method |      Mean |     Error |    StdDev |
+		//|------------- |----------:|----------:|----------:|
+		//|   DoubleLoop | 45.641 ns | 0.9484 ns | 1.4195 ns |
+		//| DivisionLoop | 70.911 ns | 1.4318 ns | 1.9598 ns |
+		//|    ArrayCopy |  6.290 ns | 0.1214 ns | 0.1076 ns |
+		//[Benchmark]
+		//public void DoubleLoop()
+		//{
+		//    int index = 0;
+		//    for (int i = 0; i < 6; i++)
+		//    {
+		//        for (int j = 0; j < 9; j++)
+		//        {
+		//            Data[index++] = (CubeMove)i;
+		//        }
+		//    }
+		//}
+
+		//[Benchmark]
+		//public void DivisionLoop()
+		//{
+		//    for (int i = 0; i < TILE_COUNT; i++)
+		//    {
+		//        Data[i] = (CubeMove)(i / 9);
+		//    }
+		//}
+
+		//[Benchmark]
+		//public void ArrayCopy()
+		//{
+		//    Array.Copy(Solved, 0, Data, 0, TILE_COUNT);
+		//}
+
+		#endregion
+
+	}
 }

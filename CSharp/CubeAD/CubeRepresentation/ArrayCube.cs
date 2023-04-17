@@ -41,7 +41,19 @@ namespace CubeAD.CubeRepresentation
             {38, 44, 36, 42},
             {45, 51, 47, 53}
         };
-        static CubeColor[] ArrayBuffer = new CubeColor[TILE_COUNT];
+
+        //Maps 3 colors to a corner tile index
+        static int[,,] FullCornerTileIndex = new int[6, 6, 6];
+		static int[,,] FullCornerIndex = new int[6, 6, 6]; 
+		static int[] IndexedCornerTilesIndexLinear = new int[8 * 3];
+
+		//Maps 2 colors to an edge tile index
+		static int[,] FullEdgeIndex = new int[6, 6];
+        static int[] IndexedEdgeTileIndexLinear = new int[12 * 2];
+        static int[,,] EdgeIsOrientedTable = new int[12, 6, 6]; // pos, color, color
+        
+
+		static CubeColor[] ArrayBuffer = new CubeColor[TILE_COUNT];
 
         static int[][] SymmetryArrays = new int[48][];
 
@@ -239,7 +251,104 @@ namespace CubeAD.CubeRepresentation
                     SolvedArray[index++] = (CubeColor)i;
                 }
             }
-        }
+
+			//Edge/Corner shortcuts            
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = 0; y < 6; y++)
+				{
+					FullEdgeIndex[x, y] = new SortedEdge((CubeColor)x, (CubeColor)y).GetIndex;
+					for (int z = 0; z < 6; z++)
+					{
+                        FullCornerTileIndex[x, y, z] = -1;
+
+						if (x / 2 == y / 2 || z / 2 == x / 2 || z / 2 == y / 2) continue;
+
+                        FullCornerTileIndex[x, y, z] = GetCornerColorIndex(x, y, z);
+                        
+                        
+                        FullCornerIndex[x, y, z] = new SortedCorner((CubeColor)x, (CubeColor)y, (CubeColor)z).GetIndex;
+					}
+				}
+			}
+
+			index = 0;
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = x + 1; y < 6; y++)
+				{
+					if (y / 2 == x / 2) continue;
+
+					for (int z = y + 1; z < 6; z++)
+					{
+						if (z / 2 == x / 2 || z / 2 == y / 2) continue;
+
+
+                        IndexedCornerTilesIndexLinear[index * 3 + 0] = FullCornerTileIndex[x, y, z];
+						IndexedCornerTilesIndexLinear[index * 3 + 1] = FullCornerTileIndex[y, x, z];
+						IndexedCornerTilesIndexLinear[index * 3 + 2] = FullCornerTileIndex[z, x, y];
+
+						index++;
+					}
+				}
+			}
+
+			index = 0;
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = x + 1; y < 6; y++)
+				{
+					if (y / 2 == x / 2) continue;
+
+                    IndexedEdgeTileIndexLinear[index * 2 + 0] = DualSideToIndex[x, y];
+					IndexedEdgeTileIndexLinear[index * 2 + 1] = DualSideToIndex[y, x];
+
+                    index++;
+				}
+			}
+
+			//orientation table
+			index = 0;
+			for (int x = 0; x < 6; x++)
+			{
+				for (int y = x + 1; y < 6; y++)
+				{
+					if (y / 2 == x / 2) continue;
+
+					for (int c1 = 0; c1 < 6; c1++)
+					{
+						for (int c2 = c1 + 1; c2 < 6; c2++)
+						{
+							if (c2 / 2 == c1 / 2) continue;
+
+                            EdgeIsOrientedTable[index, c1, c2] = Convert.ToInt32(IsOriented());
+							EdgeIsOrientedTable[index, c2, c1] = Convert.ToInt32(!IsOriented());
+
+							bool IsOriented()
+							{
+								//if contains white or yellow
+								if (c1 / 2 == 1 || c2 / 2 == 1)
+								{
+									if (x / 2 == 0)
+										return c2 / 2 == 1;
+									else
+										return c1 / 2 == 1;
+								}
+								else
+								{
+									if (y / 2 == 0)
+										return c2 / 2 == 2;
+									else
+										return c1 / 2 == 2;
+								}
+							}
+						}
+					}
+
+                    index++;
+				}
+			}
+		}
 
         private ArrayCube()
         {
@@ -310,7 +419,6 @@ namespace CubeAD.CubeRepresentation
             int index = side2 % 2 * 2 + side3 % 2;
             return CornerIndices[side1, index];
         }
-
         public static int GetCornerColorIndex(Corner corner)
         {
             return GetCornerColorIndex((int)corner.A, (int)corner.B, (int)corner.C);
@@ -320,68 +428,92 @@ namespace CubeAD.CubeRepresentation
         {
             return new Edge(Data[GetEdgeColorIndex(side1, side2)], Data[GetEdgeColorIndex(side2, side1)]);
         }
-
         public Corner GetCorner(int side1, int side2, int side3)
         {
             return new Corner(Data[GetCornerColorIndex(side1, side2, side3)],
                 Data[GetCornerColorIndex(side2, side1, side3)],
                 Data[GetCornerColorIndex(side3, side1, side2)]);
-
         }
 
-        public int[] GetEdgePerm()
-        {
-            int[] ret = new int[12];
-
+		public int[] GetEdgePerm()
+		{
+			int[] ret = new int[12];
             int index = 0;
-            for (int x = 0; x < 6; x++)
+            for(int i = 0; i < 12; i++)
             {
-                for (int y = x + 1; y < 6; y++)
-                {
-                    if (y / 2 == x / 2) continue;
-                    ret[new SortedEdge(Data[GetEdgeColorIndex(x, y)], Data[GetEdgeColorIndex(y, x)]).GetIndex] = index++;
-                }
+                ret[FullEdgeIndex[
+                    (int)Data[IndexedEdgeTileIndexLinear[index++]],
+                    (int)Data[IndexedEdgeTileIndexLinear[index++]]]] = i;
             }
 
-            return ret;
-        }
-
-        public int[] GetCornerPerm()
+			return ret;
+		}
+		public int[] GetCornerPerm()
         {
-            int[] ret = new int[8];
+			int[] ret = new int[8];
+
+			int index = 0;
+			for (int i = 0; i < 8; i++)
+			{
+				ret[FullCornerIndex[
+					(int)Data[IndexedCornerTilesIndexLinear[index++]],
+					(int)Data[IndexedCornerTilesIndexLinear[index++]],
+					(int)Data[IndexedCornerTilesIndexLinear[index++]]]] = i;
+			}
+
+			return ret;
+		}
+		public int GetCornerPermIndex()
+		{
+			Span<int> perm = stackalloc int[8];
 
             int index = 0;
-            for (int x = 0; x < 6; x++)
-            {
-                for (int y = x + 1; y < 6; y++)
-                {
-                    if (y / 2 == x / 2) continue;
+			for (int i = 0; i < 8; i++)
+			{
+				perm[FullCornerIndex[
+					(int)Data[IndexedCornerTilesIndexLinear[index++]],
+					(int)Data[IndexedCornerTilesIndexLinear[index++]],
+					(int)Data[IndexedCornerTilesIndexLinear[index++]]]] = i;
+			}
 
-                    for (int z = y + 1; z < 6; z++)
-                    {
-                        if (z / 2 == x / 2 || z / 2 == y / 2) continue;
+			return Permutation.GetIndex(perm);
+		}
+		public int GetEdgePermIndex()
+		{
+			Span<int> perm = stackalloc int[12];
+			int index = 0;
+			for (int i = 0; i < 12; i++)
+			{
+				perm[FullEdgeIndex[
+					(int)Data[IndexedEdgeTileIndexLinear[index++]],
+					(int)Data[IndexedEdgeTileIndexLinear[index++]]]] = i;
+			}
 
-                        ret[new SortedCorner(
-                            Data[GetCornerColorIndex(x, y, z)],
-                            Data[GetCornerColorIndex(y, x, z)],
-                            Data[GetCornerColorIndex(z, x, y)]
-                            ).GetIndex] = index++;
-                    }
-                }
-            }
+			return Permutation.GetIndex(perm);   
+		}
+		public int GetInverseEdgePermIndex()
+		{
+			Span<int> perm = stackalloc int[12];
+			int index = 0;
+			for (int i = 0; i < 12; i++)
+			{
+				perm[i] = FullEdgeIndex[
+					(int)Data[IndexedEdgeTileIndexLinear[index++]],
+					(int)Data[IndexedEdgeTileIndexLinear[index++]]];
+			}
 
-            return ret;
-        }
+			return Permutation.GetIndex(perm);
+		}
 
-        //Oriented green in front white on top
-        public bool EdgeIsOriented(int side1, int side2)
+
+		//Oriented green in front white on top
+		public bool EdgeIsOriented(int side1, int side2)
         {
             if (side2 < side1)
                 (side1, side2) = (side2, side1);
 
             int c1 = (int)Data[GetEdgeColorIndex(side1, side2)];
             int c2 = (int)Data[GetEdgeColorIndex(side2, side1)];
-
 
             //if contains white or yellow
             if (c1 / 2 == 1 || c2 / 2 == 1)
@@ -399,22 +531,21 @@ namespace CubeAD.CubeRepresentation
                     return c1 / 2 == 2;
             }
         }
-        public ushort FindEdgeOrientationIndex()
-        {
-            int ret = 0;
-            for (int x = 0; x < 6; x++)
+		public ushort FindEdgeOrientationIndex()
+		{
+			int ret = 0;
+            int index = 0;
+            for (int i = 0; i < 12; i++)
             {
-                for (int y = x + 1; y < 6; y++)
-                {
-                    if (x / 2 == y / 2) continue;
+				ret = (ret << 1) | EdgeIsOrientedTable[i,
+					(int)Data[IndexedEdgeTileIndexLinear[index++]],
+					(int)Data[IndexedEdgeTileIndexLinear[index++]]];
+			}
 
-                    ret = ret << 1 | (EdgeIsOriented(y, x) ? 0 : 1);
-                }
-            }
+			return (ushort)ret;
+		}
 
-            return (ushort)ret;
-        }
-        public int CornerOrientaion(int side1, int side2, int side3)
+		public int CornerOrientaion(int side1, int side2, int side3)
         {
             if (!(side1 < side2 && side2 < side3))
                 throw new ArgumentException("Sides need to be in ascending order");
@@ -427,26 +558,41 @@ namespace CubeAD.CubeRepresentation
 
             return 2;
         }
-        public ushort FindCornerOrientationIndex()
+
+		public ushort FindCornerOrientationIndex()
+		{
+			int ret = 0;
+			int index = 0;
+			for (int i = 0; i < 8; i++)
+			{
+				int val = 2;
+				if ((int)Data[IndexedCornerTilesIndexLinear[index++]] < 2)
+					val = 0;
+
+				if ((int)Data[IndexedCornerTilesIndexLinear[index]] < 2)
+					val = 1;
+
+				ret = ret * 3 + val;
+
+				index += 2;
+			}
+
+			return (ushort)ret;
+		}
+
+		public IndexCube GetIndexCube()
         {
-            int ret = 0;
-            for (int x = 0; x < 2; x++)
-            {
-                for (int y = 2; y < 4; y++)
-                {
-                    for (int z = 4; z < 6; z++)
-                    {
-                        ret = ret * 3 + CornerOrientaion(x, y, z);
-                    }
-                }
-            }
-
-            return (ushort)ret;
+            return new IndexCube((uint)GetInverseEdgePermIndex(), 
+                (ushort)GetCornerPermIndex(), FindEdgeOrientationIndex(), FindCornerOrientationIndex());
         }
+		#endregion
 
-        #endregion
-        
-        public void TransformSymmetry(SymmetryElement se, ArrayCube ret)
+		#region Symmetries
+
+		//|    Method |     Mean |     Error |    StdDev |
+		//|---------- |---------:|----------:|----------:|
+		//| LowestSym | 5.865 ms | 0.0589 ms | 0.0551 ms |
+		public void TransformSymmetry(SymmetryElement se, ArrayCube ret)
         {
             int[] perm = SymmetryArrays[se.Index];
 
@@ -518,7 +664,9 @@ namespace CubeAD.CubeRepresentation
             return ret;
         }
 
-        public string SideView()
+		#endregion
+
+		public string SideView()
         {
             int[] sides = new int[] { 0, 5, 1, 4 };
             string[] tiles = new string[]

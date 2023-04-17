@@ -72,9 +72,10 @@ namespace CubeAD
 			for (int i = 0; i < permutation.Length; i++)
 			{
 				int counter = 0;
+				int p = permutation[i];
 				for (int j = i + 1; j < permutation.Length; j++)
 				{
-					if (permutation[i] > permutation[j])
+					if (p > permutation[j])
 						counter++;
 				}
 
@@ -82,6 +83,43 @@ namespace CubeAD
 			}
 			return ret;
 		}
+
+		public static int GetIndex(Span<int> permutation)
+		{
+			int ret = 0;
+			for (int i = 0; i < permutation.Length; i++)
+			{
+				int counter = 0;
+				int p = permutation[i];
+				for (int j = i + 1; j < permutation.Length; j++)
+				{
+					if (p > permutation[j])
+						counter++;
+				}
+
+				ret += Factorial(permutation.Length - 1 - i) * counter;
+			}
+			return ret;
+		}
+
+		public static int GetInverseIndex(Span<int> permutation)
+		{
+			int ret = 0;
+			for (int i = 0; i < permutation.Length; i++)
+			{
+				int counter = 0;
+				int p = permutation[i];
+				for (int j = 0; j < i; j++)
+				{
+					if (p < permutation[j])
+						counter++;
+				}
+
+				ret += Factorial(permutation.Length - 1 - p) * counter;
+			}
+			return ret;
+		}
+
 
 		/// <returns> The inverse of <paramref name="permutation"/> </returns>
 		public static int[] GetInverse(int[] permutation)

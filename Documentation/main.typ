@@ -149,39 +149,6 @@ After the move $"L "$ (90° clockwise rotation of the orange side) the permuatio
 $ mat(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11;
 #text(red)[2], #text(red)[3], #text(red)[1], #text(red)[0], 4, 5, 6, 7, 8, 9, 10, 11) $. 
 
-//Edge Indices after L move
-#grid(
-  columns: (1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm, 1cm), 
-  emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(w, "10"),   tile(c, ""),
-  emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(b, "2"),   tile(w, ""),    tile(w, "5"),
-  emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(w, "11"),   tile(c, ""),
-  emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare,
-  
-  tile(c, ""),    tile(o, "2"),   tile(c, ""),
-  tile(c, ""),    tile(g, "11"),   tile(c, ""),
-  tile(c, ""),    tile(r, "5"),  tile(c, ""),
-  tile(c, ""),    tile(b, "6"),   tile(c, ""),
-  
-  tile(o, "0"),   tile(o, ""),    tile(o, "1"),
-  tile(w, "1"),   tile(g, ""),    tile(g, "7"),
-  tile(r, "7"),   tile(r, ""),    tile(r, "6"),
-  tile(b, "9"),   tile(b, ""),    tile(y, "0"),
-  
-  tile(c, ""),    tile(o, "3"),   tile(c, ""),
-  tile(c, ""),    tile(g, "9"),   tile(c, ""),
-  tile(c, ""),    tile(r, "4"),   tile(c, ""),
-  tile(c, ""),    tile(b, "4"),   tile(c, ""),
-  
-  emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(y, "9"),   tile(c, ""),
-  emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(g, "3"),   tile(y, ""),    tile(y, "4"),
-  emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, emptySquare, 
-  tile(c, ""),    tile(y, "8"),   tile(c, ""),
-)
 
 There are 2 ways to define the relation of the state of the cube and the permutation matrix. The matrix above describes the new position of each edge. The edge 0 (orange-yellow) is now at postion 1, where the orange-blue edge belongs. The edge 1 is now positoned where edge 3 would be in a solved cube. 
 

@@ -12,12 +12,12 @@ namespace CubeBenchmarks
 {
     public class ArrayCubeBenchmark
     {
-        const int TILE_COUNT = ArrayCube.TILE_COUNT;
+        const int TILE_COUNT = TileCube.TILE_COUNT;
         CubeMove[] Data = new CubeMove[TILE_COUNT];
         CubeMove[] Solved = new CubeMove[TILE_COUNT];
-        static List<ArrayCube> cubes = ArrayCube.GetAllCubes(3);
-        static List<ArrayCube> uniqueCubes = ArrayCube.GetUniqueCubes(4).ToList();
-        static HashSet<ArrayCube> hashset = new HashSet<ArrayCube>(uniqueCubes);
+        static List<TileCube> cubes = TileCube.GetAllCubes(3);
+        static List<TileCube> uniqueCubes = TileCube.GetUniqueCubes(4).ToList();
+        static HashSet<TileCube> hashset = new HashSet<TileCube>(uniqueCubes);
 		bool f = false;
 		bool t = true;
 
@@ -31,18 +31,12 @@ namespace CubeBenchmarks
         }
 
 		#region Conversion
-		[Benchmark(Baseline = true)]
-		public void FindCornerOrientationIndex()
-		{
-			foreach (ArrayCube cube in uniqueCubes)
-				cube.FindCornerOrientationIndex();
-		}
-		[Benchmark]
-		public void FindCornerOrientationIndexFast()
-		{
-			foreach (ArrayCube cube in uniqueCubes)
-				cube.FindCornerOrientationIndexFast();
-		}
+		//[Benchmark(Baseline = true)]
+		//public void FindCornerOrientationIndex()
+		//{
+		//	foreach (ArrayCube cube in uniqueCubes)
+		//		cube.FindCornerOrientationIndex();
+		//}
 
 		//[Benchmark]
 		//public void FindEdgeOrientationIndex()

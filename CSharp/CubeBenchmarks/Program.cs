@@ -8,7 +8,7 @@ namespace CubeBenchmarks
 	{
 		static void Main(string[] args)
 		{
-			var summary = BenchmarkRunner.Run<ArrayCubeBenchmark>();
+			var summary = BenchmarkRunner.Run<CubeMoveBenchmark>();
 
 			//ArrayCube.GetAllCubes(4);
 

@@ -27,7 +27,6 @@ namespace CubeAD
 
         public const string MOVE_TREE_PREFIX = "solved_tree_";
 
-
 		//The sizes of each sub array
 		public static int[] NextEdgeSizes = new int[6] { 5940, 840, 119_750_400, 19_958_400, 1_814_400, 181_440 };
 		//The difference (mod 12!) from the current edge permutation index ([i][]) to the next index after one clockwise move (L, R, D, U, F, B) on a side ([][j]) 
@@ -40,6 +39,8 @@ namespace CubeAD
 			new uint[NextEdgeSizes[4]],
 			new uint[NextEdgeSizes[5]]
 		};
+		public static int[][] EdgeMovePerms = new int[18][];
+
 		//The length of consecutively equal values in the uncompressed NextEdgePermDif array
 		public static int[] EdgeTrackSizes = new int[6] { 40320, 24, 2, 1, 1, 1 };
 
@@ -158,10 +159,19 @@ namespace CubeAD
                 FillNextCornerOrientArray(cast);
             });
 
+			for (int i = 0; i < 18; i++)
+			{
+				TileCube ac = TileCube.GetSolved();
+
+				ac.MakeMove((CubeMove)i);
+
+				EdgeMovePerms[i] = ac.GetEdgePerm();
+			}
+
+
             GC.Collect();
 			Console.WriteLine("TotalRamUsage: " + GC.GetTotalMemory(true).ToString("0 000 000 000"));
 			Console.WriteLine("Initialized CubeIndex class in " + sw.ElapsedMilliseconds + " ms");
-
 
 			void ReadFromFileOrCreate(string path, Array dest, Action<Array> fillAction)
 			{
@@ -190,7 +200,7 @@ namespace CubeAD
 			int N = 12;
 			//Generate full array
 			int[] data = new int[MAX_EDGE_PERMUTATION];
-			ArrayCube c = ArrayCube.GetSolved();
+			TileCube c = TileCube.GetSolved();
 			c.MakeMove(m);
 
 			int[] move = Permutation.GetInverse(c.GetEdgePerm());
@@ -378,7 +388,7 @@ namespace CubeAD
 			const int N = 8;
 			for(int move = 0; move < 18; move++)
 			{
-				ArrayCube c = ArrayCube.GetSolved();
+				TileCube c = TileCube.GetSolved();
 				CubeMove m = (CubeMove)move;
 				c.MakeMove(m);
 
@@ -463,7 +473,7 @@ namespace CubeAD
             for (int move = 0; move < 18; move++)
             {
 
-                ArrayCube c = ArrayCube.GetSolved();
+                TileCube c = TileCube.GetSolved();
                 CubeMove m = (CubeMove)move;
                 c.MakeMove(m);
 
@@ -544,7 +554,7 @@ namespace CubeAD
             const int N = 8;
             for (int move = 0; move < 18; move++)
             {
-                ArrayCube c = ArrayCube.GetSolved();
+                TileCube c = TileCube.GetSolved();
                 CubeMove m = (CubeMove)move;
                 c.MakeMove(m);
 

@@ -41,6 +41,21 @@ namespace CubeAD.IndexCubeSets
 				Data[i] = new SortedListSet(bucketCapacity);
 			}
 		}
+		
+		public void Foreach(Action<IndexCube> action)
+		{
+			int[] lengths = new int[Data.Length];
+			for(int i = 0; i < Data.Length; i++)
+				lengths[i] = Data[i].Count;
+
+			for(int b = 0; b < Data.Length; b++)
+			{
+				for(int i = 0; i < lengths[i]; i++)
+				{
+					action(Data[b].Data[i]);
+				}
+			}
+		}
 
 		public void Add(IndexCube element)
 		{

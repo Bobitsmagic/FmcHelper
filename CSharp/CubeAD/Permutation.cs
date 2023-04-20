@@ -65,6 +65,27 @@ namespace CubeAD
 			}
 		}
 
+		public static void GetIndexedPerm(Span<int> permutation, int index)
+		{
+			int n = permutation.Length;
+
+			bufferList.Clear();
+			for (int i = 0; i < n; i++) bufferList.Add(i);
+
+			int[] indices = new int[n];
+			for (int i = n - 1; i >= 0; i--)
+			{
+				indices[i] = index / Factorial(i);
+				index -= indices[i] * Factorial(i);
+			}
+
+			for (int i = permutation.Length - 1; i >= 0; i--)
+			{
+				permutation[n - i - 1] = bufferList[indices[i]];
+				bufferList.RemoveAt(indices[i]);
+			}
+		}
+
 		/// <returns> The lexicographic index of <paramref name="permutation"/> </returns>
 		public static int GetIndex(int[] permutation)
 		{

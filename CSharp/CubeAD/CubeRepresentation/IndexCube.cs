@@ -238,11 +238,11 @@ namespace CubeAD.CubeRepresentation
             LastMove = m;
         }
 
-        //[TODO] Solve orientation issue, Unit tests (Cube1 * Cube2 = MoveSequenz1 + MoveSequenz2)
-        /// <summary> 
-        /// Uses <paramref name="cube"/> as a transformation such that every move to scramble <paramref name="cube"/> is applied on this <see cref="IndexCube"/>
-        /// </summary>
-        public void Transform(IndexCube cube)
+		//[TODO] Solve orientation issue, Unit tests (Cube1 * Cube2 = MoveSequenz1 + MoveSequenz2)
+		/// <summary> 
+		/// Uses <paramref name="cube"/> as a transformation such that every move to scramble <paramref name="cube"/> is applied on this <see cref="IndexCube"/>
+		/// </summary>
+		public void Transform(IndexCube cube)
         {
             int[] edgePerm = GetEdgePermutation();
             int[] edgeOrient = GetEdgeOrientation();

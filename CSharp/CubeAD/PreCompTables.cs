@@ -392,7 +392,7 @@ namespace CubeAD
 				CubeMove m = (CubeMove)move;
 				c.MakeMove(m);
 
-				int[] movePerm = c.GetCornerPerm();
+				int[] movePerm = GetInverse(c.GetCornerPerm());
 
 				Console.WriteLine("Generating: " + m);
 
@@ -408,7 +408,7 @@ namespace CubeAD
                         Console.WriteLine(	"KEK");
                     }
 
-					Transform(movePerm, currentPerm, result);
+					Transform(currentPerm, movePerm, result);
 
 					array[i, move] = (ushort)GetIndex(result);
 

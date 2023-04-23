@@ -23,6 +23,11 @@ namespace CubeAD
 		public static readonly MoveSequenz TPerm = new MoveSequenz("R U R' U' R' F R2 U' R' U' R U R' F'");
 		public static readonly MoveSequenz HPerm = new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2");
 
+		//Positiones the orange yellow blue corner
+		public static readonly MoveSequenz CornerPermutation = new MoveSequenz("L' L' L' B2 R R R B L L L B2 R' R' R' D L' L' L' B2 R R R");
+
+		public static readonly MoveSequenz InverseCubeScramble = new MoveSequenz("D2 U' R2 D2 B2 R2 B2 D L' D' B' D2 U L R' B' R D F U2");
+
 
 		public int Count { get { return Moves.Count; } }
 

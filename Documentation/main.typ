@@ -478,3 +478,27 @@ A solution is to define an total order over all cubes and then only store the sm
 
 == Symmetry resistent properties
 Some properties are the same for all symmetries of a specific cube. The amount of correctly placed edges and corners is such a property. Since the can only be $8 * 12$ diffrent values for the amount of solved edges and corners this is not sufficient as a hashing function. 
+
+#color_viewer(0.6cm,
+n, n, n, y, o, y, n, n, n, n, n, n,
+n, n, n, b, w, r, n, n, n, n, n, n,
+n, n, n, y, o, y, n, n, n, n, n, n,
+g, w, b, r, y, o, b, b, g, o, w, r,
+y, o, y, b, g, r, y, r, w, r, b, g,
+g, w, b, r, b, o, b, g, g, o, g, r,
+n, n, n, w, o, w, n, n, n, n, n, n,
+n, n, n, g, y, r, n, n, n, n, n, n,
+n, n, n, w, o, w, n, n, n, n, n, n,
+)
+
+#color_viewer(0.6cm,
+n, n, n, y, o, y, n, n, n, n, n, n,
+n, n, n, b, w, r, n, n, n, n, n, n,
+n, n, n, y, o, y, n, n, n, n, n, n,
+g, w, b, r, y, o, b, b, g, o, w, r,
+y, o, y, b, g, r, y, r, w, r, b, g,
+g, w, b, r, b, o, b, g, g, o, g, r,
+n, n, n, w, o, w, n, n, n, n, n, n,
+n, n, n, g, y, r, n, n, n, n, n, n,
+n, n, n, w, o, w, n, n, n, n, n, n,
+)

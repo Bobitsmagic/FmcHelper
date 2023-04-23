@@ -183,7 +183,7 @@ namespace CubeAD.CubeRepresentation
 
             for (int i = 0; i < 12; i++)
             {
-                buffer[i] = EdgeOrientationIndex >> i & 1;
+                buffer[i] = (EdgeOrientationIndex >> (11 - i)) & 1;
             }
 
             return buffer;
@@ -198,7 +198,7 @@ namespace CubeAD.CubeRepresentation
         {
             int buffer = CornerOrientationIndex;
             int[] ret = new int[8];
-            for (int i = 0; i < 8; i++)
+            for (int i = 8 - 1; i >= 0; i--)
             {
                 ret[i] = buffer % 3;
                 buffer /= 3;

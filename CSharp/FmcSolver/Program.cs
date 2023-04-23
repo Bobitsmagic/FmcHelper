@@ -3,19 +3,21 @@ using CubeAD.CubeRepresentation;
 using Microsoft.Diagnostics.Tracing.Parsers.MicrosoftWindowsTCPIP;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 
 
-Stopwatch sw = Stopwatch.StartNew();
-for(int i = 0; i < 10; i++)
-{
-    Console.WriteLine("MaxDepth: " + i);
-    Console.WriteLine("Count: " + TileCube.GetUniqueSymCubes(i).Count.ToString("000 000 000 000"));
-    Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000"));
-}
+TileCube tc = TileCube.GetSolved();
+IndexCube id = new IndexCube();
+
+MoveSequenz ms = MoveSequenz.InverseCubeScramble;
+
+tc.ApplySequence(ms.Moves);
+
+Console.WriteLine(tc.SideView());
 
 Console.WriteLine("Done");
 Console.ReadLine();

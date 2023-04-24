@@ -502,3 +502,28 @@ n, n, n, w, o, w, n, n, n, n, n, n,
 n, n, n, g, y, r, n, n, n, n, n, n,
 n, n, n, w, o, w, n, n, n, n, n, n,
 )
+
+#color_viewer(0.6cm,
+n, n, n, w, w, w, n, n, n, n, n, n,
+n, n, n, w, w, w, n, n, n, n, n, n,
+n, n, n, w, w, w, n, n, n, n, n, n,
+o, o, o, g, g, g, r, r, r, b, b, b,
+o, o, o, g, g, g, r, r, r, b, b, b,
+o, o, y, b, g, g, r, r, r, b, b, b,
+n, n, n, o, y, y, n, n, n, n, n, n,
+n, n, n, y, y, y, n, n, n, n, n, n,
+n, n, n, y, y, y, n, n, n, n, n, n,
+)
+
+#color_viewer(0.6cm,
+n, n, n, w, w, w, n, n, n, n, n, n,
+n, n, n, w, w, w, n, n, n, n, n, n,
+n, n, n, w, w, w, n, n, n, n, n, n,
+o, o, o, g, g, g, r, r, r, b, b, b,
+o, o, o, g, g, g, r, r, r, b, b, b,
+o, o, y, b, g, g, r, r, r, b, b, b,
+n, n, n, o, y, y, n, n, n, n, n, n,
+n, n, n, y, y, y, n, n, n, n, n, n,
+n, n, n, y, y, y, n, n, n, n, n, n,
+)
+

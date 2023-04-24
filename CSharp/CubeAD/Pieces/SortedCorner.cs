@@ -43,6 +43,11 @@ namespace CubeAD.Pieces
             C = (CubeColor)array[2];
         }
 
+        public SortedCorner Transform(SymmetryElement se)
+        {
+            return new SortedCorner(se.TransformColor(A), se.TransformColor(B), se.TransformColor(C));
+        }
+
         public static bool operator ==(SortedCorner left, SortedCorner right)
         {
             return left.A == right.A && left.B == right.B;
@@ -54,7 +59,7 @@ namespace CubeAD.Pieces
 
         public override string ToString()
         {
-            return "(" + A + ", " + B + ")";
+            return "(" + A + ", " + B + ", " + C + ")";
         }
     }
 }

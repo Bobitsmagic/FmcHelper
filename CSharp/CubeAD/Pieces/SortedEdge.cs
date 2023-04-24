@@ -41,6 +41,10 @@ namespace CubeAD.Pieces
             B = (CubeColor)Math.Max((int)a, (int)b);
         }
 
+        public SortedEdge Transform(SymmetryElement se)
+        {
+            return new SortedEdge(se.TransformColor(A), se.TransformColor(B));
+        }
         public static bool operator ==(SortedEdge left, SortedEdge right)
         {
             return left.A == right.A && left.B == right.B;

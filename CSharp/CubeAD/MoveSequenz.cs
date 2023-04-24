@@ -150,7 +150,7 @@ namespace CubeAD
 		}
 
 		/// <returns> A new <see cref="MoveSequenz"/> with all moves transformed by <paramref name="se"/> </returns>
-		public MoveSequenz Rotate(SymmetryElement se)
+		public MoveSequenz TransForm(SymmetryElement se)
 		{
 			return new MoveSequenz(Moves.Select(x => se.TransformMove(x)));
 		}
@@ -169,7 +169,7 @@ namespace CubeAD
 
 			foreach(var se in SymmetryElement.Elements)
 			{
-				MoveSequenz c = other.Rotate(se);
+				MoveSequenz c = other.TransForm(se);
 
 				bool res = true;
 				for(int i = 0; i < Count; i++)

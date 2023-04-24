@@ -17,16 +17,17 @@ namespace CubeBenchmarks
         PermCube pc = new PermCube();
         PermCubeSingleArray pcsa = new PermCubeSingleArray();
         SeperatedCube sc = new SeperatedCube();
+        PieceCube piece = new PieceCube();
 
 
 //|                      Method |     Mean |    Error |   StdDev | Ratio | RatioSD |
 //|---------------------------- |---------:|---------:|---------:|------:|--------:|
-//|           ArrayCubeMakeMove | 30.01 us | 0.146 us | 0.122 us |  1.00 |    0.00 |
-//|           IndexCubeMakeMove | 80.52 us | 1.205 us | 1.566 us |  2.68 |    0.05 |
-//|            PermCubeMakeMove | 60.95 us | 0.183 us | 0.171 us |  2.03 |    0.01 |
-//| PermCubeSingleArrayMakeMove | 47.52 us | 0.540 us | 0.478 us |  1.58 |    0.02 |
-//|       SeperatedCubeMakeMove | 24.53 us | 0.042 us | 0.038 us |  0.82 |    0.00 |
-
+//|           ArrayCubeMakeMove | 30.06 us | 0.279 us | 0.248 us |  1.65 |    0.02 |
+//|           IndexCubeMakeMove | 76.23 us | 1.455 us | 1.732 us |  4.18 |    0.11 |
+//|            PermCubeMakeMove | 60.41 us | 0.204 us | 0.170 us |  3.31 |    0.02 |
+//| PermCubeSingleArrayMakeMove | 45.68 us | 0.360 us | 0.337 us |  2.50 |    0.03 |
+//|       SeperatedCubeMakeMove | 25.26 us | 0.212 us | 0.198 us |  1.38 |    0.01 |
+//|           PieceCubeMakeMove | 18.29 us | 0.169 us | 0.159 us |  1.00 |    0.00 |
 
         static CubeMoveBenchmark()
         {
@@ -35,15 +36,14 @@ namespace CubeBenchmarks
             id.MakeMove(CubeMove.L);
         }
 
-        [Benchmark(Baseline = true)]
-        public void ArrayCubeMakeMove()
+		[Benchmark]
+		public void ArrayCubeMakeMove()
         {
             for (int i = 0; i < COUNT; i++)
             {
                 ac.MakeMove(ms.Moves[i]);
             }
         }
-
         [Benchmark]
         public void IndexCubeMakeMove()
         {
@@ -68,13 +68,20 @@ namespace CubeBenchmarks
                 pcsa.MakeMove(ms.Moves[i]);
             }
         }
-
         [Benchmark]
 		public void SeperatedCubeMakeMove()
 		{
 			for (int i = 0; i < COUNT; i++)
 			{
 				sc.MakeMove(ms.Moves[i]);
+			}
+		}
+		[Benchmark(Baseline = true)]
+		public void PieceCubeMakeMove()
+		{
+			for (int i = 0; i < COUNT; i++)
+			{
+				piece.MakeMove(ms.Moves[i]);
 			}
 		}
 	}

@@ -49,21 +49,14 @@ namespace CubeAD
 		public static ushort[,] NextEdgeOrient = new ushort[MAX_EDGE_ORIENTATION, 18];
 		public static ushort[,] NextCornerOrient = new ushort[MAX_CORNER_ORIENTATION, 18];
 
-		//The amount of correct pieces given an index
-		public static byte[] OrientedEdgesCount = new byte[MAX_EDGE_ORIENTATION];
-		public static byte[] OrientedCornersCount = new byte[MAX_CORNER_ORIENTATION];
-		public static byte[] PositionedEdgesCount = new byte[MAX_EDGE_PERMUTATION];
-		public static byte[] PositionedCornersCount = new byte[MAX_CORNER_PERMUTATION];
-
 		public static class Symmetry
 		{
 			//The permutation that a symmetry transformation performs
-			public static byte[][] CornerPermTranform = new byte[SymmetryElement.ORDER][];
-			public static byte[][] EdgePermTranform = new byte[SymmetryElement.ORDER][];
-			//The orientation a corner has after a symmetry transformation
-			public static byte[][,,] CornerOrientTransform = new byte[SymmetryElement.ORDER][,,]; //color index, position, orient
-			//Whether a edge get flipped by a symmetry transformation
-			public static byte[][] EdgeOrientTransform = new byte[SymmetryElement.ORDER][];
+			public static ushort[,] CornerPermTranform = new ushort[MAX_CORNER_PERMUTATION, SymmetryElement.ORDER];
+
+			//(CornerPerm, Symmetry)x(pos, orient) -> new orient
+			public static byte[,][,] SingleCornerOrientTransform = new byte[MAX_CORNER_PERMUTATION, SymmetryElement.ORDER][,];
+
 		} 
 
 		//A set containing all cubes (with all edges oriented) that can be solved in MAX_EO_MOVE_DEPTH moves or less
@@ -126,10 +119,16 @@ namespace CubeAD
 			for (int i = 0; i < 18; i += 3)
 			{
 				CubeMove m = (CubeMove)i;
+
 				string path = Path.Combine(PRE_COMP_PATH, "next_edge_perm_" + m.ToString() + ".bin");
 
 				ReadFromFileOrCreate(path, NextEdgePermDif[i / 3], (ret) => {
-					Array gen = GenerateShortendNextEdgePermArrays(m);
+					Console.WriteLine("Generating: " + m);
+					TileCube c = TileCube.GetSolved();
+					c.MakeMove(m);
+					int[] move = GetInverse(c.GetEdgePerm());
+
+					Array gen = GenerateShortendNextEdgePermArrays(move);
 					Console.WriteLine("Gen: " + gen.Length + " ret: " + ret.Length);
 					Array.Copy(gen, ret, gen.Length);
 				});
@@ -195,17 +194,11 @@ namespace CubeAD
 			}
 		}
 
-		public static uint[] GenerateShortendNextEdgePermArrays(CubeMove m)
+		public static uint[] GenerateShortendNextEdgePermArrays(int[] move)
 		{
 			int N = 12;
 			//Generate full array
 			int[] data = new int[MAX_EDGE_PERMUTATION];
-			TileCube c = TileCube.GetSolved();
-			c.MakeMove(m);
-
-			int[] move = Permutation.GetInverse(c.GetEdgePerm());
-
-			Console.WriteLine("Generating: " + m);
 
 			int[] currentPerm = Enumerable.Range(0, 12).ToArray();
 
@@ -281,7 +274,7 @@ namespace CubeAD
             int minCycle = MinCycle(data); //The smallest cycle of distinct elements (ABCABCABC -> 3)
 			int trackLength = MaxTrack(data); //The longest sequenz of repeating elements (AAABBBCCC -> 3)
 
-			Console.WriteLine(m + " -> Cycle: " + minCycle.ToString("000 000 000") + " TrackLength: " + trackLength);
+			Console.WriteLine("Cycle: " + minCycle.ToString("000 000 000") + " TrackLength: " + trackLength);
 
 			//Checks whether the tracksize is correct
 			bool correct = true;

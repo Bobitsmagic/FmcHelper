@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 
 namespace CubeAD.CubeRepresentation
@@ -37,18 +38,22 @@ namespace CubeAD.CubeRepresentation
 			{38, 44, 36, 42},
 			{45, 51, 47, 53}
 		};
+		static int[] CenterIndices = new int[6]
+		{
+			4, 13, 22, 31, 40, 49
+		};
 
 		//Maps 3 colors to a corner tile index
 		static int[,,] FullCornerTileIndex = new int[6, 6, 6];
 		static int[,,] FullCornerIndex = new int[6, 6, 6];
 		static int[] IndexedCornerTileIndexLinear = new int[8 * 3];
-		static Corner[,,] CornerOrientColor = new Corner[8, 8, 3]; //(corner, pos, orient) -> (c1, c2, c3)
+		public static Corner[,,] CornerOrientColor = new Corner[8, 8, 3]; //(corner, pos, orient) -> (c1, c2, c3)
 
 		//Maps 2 colors to an edge tile index
 		static int[,] FullEdgeIndex = new int[6, 6];				// (color, color) -> tile index 
 		static int[] IndexedEdgeTileIndexLinear = new int[12 * 2];	// (pos, index) -> tile index
 		static int[,,] EdgeIsFlippedTable = new int[12, 6, 6];		// (pos, color, color) -> is oriented
-		static Edge[,,] EdgeOrientColor = new Edge[12, 12, 2];	// (edge, pos, orient) -> (c1, c2)
+		public static Edge[,,] EdgeOrientColor = new Edge[12, 12, 2];	// (edge, pos, orient) -> (c1, c2)
 
 		static CubeColor[] ArrayBuffer = new CubeColor[TILE_COUNT];
 
@@ -438,6 +443,40 @@ namespace CubeAD.CubeRepresentation
 			}
 		}
 
+		public static int EdgeOrientAfterTransformation(int edgeIndex, int prevPos, int prevOrient, SymmetryElement se)
+		{
+			TileCube tc = GetSolved();
+
+			Edge edge = EdgeOrientColor[edgeIndex, prevPos, prevOrient];
+		
+			tc.Data[IndexedEdgeTileIndexLinear[prevPos * 2 + 0]] = edge.A;
+			tc.Data[IndexedEdgeTileIndexLinear[prevPos * 2 + 1]] = edge.B;
+
+			TileCube buffer = new TileCube();
+			tc.TransformSymmetry(se, buffer);
+
+			return buffer.EdgeIsFlipped(SortedEdge.Edges[prevPos].Transform(se).GetIndex) ? 1 : 0;
+		}
+		public static int CornerOrientAfterTransformation(int cornerIndex, int prevPos, int prevOrient, SymmetryElement se)
+		{
+			TileCube tc = GetSolved();
+
+			Corner corner = CornerOrientColor[cornerIndex, prevPos, prevOrient];
+
+			tc.Data[IndexedCornerTileIndexLinear[prevPos * 3 + 0]] = corner.A;
+			tc.Data[IndexedCornerTileIndexLinear[prevPos * 3 + 1]] = corner.B;
+			tc.Data[IndexedCornerTileIndexLinear[prevPos * 3 + 2]] = corner.C;
+
+            //Console.WriteLine(tc.SideView());
+
+            TileCube buffer = new TileCube();
+			tc.TransformSymmetry(se, buffer);
+			//Console.WriteLine(buffer.SideView());
+			SortedCorner sorted = SortedCorner.Corners[prevPos].Transform(se);
+
+			return buffer.CornerOrientaion(sorted.GetIndex);
+		}
+
 		private TileCube()
 		{
 
@@ -472,6 +511,13 @@ namespace CubeAD.CubeRepresentation
 			}
 		}
 
+		public void WritePerms()
+		{
+            Console.WriteLine("Edges Perm:    " + string.Join(" ", GetEdgePerm()));
+			Console.WriteLine("Edges Orient:  " + string.Join(" ", Enumerable.Range(0, 12).Select(x => EdgeIsFlipped(x) ? 1 : 0)));
+			Console.WriteLine("Corner Perm:   " + string.Join(" ", GetCornerPerm()));
+			Console.WriteLine("Corner Orient: " + string.Join(" ", Enumerable.Range(0, 8).Select(x => CornerOrientaion(x))));
+		}
 		public TileCube(IndexCube src) : this(src.GetEdgePermutation(), src.GetEdgeOrientation(), src.GetCornerPermuation(), src.GetCornerOrientation())
 		{
 			
@@ -479,31 +525,31 @@ namespace CubeAD.CubeRepresentation
 
 		public TileCube(int[] edgeIndices, int[] edgeOrientations, int[] cornerIndices, int[] cornerOrientations)
 		{
-			//Console.WriteLine("Edges Perm:    " + string.Join(" ", edgeIndices));
-			//Console.WriteLine("Edges Orient:  " + string.Join(" ", edgeOrientations));
-			//Console.WriteLine("Corner Perm:   " + string.Join(" ", cornerIndices));
-			//Console.WriteLine("Corner Orient: " + string.Join(" ", cornerOrientations));
 
-			Reset();
 
+			for (int i = 0; i < CenterIndices.Length; i++)
+				Data[CenterIndices[i]] = (CubeColor)i;
+
+			int index = 0;
 			for (int pos = 0; pos < 12; pos++)
 			{
 				int edge = edgeIndices[pos];
 				var pair = EdgeOrientColor[edge, pos, edgeOrientations[pos]];
 
                 //Console.WriteLine("Placing: " + pair);
-                Data[IndexedEdgeTileIndexLinear[2 * pos + 0]] = pair.A;
-				Data[IndexedEdgeTileIndexLinear[2 * pos + 1]] = pair.B;
+                Data[IndexedEdgeTileIndexLinear[index++]] = pair.A;
+				Data[IndexedEdgeTileIndexLinear[index++]] = pair.B;
 			}
 
+			index = 0;
 			for (int pos = 0; pos < 8; pos++)
 			{
 				int corner = cornerIndices[pos];
 				var pair = CornerOrientColor[corner, pos, cornerOrientations[pos]];
 
-				Data[IndexedCornerTileIndexLinear[3 * pos + 0]] = pair.A;
-				Data[IndexedCornerTileIndexLinear[3 * pos + 1]] = pair.B;
-				Data[IndexedCornerTileIndexLinear[3 * pos + 2]] = pair.C;
+				Data[IndexedCornerTileIndexLinear[index++]] = pair.A;
+				Data[IndexedCornerTileIndexLinear[index++]] = pair.B;
+				Data[IndexedCornerTileIndexLinear[index++]] = pair.C;
 			}
 		}
 
@@ -670,7 +716,7 @@ namespace CubeAD.CubeRepresentation
 					(int)Data[IndexedEdgeTileIndexLinear[pos * 2 + 1]]] != 0;
 		}
 
-		public ushort FindEdgeOrientationIndex()
+		public ushort GetEdgeOrientationIndex()
 		{
 			int ret = 0;
 			int index = 0;
@@ -708,7 +754,7 @@ namespace CubeAD.CubeRepresentation
 			return 2;
 		}
 
-		public ushort FindCornerOrientationIndex()
+		public ushort GetCornerOrientationIndex()
 		{
 			int ret = 0;
 			int index = 0;
@@ -729,10 +775,19 @@ namespace CubeAD.CubeRepresentation
 			return (ushort)ret;
 		}
 
+		public int[] GetCornerOrientation()
+		{
+			return Enumerable.Range(0, 8).Select(x => CornerOrientaion(x)).ToArray();
+		}
+		public int[] GetEdgeOrientation()
+		{
+			return Enumerable.Range(0, 12).Select(x => EdgeIsFlipped(x) ? 1 : 0).ToArray();
+		}
+
 		public IndexCube GetIndexCube()
 		{
 			return new IndexCube((uint)GetInverseEdgePermIndex(),
-				(ushort)GetInverseCornerPermIndex(), FindEdgeOrientationIndex(), FindCornerOrientationIndex());
+				(ushort)GetInverseCornerPermIndex(), GetEdgeOrientationIndex(), GetCornerOrientationIndex());
 		}
 		#endregion
 
@@ -815,6 +870,18 @@ namespace CubeAD.CubeRepresentation
 			return ret;
 		}
 
+		public static int[] SymmetryPerm(SymmetryElement se)
+		{
+			int[] ret = new int[12];
+
+			for (int i = 0; i < 12; i++)
+			{
+				SortedEdge edge = SortedEdge.Edges[i];
+				ret[i] = new SortedEdge(se.TransformColor(edge.A), se.TransformColor(edge.B)).GetIndex;	
+			}
+
+			return ret;
+		}
 		#endregion
 		public string SideView()
 		{
@@ -884,9 +951,26 @@ namespace CubeAD.CubeRepresentation
 		}
 		public int CompareTo(TileCube other)
 		{
-			if (this == other) return 0;
+			unsafe
+			{
+				fixed (void* ptr = Data)
+				{
+					fixed(void* oth = other.Data)
+					{
+						
+						for (int i = 0; i < TILE_COUNT / 4; i++)
+						{
+							int dif = ((int*)ptr)[i] - ((int*)oth)[i];
+							
+							if(dif != 0)
+								return dif;
+						}
 
-			for (int i = 0; i < TILE_COUNT; i++)
+					}
+				}
+			}
+
+			for (int i = TILE_COUNT - (TILE_COUNT % 4); i < TILE_COUNT; i++)
 			{
 				if (Data[i] != other.Data[i])
 				{

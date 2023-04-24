@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CubeBenchmarks
 {
-    public class ArrayCubeBenchmark
+    public class TileCubeBenchmark
     {
         const int TILE_COUNT = TileCube.TILE_COUNT;
         CubeMove[] Data = new CubeMove[TILE_COUNT];
@@ -18,44 +18,68 @@ namespace CubeBenchmarks
         static List<TileCube> cubes = TileCube.GetAllCubes(3);
         static List<TileCube> uniqueCubes = TileCube.GetUniqueCubes(4).ToList();
         static HashSet<TileCube> hashset = new HashSet<TileCube>(uniqueCubes);
+		IndexCube IndexCube = new IndexCube();
+		int[][] Arrays = new int[4][];
+
 		bool f = false;
 		bool t = true;
 
-        public ArrayCubeBenchmark()
+        public TileCubeBenchmark()
         {
             for(int i = 0; i < TILE_COUNT; i++)
             {
                 Solved[i] = (CubeMove)(i / 9);
                 Data[i] = Solved[i];
             }
-        }
+
+			IndexCube.ApplyMoveSequenz(MoveSequenz.FmcWr);
+			Arrays[0] = IndexCube.GetEdgePermutation();
+			Arrays[1] = IndexCube.GetEdgeOrientation();
+			Arrays[2] = IndexCube.GetCornerPermuation();
+			Arrays[3] = IndexCube.GetCornerOrientation();
+		}
+		#region Constructor
+
+		[Benchmark] 
+		public void ConstructorFromArrays()
+		{
+			new TileCube(Arrays[0], Arrays[1], Arrays[2], Arrays[3]);
+		}
+
+		#endregion
 
 		#region Conversion
+		//|                     Method |      Mean |     Error |    StdDev | Ratio | RatioSD |
+		//|--------------------------- |----------:|----------:|----------:|------:|--------:|
+		//| FindCornerOrientationIndex |  1.759 ms | 0.0114 ms | 0.0101 ms |  1.00 |    0.00 |
+		//|   FindEdgeOrientationIndex |  1.539 ms | 0.0034 ms | 0.0027 ms |  0.87 |    0.00 |
+		//|              EdgePermIndex | 11.397 ms | 0.1493 ms | 0.1397 ms |  6.47 |    0.09 |
+		//|            CornerPermIndex |  6.072 ms | 0.0455 ms | 0.0404 ms |  3.45 |    0.03 |
 		//[Benchmark(Baseline = true)]
 		//public void FindCornerOrientationIndex()
 		//{
-		//	foreach (ArrayCube cube in uniqueCubes)
+		//	foreach (TileCube cube in uniqueCubes)
 		//		cube.FindCornerOrientationIndex();
 		//}
 
 		//[Benchmark]
 		//public void FindEdgeOrientationIndex()
 		//{
-		//	foreach (ArrayCube cube in uniqueCubes)
+		//	foreach (TileCube cube in uniqueCubes)
 		//		cube.FindEdgeOrientationIndex();
 		//}
 
 		//[Benchmark]
 		//public void EdgePermIndex()
 		//{
-		//	foreach (ArrayCube cube in uniqueCubes)
+		//	foreach (TileCube cube in uniqueCubes)
 		//		cube.GetEdgePermIndex();
 		//}
 
 		//[Benchmark]
 		//public void CornerPermIndex()
 		//{
-		//	foreach (ArrayCube cube in uniqueCubes)
+		//	foreach (TileCube cube in uniqueCubes)
 		//		cube.GetCornerPermIndex();
 		//}
 
@@ -66,7 +90,7 @@ namespace CubeBenchmarks
 		//[Benchmark]
 		//public void LowestSym()
 		//{
-		//    foreach (ArrayCube cube in uniqueCubes)
+		//    foreach (TileCube cube in uniqueCubes)
 		//        cube.FindLowestSymmetry();
 		//}
 

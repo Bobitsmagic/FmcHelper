@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static CubeAD.PreCompTables;
 using static CubeAD.Permutation;
+using System.Buffers;
 
 namespace CubeAD.CubeRepresentation
 {
@@ -17,6 +18,9 @@ namespace CubeAD.CubeRepresentation
 
 		static byte[][] EdgeMovePerm = new byte[18][];
 		static byte[] Buffer = new byte[12];
+		static byte[] IdenityPerm = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+
+		static ArrayPool<byte> ArrayPool = ArrayPool<byte>.Create();
 
 		static SeperatedCube()
 		{
@@ -24,24 +28,27 @@ namespace CubeAD.CubeRepresentation
 			{
 				TileCube ac = TileCube.GetSolved();
 				ac.MakeMove((CubeMove)i);
-
+	
 				EdgeMovePerm[i] = ac.GetEdgePerm().Select(x => (byte)x).ToArray();
 			}
 		}
 
-		ushort CornerPermutationIndex;
+		public ushort CornerPermutationIndex;
 		ushort CornerOrientationIndex;
 		ushort EdgeOrientationIndex;
-		byte[] EdgePerm = new byte[12];
+		byte[] EdgePerm = ArrayPool.Rent(12);
 		public SeperatedCube()
 		{
 			CornerPermutationIndex = 0;
 			CornerOrientationIndex = 0;
 			EdgeOrientationIndex = 0;
-				
-			for (int i = 0; i < 12; i++)
-				EdgePerm[i] = (byte)i;
+
+			Array.Copy(IdenityPerm, EdgePerm, 12);
 		}
+		~SeperatedCube()
+		{
+			ArrayPool.Return(EdgePerm);
+        }
 
 		public void MakeMove(CubeMove m)
 		{

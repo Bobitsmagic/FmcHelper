@@ -16,8 +16,11 @@ namespace CubeAD.Pieces
             B = b;
             C = c;
         }
-
-        public static bool operator ==(Corner left, Corner right)
+		public Corner Transform(SymmetryElement se)
+		{
+			return new Corner(se.TransformColor(A), se.TransformColor(B), se.TransformColor(C));
+		}
+		public static bool operator ==(Corner left, Corner right)
         {
             return left.A == right.A && left.B == right.B && left.C == right.C;
         }

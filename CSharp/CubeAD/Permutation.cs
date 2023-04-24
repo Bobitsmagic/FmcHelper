@@ -177,6 +177,14 @@ namespace CubeAD
 			}
 		}
 
+		public static void Commutate(int[] outer, int[] inner, int[] result)
+		{			
+			for (int i = 0; i < outer.Length; i++)
+			{
+				result[i] = outer[inner[outer[i]]];
+			}
+		}
+
 		public static int TransfromToFacNumber(int N, int value)
 		{
 			int ret = 0;

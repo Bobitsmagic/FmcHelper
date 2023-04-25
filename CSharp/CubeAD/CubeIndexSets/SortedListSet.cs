@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using CubeAD.CubeIndexSets;
 using CubeAD.CubeRepresentation;
 
 namespace CubeAD.IndexCubeSets
@@ -10,21 +11,19 @@ namespace CubeAD.IndexCubeSets
     /// </summary>
     public class SortedListSet
 	{
-		public static List<IndexCube> CubeIndexBuffer = new List<IndexCube>();
-
 		public int Count => Data.Count;
 
-		public List<IndexCube> Data;
+		public List<EdgeCornerOrientState> Data;
 
 		//Flag whether this instance can contain duplicates
 		bool IsDirty = false;
 
 		public SortedListSet(int capacity = 0)
 		{
-			Data = new List<IndexCube>(capacity);
+			Data = new List<EdgeCornerOrientState>(capacity);
 		}
 
-		public void Add(IndexCube element)
+		public void Add(EdgeCornerOrientState element)
 		{
 			Data.Add(element);
 			IsDirty = true;
@@ -35,15 +34,16 @@ namespace CubeAD.IndexCubeSets
 		{
 			if (Data.Count > 1 && IsDirty)
 			{
-				IndexCube.RadixSortCubeIndices(Data, CubeIndexBuffer);
+				//IndexCube.RadixSortCubeIndices(Data, CubeIndexBuffer);
 
+				Data.Sort();
 
 				//Copy all unique elements at the first duplicate and count duplicates
-				IndexCube current = Data[0];
+				EdgeCornerOrientState current = Data[0];
 				int deleteCount = 0;
 				for (int i = 1; i < Data.Count; i++)
 				{
-					IndexCube cube = Data[i];
+					EdgeCornerOrientState cube = Data[i];
 					if (cube != current)
 					{
 						current = cube;
@@ -70,10 +70,12 @@ namespace CubeAD.IndexCubeSets
 		}
 
 		//For testing purposes
-		public bool Contains(IndexCube cube)
+		public bool Contains(EdgeCornerOrientState cube)
 		{
+#if DEBUG
 			if (IsDirty)
 				throw new Exception("Contains call on dirty list");
+#endif
 
 			return Data.BinarySearch(cube) >= 0;
 		}

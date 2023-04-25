@@ -16,7 +16,7 @@ namespace CubeBenchmarks
         IndexCube id = new IndexCube();
         PermCube pc = new PermCube();
         PermCubeSingleArray pcsa = new PermCubeSingleArray();
-        SeperatedCube sc = new SeperatedCube();
+        
         PieceCube piece = new PieceCube();
 
 
@@ -33,7 +33,7 @@ namespace CubeBenchmarks
         {
             ms.ReRoll(COUNT);
             IndexCube id = new IndexCube();
-            id.MakeMove(CubeMove.L);
+           
         }
 
 		[Benchmark]
@@ -42,14 +42,6 @@ namespace CubeBenchmarks
             for (int i = 0; i < COUNT; i++)
             {
                 ac.MakeMove(ms.Moves[i]);
-            }
-        }
-        [Benchmark]
-        public void IndexCubeMakeMove()
-        {
-            for (int i = 0; i < COUNT; i++)
-            {
-                id.MakeMove(ms.Moves[i]);
             }
         }
         [Benchmark]
@@ -68,14 +60,6 @@ namespace CubeBenchmarks
                 pcsa.MakeMove(ms.Moves[i]);
             }
         }
-        [Benchmark]
-		public void SeperatedCubeMakeMove()
-		{
-			for (int i = 0; i < COUNT; i++)
-			{
-				sc.MakeMove(ms.Moves[i]);
-			}
-		}
 		[Benchmark(Baseline = true)]
 		public void PieceCubeMakeMove()
 		{

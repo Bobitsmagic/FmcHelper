@@ -19,159 +19,16 @@ namespace CubeAD
     /// </summary>
     public static class PreCompTables
 	{	
-		public const int MAX_EO_MOVE_DEPTH = 8;
-		public const int MAX_MOVE_DEPTH = 7;
-
 		//public static readonly string PRE_COMP_PATH = @"C:\Users\hmart\source\repos\FmcHelper\Files";
         public static readonly string PRE_COMP_PATH = @"C:\Users\Martin\source\repos\FmcHelper\Files";
 
         public const string MOVE_TREE_PREFIX = "solved_tree_";
 
 		//The sizes of each sub array
-		public static int[] NextEdgeSizes = new int[6] { 5940, 840, 119_750_400, 19_958_400, 1_814_400, 181_440 };
-		//The difference (mod 12!) from the current edge permutation index ([i][]) to the next index after one clockwise move (L, R, D, U, F, B) on a side ([][j]) 
-		public static uint[][] NextEdgePermDif = new uint[6][]
-		{
-			new uint[NextEdgeSizes[0]],
-			new uint[NextEdgeSizes[1]],
-			new uint[NextEdgeSizes[2]],
-			new uint[NextEdgeSizes[3]],
-			new uint[NextEdgeSizes[4]],
-			new uint[NextEdgeSizes[5]]
-		};
-		public static int[][] EdgeMovePerms = new int[18][];
-
-		//The length of consecutively equal values in the uncompressed NextEdgePermDif array
-		public static int[] EdgeTrackSizes = new int[6] { 40320, 24, 2, 1, 1, 1 };
-
-		//The index after a move [, j] given a current index [i, ]
-		public static ushort[,] NextCornerPerm = new ushort[MAX_CORNER_PERMUTATION, 18];
-		public static ushort[,] NextEdgeOrient = new ushort[MAX_EDGE_ORIENTATION, 18];
-		public static ushort[,] NextCornerOrient = new ushort[MAX_CORNER_ORIENTATION, 18];
-
-		public static class Symmetry
-		{
-			//The permutation that a symmetry transformation performs
-			public static ushort[,] CornerPermTranform = new ushort[MAX_CORNER_PERMUTATION, SymmetryElement.ORDER];
-
-			//(CornerPerm, Symmetry)x(pos, orient) -> new orient
-			public static byte[,][,] SingleCornerOrientTransform = new byte[MAX_CORNER_PERMUTATION, SymmetryElement.ORDER][,];
-
-		} 
-
-		//A set containing all cubes (with all edges oriented) that can be solved in MAX_EO_MOVE_DEPTH moves or less
-		private static SealedHashset _EOMoveTree = null;
-		public static SealedHashset GetEdgeOrientedMoveTree
-		{
-			get
-			{
-				if (_EOMoveTree is null)
-				{
-					string path = Path.Combine(PRE_COMP_PATH, "solved_eo_tree_" + MAX_EO_MOVE_DEPTH + ".bin");
-
-					if (File.Exists(path))
-					{
-						_EOMoveTree = new SealedHashset(path);
-					}
-					else
-					{
-						_EOMoveTree = new SealedHashset(GenerateSolvedTreeOrientedEdges(MAX_EO_MOVE_DEPTH).GetArray());
-						_EOMoveTree.SaveToFile(path);
-						Console.WriteLine("Created: " + path);
-					}
-				}
-
-				return _EOMoveTree;
-			}
-		}
-
-		//A set containing all cubes that can be solved in MAX_MOVE_DEPTH moves or less
-		private static SealedHashset _MoveTree = null;
-		public static SealedHashset GetMoveTree
-		{
-			get
-			{
-				if (_MoveTree is null)
-				{
-					string path = Path.Combine(PRE_COMP_PATH, "solved_tree_" + MAX_MOVE_DEPTH + ".bin");
-
-					if (File.Exists(path))
-					{
-						_MoveTree = new SealedHashset(path);
-					}
-					else
-					{
-						_MoveTree = new SealedHashset(GenerateSolvedTree(MAX_MOVE_DEPTH).GetArray());
-						_MoveTree.SaveToFile(path);
-						Console.WriteLine("Created: " + path);
-					}
-				}
-
-				return _MoveTree;
-			}
-		}
-
+		
 		static PreCompTables()
 		{
-			Stopwatch sw = Stopwatch.StartNew();
-
-			//Egde permutation
-			for (int i = 0; i < 18; i += 3)
-			{
-				CubeMove m = (CubeMove)i;
-
-				string path = Path.Combine(PRE_COMP_PATH, "next_edge_perm_" + m.ToString() + ".bin");
-
-				ReadFromFileOrCreate(path, NextEdgePermDif[i / 3], (ret) => {
-					Console.WriteLine("Generating: " + m);
-					TileCube c = TileCube.GetSolved();
-					c.MakeMove(m);
-					int[] move = GetInverse(c.GetEdgePerm());
-
-					Array gen = GenerateShortendNextEdgePermArrays(move);
-					Console.WriteLine("Gen: " + gen.Length + " ret: " + ret.Length);
-					Array.Copy(gen, ret, gen.Length);
-				});
-			}
-
-			//Next corner perm
-			ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "next_corner_perm.bin"), NextCornerPerm, (ret) =>
-			{
-				ushort[,] cast = (ushort[,])ret;
-
-				FillNextCornerPermArray(cast);
-			});
-
-            //Next edge orient
-            ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "next_edge_orient.bin"), NextEdgeOrient, (ret) =>
-            {
-                ushort[,] cast = (ushort[,])ret;
-
-                FillNextEdgeOrientArray(cast);
-            });
-
-            //Next corner orient
-            ReadFromFileOrCreate(Path.Combine(PRE_COMP_PATH, "next_corner_orient.bin"), NextCornerOrient, (ret) =>
-            {
-                ushort[,] cast = (ushort[,])ret;
-
-                FillNextCornerOrientArray(cast);
-            });
-
-			for (int i = 0; i < 18; i++)
-			{
-				TileCube ac = TileCube.GetSolved();
-
-				ac.MakeMove((CubeMove)i);
-
-				EdgeMovePerms[i] = ac.GetEdgePerm();
-			}
-
-
-            GC.Collect();
-			Console.WriteLine("TotalRamUsage: " + GC.GetTotalMemory(true).ToString("0 000 000 000"));
-			Console.WriteLine("Initialized CubeIndex class in " + sw.ElapsedMilliseconds + " ms");
-
+		
 			void ReadFromFileOrCreate(string path, Array dest, Action<Array> fillAction)
 			{
 				if (File.Exists(path))

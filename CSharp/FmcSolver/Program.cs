@@ -1,4 +1,5 @@
 ﻿using CubeAD;
+using CubeAD.CubeIndexSets;
 using CubeAD.CubeRepresentation;
 using Microsoft.CodeAnalysis;
 using Microsoft.Diagnostics.Tracing.Parsers.Clr;
@@ -13,13 +14,15 @@ using System.Management;
 using System.Runtime.ExceptionServices;
 using System.Security.Principal;
 
-Stopwatch sw = Stopwatch.StartNew();
-for(int d = 0; d < 11; d++)
-{
-    sw.Restart();
-    Console.WriteLine("Count : " + PieceCube.GetUniqueSymCubes(d).Count.ToString("0 000 000 000"));
-    Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000"));
-}
+
+
+//Stopwatch sw = Stopwatch.StartNew();
+//for (int d = 0; d < 11; d++)
+//{
+//    sw.Restart();
+//    Console.WriteLine("Count : " + PieceCube.GetUniqueSymCubesFast(d).Count.ToString("0 000 000 000"));
+//    Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000"));
+//}
 
 Console.WriteLine("Done");
 Console.ReadLine();

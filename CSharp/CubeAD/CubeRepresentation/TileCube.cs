@@ -514,9 +514,9 @@ namespace CubeAD.CubeRepresentation
 		public void WritePerms()
 		{
             Console.WriteLine("Edges Perm:    " + string.Join(" ", GetEdgePerm()));
-			Console.WriteLine("Edges Orient:  " + string.Join(" ", Enumerable.Range(0, 12).Select(x => EdgeIsFlipped(x) ? 1 : 0)));
+			Console.WriteLine("Edges Orient:  " + string.Join(" ", GetEdgeOrientation()));
 			Console.WriteLine("Corner Perm:   " + string.Join(" ", GetCornerPerm()));
-			Console.WriteLine("Corner Orient: " + string.Join(" ", Enumerable.Range(0, 8).Select(x => CornerOrientaion(x))));
+			Console.WriteLine("Corner Orient: " + string.Join(" ", GetCornerOrientation()));
 		}
 		public TileCube(IndexCube src) : this(src.GetEdgePermutation(), src.GetEdgeOrientation(), src.GetCornerPermuation(), src.GetCornerOrientation())
 		{
@@ -786,8 +786,8 @@ namespace CubeAD.CubeRepresentation
 
 		public IndexCube GetIndexCube()
 		{
-			return new IndexCube((uint)GetInverseEdgePermIndex(),
-				(ushort)GetInverseCornerPermIndex(), GetEdgeOrientationIndex(), GetCornerOrientationIndex());
+			return new IndexCube((uint)GetEdgePermIndex(),
+				(ushort)GetCornerPermIndex(), GetEdgeOrientationIndex(), GetCornerOrientationIndex());
 		}
 		#endregion
 

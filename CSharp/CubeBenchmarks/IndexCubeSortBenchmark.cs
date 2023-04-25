@@ -13,47 +13,33 @@ namespace CubeBenchmarks
 		Random Rnd = new Random(0);
 
 		IndexCube[] Indices = SearchingAlgorithms.GenerateRandomCubes(new Random(0), COUNT).ToArray();
-		//IndexCube[] Buffer = new IndexCube[COUNT];
+		IndexCube[] Buffer = new IndexCube[COUNT];
 
 		//[IterationSetup]
-		//public void Setup()
-		//{
-		//	for (int i = 0; i < COUNT - 1; i++)
-		//	{
-		//		int index = Rnd.Next(i + 1, COUNT);
+		public void Setup()
+		{
+			for (int i = 0; i < COUNT - 1; i++)
+			{
+				int index = Rnd.Next(i + 1, COUNT);
 
-		//		IndexCube buffer = Indices[i];
-		//		Indices[i] = Indices[index];
-		//		Indices[index] = buffer;
-		//	}
+				IndexCube buffer = Indices[i];
+				Indices[i] = Indices[index];
+				Indices[index] = buffer;
+			}
 
-		//	Console.WriteLine("Run Setup");
-		//}
-
-
-
-		//[Benchmark]
-		//public void MakeMove()
-		//{
-		//	for(int i = 0; i < COUNT; i++)
-		//	{
-		//		for(int m = 0; m < 18; m++)
-		//		{
-		//			Indices[i].MakeMove((CubeMove)m);
-		//		}
-		//	}
-		//}
+			Console.WriteLine("Run Setup");
+		}
 
 
-		//[Benchmark]
-		//public void StandardSort()
-		//{
-		//	Array.Sort(Indices);
-		//}
-		//[Benchmark]
-		//public void RadixSort()
-		//{
-		//	IndexCube.RadixSortCubeIndices(Indices, Buffer);
-		//}
+		[Benchmark]
+		public void StandardSort()
+		{
+			Array.Sort(Indices);
+		}
+		[Benchmark]
+		public void RadixSort()
+		{
+			IndexCube.RadixSortCubeIndices(Indices, Buffer);
+		}
 	}
 }

@@ -1,9 +1,11 @@
-﻿using CubeAD.Pieces;
+﻿using CubeAD.CubeIndexSets;
+using CubeAD.Pieces;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 
 namespace CubeAD.CubeRepresentation
 {
@@ -97,8 +99,50 @@ namespace CubeAD.CubeRepresentation
 					}
 				}
 
+
 				(currentList, next) = (next, currentList);
 			}
+			Console.WriteLine("Ram usage: " + GC.GetTotalMemory(true).ToString("000 000 000 000"));
+
+			return set;
+		}
+
+		public static SortedBucketsSet GetUniqueSymCubesFast(int maxDepth)
+		{
+			SortedBucketsSet set = new SortedBucketsSet();
+			set.Add(new IndexCube());
+
+			//int[] edgePerm = new int[12];
+			//int[] edgeOrient= new int[12];
+			//int[] cornerPerm = new int[8];
+			//int[] cornerOrient = new int[8];
+
+			for (int d = 0; d < maxDepth; d++)
+			{
+				set.Foreach(x =>
+				{
+					PieceCube pc = new PieceCube(x.GetEdgePermutation(), x.GetEdgeOrientation(), x.GetCornerPermuation(), x.GetCornerOrientation());
+					for(int  i = 0; i < 18; i++)
+					{
+						CubeMove cm = (CubeMove)i;
+
+						pc.MakeMove(cm);
+
+						PieceCube lowSym = pc.FindLowestSymmetry();
+
+						set.Add(new IndexCube((uint)lowSym.GetEdgePermIndex(), (ushort)lowSym.GetCornerPermIndex(), (ushort)lowSym.GetEdgeOrientationIndex(), (ushort)lowSym.GetCornerOrientationIndex()));
+
+						pc.MakeMove(MoveSequenz.ReverseMove(cm));	
+					}
+				});
+
+
+				set.RemoveDuplicates();
+			}
+
+            Console.WriteLine("Ram usage: " + GC.GetTotalMemory(true).ToString("000 000 000 000"));
+
+			
 
 			return set;
 		}
@@ -254,6 +298,11 @@ namespace CubeAD.CubeRepresentation
 				Edges[i] = new EdgeState(i, 0);
 			}
 		}
+
+		public PieceCube(IndexCube src) : this(src.GetEdgePermutation(), src.GetEdgeOrientation(), src.GetCornerPermuation(), src.GetCornerOrientation())
+		{
+			
+		}
 		public PieceCube(int[] edgePerm, int[] edgeOrientations, int[] cornerPerm, int[] cornerOrientations)
 		{
 			for (int i = 0; i < 8; i++)
@@ -287,7 +336,13 @@ namespace CubeAD.CubeRepresentation
 			for (int i = 0; i < 12; i++)
 				Edges[i] = nextEdgeArray[Edges[i].State];
 		}
-
+		public void ApplySequence(List<CubeMove> moves)
+		{
+			foreach(CubeMove m in moves)
+			{
+				MakeMove(m);
+			}
+		}
 
 
 		public void Transform(SymmetryElement se, PieceCube res)
@@ -307,6 +362,11 @@ namespace CubeAD.CubeRepresentation
 			{
 				res.Edges[ePerm[i]] = eTrans[i, Edges[i].State];
 			}
+		}
+
+		public IndexCube GetIndexCube()
+		{
+			return new IndexCube(GetEdgePermIndex(), GetCornerPermIndex(), GetEdgeOrientationIndex(), GetCornerOrientationIndex());
 		}
 
 		public PieceCube FindLowestSymmetry()
@@ -331,10 +391,28 @@ namespace CubeAD.CubeRepresentation
 		{
 			return Edges.Select(x => x.Position).ToArray();
 		}
+		public int GetEdgePermIndex()
+		{
+			Span<int> perm = stackalloc int[12];
+			for (int i = 0; i < 12; i++)
+				perm[i] = Edges[i].Position;
+
+			return Permutation.GetIndex(perm);
+		}
+
 		public int[] GetCornerPerm()
 		{
 			return Corners.Select(x => x.Position).ToArray();
 		}
+		public int GetCornerPermIndex()
+		{
+			Span<int> perm = stackalloc int[8];
+			for (int i = 0; i < 8; i++)
+				perm[i] = Corners[i].Position;
+
+			return Permutation.GetIndex(perm);
+		}
+
 		public int[] GetEdgeOrient()
 		{
 			int[] ret = new int[12];
@@ -346,6 +424,23 @@ namespace CubeAD.CubeRepresentation
 
 			return ret;
 		}
+		public int GetEdgeOrientationIndex()
+		{
+			int ret = 0;
+			Span<int> vals = stackalloc int[12];
+			for(int i = 0; i < 12; i++)
+			{
+				vals[Edges[i].Position] = Edges[i].Orientation;
+			}
+
+			for (int i = 0; i < 12; i++)
+			{
+				ret = (ret << 1) | vals[i];
+			}
+
+			return ret;
+		}
+
 		public int[] GetCornerOrient()
 		{
 			int[] ret = new int[8];
@@ -357,7 +452,21 @@ namespace CubeAD.CubeRepresentation
 
 			return ret;
 		}
+		public int GetCornerOrientationIndex()
+		{
+			int ret = 0;
+			Span<int> vals = stackalloc int[8];
+			for (int i = 0; i < 8; i++)
+			{
+				vals[Corners[i].Position] = Corners[i].Orientation;
+			}
+			for (int i = 0; i < 8; i++)
+			{
+				ret = ret * 3 + vals[i];
+			}
 
+			return (ushort)ret;
+		}
 
 		public static bool operator ==(PieceCube left, PieceCube right)
 		{

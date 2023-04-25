@@ -32,7 +32,7 @@ namespace CubeBenchmarks
                 Data[i] = Solved[i];
             }
 
-			IndexCube.ApplyMoveSequenz(MoveSequenz.FmcWr);
+			//IndexCube.ApplyMoveSequenz(MoveSequenz.FmcWr);
 			Arrays[0] = IndexCube.GetEdgePermutation();
 			Arrays[1] = IndexCube.GetEdgeOrientation();
 			Arrays[2] = IndexCube.GetCornerPermuation();

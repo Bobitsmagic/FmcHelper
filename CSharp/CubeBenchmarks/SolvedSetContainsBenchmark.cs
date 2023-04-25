@@ -16,33 +16,33 @@ namespace CubeBenchmarks
 		static HashSet<IndexCube> HashSet;
 		static SealedHashset SealedHS;
 
-		static SolvedSetContainsBenchmark()
-		{
+		//static SolvedSetContainsBenchmark()
+		//{
 
-			IndexCube[] array = SearchingAlgorithms.GenerateSolvedTree(DEPTH).GetArray();
+		//	IndexCube[] array = SearchingAlgorithms.GenerateSolvedTree(DEPTH).GetArray();
 
-			Console.WriteLine("Created Array with depth: " + DEPTH);
-			Console.WriteLine("Length: " + array.Length);
+		//	Console.WriteLine("Created Array with depth: " + DEPTH);
+		//	Console.WriteLine("Length: " + array.Length);
 
-			HashSet = new HashSet<IndexCube>(array);
-			SealedHS = new SealedHashset(array);
-			Console.WriteLine("Added to other sets");
+		//	HashSet = new HashSet<IndexCube>(array);
+		//	SealedHS = new SealedHashset(array);
+		//	Console.WriteLine("Added to other sets");
 
-			for (int i = 0; i < Cubes.Length / 10; i++)
-			{
-				Cubes[i] = array[rnd.Next(array.Length)];
-			}
+		//	for (int i = 0; i < Cubes.Length / 10; i++)
+		//	{
+		//		Cubes[i] = array[rnd.Next(array.Length)];
+		//	}
 
-			int count = Cubes.Length / 10;
-			foreach (IndexCube index in SearchingAlgorithms.GenerateRandomCubes(rnd, 9000))
-			{
-				Cubes[count++] = index;
-			}
+		//	int count = Cubes.Length / 10;
+		//	foreach (IndexCube index in SearchingAlgorithms.GenerateRandomCubes(rnd, 9000))
+		//	{
+		//		Cubes[count++] = index;
+		//	}
 
-			GC.Collect();
+		//	GC.Collect();
 
-			Console.WriteLine("Finished intializing Sets");
-		}
+		//	Console.WriteLine("Finished intializing Sets");
+		//}
 
 		[Benchmark]
 		public void BenchHashSet()

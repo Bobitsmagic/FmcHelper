@@ -33,11 +33,11 @@ namespace CubeAD.IndexCubeSets
 			Data = new IndexCube[cubes.Length];
 			cubes.CopyTo(Data, 0);
 
-			IndexCube.RadixSortCubeIndices(Data, cubes);
+			//IndexCube.RadixSortCubeIndices(Data, cubes);
 
 			//Count cubes for each bucket
 			for (int i = 0; i < cubes.Length; i++)
-				StartIndex[cubes[i].InverseEdgePermutationIndex]++;
+				StartIndex[cubes[i].EdgePermation]++;
 
 			//Calculate distribution metrics
 			double Mean = (double)cubes.Length / BUCKET_COUNT;
@@ -88,7 +88,7 @@ namespace CubeAD.IndexCubeSets
 
 			//Count cubes for each bucket
 			for (int i = 0; i < Data.Length; i++)
-				StartIndex[Data[i].InverseEdgePermutationIndex]++;
+				StartIndex[Data[i].EdgePermation]++;
 			//Sum up the first i cubes (prefix sum)
 			for (int i = 1; i < StartIndex.Length; i++)
 				StartIndex[i] += StartIndex[i - 1];
@@ -127,8 +127,8 @@ namespace CubeAD.IndexCubeSets
 		public bool Contains(IndexCube index)
 		{
 			//Find start and end of corresbonding bucket
-			int start = StartIndex[index.InverseEdgePermutationIndex];
-			int end = StartIndex[index.InverseEdgePermutationIndex + 1];
+			int start = StartIndex[index.EdgePermation];
+			int end = StartIndex[index.EdgePermation + 1];
 
 			for (int i = start; i < end; i++)
 			{
@@ -141,8 +141,8 @@ namespace CubeAD.IndexCubeSets
 
 		public bool TryGetValue(IndexCube index, out IndexCube actual)
 		{
-			int start = StartIndex[index.InverseEdgePermutationIndex];
-			int end = StartIndex[index.InverseEdgePermutationIndex + 1];
+			int start = StartIndex[index.EdgePermation];
+			int end = StartIndex[index.EdgePermation + 1];
 
 			for (int i = start; i < end; i++)
 			{
@@ -155,34 +155,6 @@ namespace CubeAD.IndexCubeSets
 
 			actual = new IndexCube();
 			return false;
-		}
-
-		/// <summary>
-		/// Searches a cube in this tree/set
-		/// </summary>
-		/// <returns> If this cube is contained within the tree then a list of <see cref="CubeMove"/> that solves is this cube otherwise <see cref="null"/> </returns>
-		public List<CubeMove> SearchSolutionInTree(IndexCube cube)
-        {
-			List<CubeMove> list = new List<CubeMove>();
-
-			while (!cube.IsSovled)
-			{
-				if (TryGetValue(cube, out cube))
-				{
-					if (!cube.IsSovled)
-					{
-						list.Add(MoveSequenz.ReverseMove(cube.LastMove));
-						cube.MakeMove(MoveSequenz.ReverseMove(cube.LastMove));
-					}
-				}
-				else
-				{
-					Console.WriteLine("Cube not in set");
-					return null;
-				}
-			}
-
-			return list;
 		}
 	}
 }

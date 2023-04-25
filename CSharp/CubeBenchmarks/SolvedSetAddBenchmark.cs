@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using CubeAD;
+using CubeAD.CubeIndexSets;
 using CubeAD.CubeRepresentation;
 using CubeAD.IndexCubeSets;
 using System;
@@ -49,16 +50,16 @@ namespace CubeBenchmarks
 				hashset.Add(Cubes[i]);
 			}
 		}
-		[Benchmark]
-		public void SortedCubeIndices()
-		{
-			for (int i = 0; i < Cubes.Length; i++)
-			{
-				sortCubeInd.Add(Cubes[i]);
-			}
+		//[Benchmark]
+		//public void SortedCubeIndices()
+		//{
+		//	for (int i = 0; i < Cubes.Length; i++)
+		//	{
+		//		sortCubeInd.Add(Cubes[i]);
+		//	}
 
-			sortCubeInd.RemoveDuplicates();
-		}
+		//	sortCubeInd.RemoveDuplicates();
+		//}
 
 		[Benchmark]
 		public void BucketCubeIndices()

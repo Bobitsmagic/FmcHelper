@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Channels;
 using System.Xml.Linq;
 using CubeAD.CubeIndexSets;
 using CubeAD.CubeRepresentation;
@@ -30,7 +31,7 @@ namespace CubeAD.CubeIndexSets
 
 		//Each bucket is a SortedCubeIndexSet
 		//All buckets are indexed by the corner permutation index
-		SortedListSet[] Data = new SortedListSet[IndexCube.MAX_CORNER_PERMUTATION];
+		SortedEdgeCornerOrientStateList[] Data = new SortedEdgeCornerOrientStateList[IndexCube.MAX_CORNER_PERMUTATION];
 
 		//Flag whether this instance can contain duplicates
 		ulong IsDirty = 0;
@@ -43,7 +44,7 @@ namespace CubeAD.CubeIndexSets
 		{
 			for (int i = 0; i < Data.Length; i++)
 			{
-				Data[i] = new SortedListSet(bucketCapacity);
+				Data[i] = new SortedEdgeCornerOrientStateList(bucketCapacity);
 			}
 		}
 		
@@ -83,16 +84,16 @@ namespace CubeAD.CubeIndexSets
 
 		public void Add(IndexCube cube)
 		{
-			Data[cube.CornerPermuation].Add(new EdgeCornerOrientState(cube.EdgePermation, cube.EdgeOrientation, cube.CornerOrientation));
+			Data[cube.CornerPermuation].Add(new EdgeCornerOrientState(cube.EdgePermation, cube.EdgeOrientation, cube.CornerOrientation, cube.LastMove));
 			IsDirty++;
 
-			if(IsDirty > 100_000_000 || GC.GetTotalMemory(false) > 10_000_000_000)
-			{
-				long c = Count;
-				RemoveDuplicates();
+			//if(IsDirty > 100_000_000)
+			//{
+			//	long c = Count;
+			//	RemoveDuplicates();
 				
-                Console.WriteLine("Removed duplicates: " + c + " -> " + Count + " " + (((double)c - Count) / c).ToString("0.0000"));
-            }
+   //             Console.WriteLine("Removed duplicates: " + c + " -> " + Count + " " + (((double)c - Count) / c).ToString("0.0000"));
+   //         }
 		}
 
 		public void RemoveDuplicates()
@@ -108,6 +109,20 @@ namespace CubeAD.CubeIndexSets
 			}
 		}
 
+		public void PrintStats()
+		{
+			int min = int.MaxValue;
+			int max = 0;
+
+			for(int i = 0; i < Data.Length; i++)
+			{
+				min = Math.Min(Data[i].Count, min);
+				max = Math.Max(Data[i].Count, max);
+			}
+
+            Console.WriteLine("Min: " + min + " max: " + max + " avg: " + ((double)Count / Data.Length));
+        }
+
 		public void Clear()
 		{
 			for (int i = 0; i < Data.Length; i++)
@@ -118,22 +133,22 @@ namespace CubeAD.CubeIndexSets
 			IsDirty = 0;
 		}
 
-		/// <returns>An array containing all unique elements</returns>
-		public EdgeCornerOrientState[] GetArray()
+		public IndexCube[] GetArray()
 		{
 			if(IsDirty > 0) 
 				RemoveDuplicates();
 
-			EdgeCornerOrientState[] cubeIndices = new EdgeCornerOrientState[Count];
+			IndexCube[] cubeIndices = new IndexCube[Count];
 
 			int counter = 0;
 			for (int i = 0; i < Data.Length; i++)
 			{
 				List<EdgeCornerOrientState> list = Data[i].Data;
 
-				for (int j = 0; j < list.Count; j++)
+				foreach (EdgeCornerOrientState state in list)
 				{
-					cubeIndices[counter++] = list[j];
+
+					cubeIndices[counter++] = new IndexCube(state.EdgePermIndex, (ushort)i, state.EdgeOrientIndex, state.CornerOrientIndex, state.LastMove);						
 				}
 			}
 
@@ -150,6 +165,119 @@ namespace CubeAD.CubeIndexSets
 #endif
 
 			return Data[cube.CornerPermuation].Contains(new EdgeCornerOrientState(cube.EdgePermation, cube.EdgeOrientation, cube.CornerOrientation));
+		}
+
+		class SortedEdgeCornerOrientStateList
+		{
+			public int Count => Data.Count;
+
+			public List<EdgeCornerOrientState> Data;
+
+			//Flag whether this instance can contain duplicates
+			bool IsDirty = false;
+
+			public SortedEdgeCornerOrientStateList(int capacity = 0)
+			{
+				Data = new List<EdgeCornerOrientState>(capacity);
+			}
+
+			public void Add(EdgeCornerOrientState element)
+			{
+				Data.Add(element);
+				IsDirty = true;
+			}
+
+			//Sorts the CubeIndexBuffer and removes all duplicates afterwards
+			public void RemoveDuplicates()
+			{
+				if (Data.Count > 1 && IsDirty)
+				{
+					//IndexCube.RadixSortCubeIndices(Data, CubeIndexBuffer);
+
+					Data.Sort();
+
+					//Copy all unique elements at the first duplicate and count duplicates
+					EdgeCornerOrientState current = Data[0];
+					int deleteCount = 0;
+					for (int i = 1; i < Data.Count; i++)
+					{
+						EdgeCornerOrientState cube = Data[i];
+						if (cube != current)
+						{
+							current = cube;
+							Data[i - deleteCount] = cube;
+						}
+						else
+						{
+							deleteCount++;
+						}
+					}
+
+					//Remove all duplicates at the end of the list
+					Data.RemoveRange(Data.Count - deleteCount, deleteCount);
+				}
+
+				IsDirty = false;
+			}
+
+			public void Clear()
+			{
+				Data.Clear();
+				Data.Capacity = 0;
+				IsDirty = false;
+			}
+
+			//For testing purposes
+			public bool Contains(EdgeCornerOrientState cube)
+			{
+#if DEBUG
+			if (IsDirty)
+				throw new Exception("Contains call on dirty list");
+#endif
+
+				return Data.BinarySearch(cube) >= 0;
+			}
+		}
+
+		//No corner perm
+		public readonly struct EdgeCornerOrientState : IComparable<EdgeCornerOrientState>
+		{
+			public const int PADDED_SIZE_IN_BYTES = 8;
+
+			public readonly uint EdgePermIndex;
+			public readonly ushort EdgeOrientIndex;
+			public readonly ushort CornerOrientIndex;
+			public readonly CubeMove LastMove;
+
+			public EdgeCornerOrientState(uint egdePermIndex, ushort edgeOrientIndex, ushort cornerOrientIndex, CubeMove lastMove = CubeMove.None)
+			{
+				EdgePermIndex = egdePermIndex;
+				EdgeOrientIndex = edgeOrientIndex;
+				CornerOrientIndex = cornerOrientIndex;
+				LastMove = lastMove;
+			}
+
+			public static bool operator ==(EdgeCornerOrientState left, EdgeCornerOrientState right)
+			{
+				return left.EdgePermIndex == right.EdgePermIndex &&
+					left.EdgeOrientIndex == right.EdgeOrientIndex &&
+					left.CornerOrientIndex == right.CornerOrientIndex;
+			}
+			public static bool operator !=(EdgeCornerOrientState left, EdgeCornerOrientState right)
+			{
+				return !(left == right);
+			}
+
+			public int CompareTo(EdgeCornerOrientState other)
+			{
+				if (EdgePermIndex != other.EdgePermIndex)
+					return EdgePermIndex.CompareTo(other.EdgePermIndex);
+
+				if (EdgeOrientIndex != other.EdgeOrientIndex)
+					return EdgeOrientIndex.CompareTo(other.EdgeOrientIndex);
+
+				return CornerOrientIndex.CompareTo(other.CornerOrientIndex);
+			}
 		}
 	}
 }

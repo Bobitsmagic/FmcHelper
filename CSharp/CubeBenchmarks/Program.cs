@@ -8,7 +8,9 @@ namespace CubeBenchmarks
 	{
 		static void Main(string[] args)
 		{
-			var summary = BenchmarkRunner.Run<IndexCubeSortBenchmark>();
+            Console.WriteLine(System.Runtime.InteropServices.Marshal.SizeOf(typeof(IndexCube)));
+
+            var summary = BenchmarkRunner.Run<IndexCubeSortBenchmark>();
 
 			//ArrayCube.GetAllCubes(4);
 

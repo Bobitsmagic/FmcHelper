@@ -9,13 +9,13 @@ namespace CubeBenchmarks
     [MemoryDiagnoser]
 	public class IndexCubeSortBenchmark
 	{
-		const int COUNT = 1_000;
+		const int COUNT = 10_000_000;
 		Random Rnd = new Random(0);
 
 		IndexCube[] Indices = SearchingAlgorithms.GenerateRandomCubes(new Random(0), COUNT).ToArray();
 		IndexCube[] Buffer = new IndexCube[COUNT];
 
-		//[IterationSetup]
+		[IterationSetup]
 		public void Setup()
 		{
 			for (int i = 0; i < COUNT - 1; i++)
@@ -27,15 +27,15 @@ namespace CubeBenchmarks
 				Indices[index] = buffer;
 			}
 
-			Console.WriteLine("Run Setup");
+			//Console.WriteLine("Run Setup");
 		}
 
 
-		[Benchmark]
-		public void StandardSort()
-		{
-			Array.Sort(Indices);
-		}
+		//[Benchmark]
+		//public void StandardSort()
+		//{
+		//	Array.Sort(Indices);
+		//}
 		[Benchmark]
 		public void RadixSort()
 		{

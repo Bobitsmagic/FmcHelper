@@ -1,34 +1,44 @@
-﻿using CubeAD.IndexCubeSets;
+﻿using CubeAD.CubeRepresentation;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using static CubeAD.CubeRepresentation.IndexCube;
-using static CubeAD.SearchingAlgorithms;
-using static CubeAD.Permutation;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using CubeAD.CubeRepresentation;
-using System.Security.Cryptography;
-using System.Runtime.ExceptionServices;
+using static CubeAD.CubeRepresentation.IndexCube;
+using static CubeAD.Permutation;
 
 namespace CubeAD
 {
-    /// <summary>
-    /// A class holding pre-computed data either loaded from files or generated
-    /// </summary>
-    public static class PreCompTables
-	{	
+	/// <summary>
+	/// A class holding pre-computed data either loaded from files or generated
+	/// </summary>
+	public static class PreCompTables
+	{
 		//public static readonly string PRE_COMP_PATH = @"C:\Users\hmart\source\repos\FmcHelper\Files";
-        public static readonly string PRE_COMP_PATH = @"C:\Users\Martin\source\repos\FmcHelper\Files";
+		public static readonly string PRE_COMP_PATH = @"C:\Users\Martin\source\repos\FmcHelper\Files";
 
-        public const string MOVE_TREE_PREFIX = "solved_tree_";
+		public const string MOVE_TREE_PREFIX = "solved_tree_";
 
-		//The sizes of each sub array
-		
+		public static long[] UniqueCubesMoveCount = new long[14]
+		{
+			1,
+			18,
+			243,
+			3_240,
+			43_239,
+			574_908,
+			7_618_438,
+			100_803_036,
+			1_332_343_288,
+			17_596_479_795,
+			232_248_063_316,
+			306_328_880_9012,
+			40_374_425_656_248,
+			531_653_418_284_628
+		};
+
 		static PreCompTables()
 		{
-		
+
 			void ReadFromFileOrCreate(string path, Array dest, Action<Array> fillAction)
 			{
 				if (File.Exists(path))
@@ -117,9 +127,9 @@ namespace CubeAD
 				}
 			}
 
-            //Shorten the array
-            //Calculate the differences to the current index
-            for (int j = 0; j < data.Length; j++)
+			//Shorten the array
+			//Calculate the differences to the current index
+			for (int j = 0; j < data.Length; j++)
 			{
 				data[j] -= j;
 
@@ -127,8 +137,8 @@ namespace CubeAD
 					data[j] += data.Length;
 			}
 
-            //Find redundancies
-            int minCycle = MinCycle(data); //The smallest cycle of distinct elements (ABCABCABC -> 3)
+			//Find redundancies
+			int minCycle = MinCycle(data); //The smallest cycle of distinct elements (ABCABCABC -> 3)
 			int trackLength = MaxTrack(data); //The longest sequenz of repeating elements (AAABBBCCC -> 3)
 
 			Console.WriteLine("Cycle: " + minCycle.ToString("000 000 000") + " TrackLength: " + trackLength);
@@ -177,9 +187,9 @@ namespace CubeAD
 				}
 			}
 
-            Console.WriteLine("Final array length: " + array.Length.ToString("000 000 000"));
+			Console.WriteLine("Final array length: " + array.Length.ToString("000 000 000"));
 
-            return array;
+			return array;
 
 			int MinCycle(int[] data)
 			{
@@ -236,7 +246,7 @@ namespace CubeAD
 		public static void FillNextCornerPermArray(ushort[,] array)
 		{
 			const int N = 8;
-			for(int move = 0; move < 18; move++)
+			for (int move = 0; move < 18; move++)
 			{
 				TileCube c = TileCube.GetSolved();
 				CubeMove m = (CubeMove)move;
@@ -253,10 +263,10 @@ namespace CubeAD
 
 				for (int i = 0; i < MAX_CORNER_PERMUTATION; i++)
 				{
-					if(i == 11306 && m == CubeMove.U2)
+					if (i == 11306 && m == CubeMove.U2)
 					{
-                        Console.WriteLine(	"KEK");
-                    }
+						Console.WriteLine("KEK");
+					}
 
 					Transform(currentPerm, movePerm, result);
 
@@ -312,61 +322,61 @@ namespace CubeAD
 				}
 			}
 
-		} 
+		}
 
 		public static void FillNextEdgeOrientArray(ushort[,] array)
 		{
 			int[] frontEdges = new int[] { 3, 7, 9, 11 };
 			int[] backEdges = new int[] { 2, 6, 8, 10 };
 
-            const int N = 12;
-            for (int move = 0; move < 18; move++)
-            {
+			const int N = 12;
+			for (int move = 0; move < 18; move++)
+			{
 
-                TileCube c = TileCube.GetSolved();
-                CubeMove m = (CubeMove)move;
-                c.MakeMove(m);
+				TileCube c = TileCube.GetSolved();
+				CubeMove m = (CubeMove)move;
+				c.MakeMove(m);
 
 				//inverse because we are working in position space not permuation space
-                int[] movePerm = GetInverse(c.GetEdgePerm());
+				int[] movePerm = GetInverse(c.GetEdgePerm());
 
-                Console.WriteLine("Generating: " + m);
+				Console.WriteLine("Generating: " + m);
 
 				int[] currentPerm = new int[N];
-                int[] result = new int[N];
+				int[] result = new int[N];
 
-                for (int i = 0; i < MAX_EDGE_ORIENTATION; i++)
-                {
-                    Transform(currentPerm, movePerm, result);
+				for (int i = 0; i < MAX_EDGE_ORIENTATION; i++)
+				{
+					Transform(currentPerm, movePerm, result);
 
-					if(m == CubeMove.F || m == CubeMove.FP)
+					if (m == CubeMove.F || m == CubeMove.FP)
 					{
-						foreach(int index in frontEdges)
+						foreach (int index in frontEdges)
 						{
 							result[index] = 1 - result[index];
 						}
 					}
 
-                    if (m == CubeMove.B || m == CubeMove.BP)
-                    {
-                        foreach (int index in backEdges)
-                        {
-                            result[index] = 1 - result[index];
-                        }
-                    }
+					if (m == CubeMove.B || m == CubeMove.BP)
+					{
+						foreach (int index in backEdges)
+						{
+							result[index] = 1 - result[index];
+						}
+					}
 
-                    array[i, move] = OrientationIndex();
+					array[i, move] = OrientationIndex();
 
-                    NextLexico();
+					NextLexico();
 
-                    void NextLexico()
-                    {
-						for(int i = N - 1; i >= 0; i--)
+					void NextLexico()
+					{
+						for (int i = N - 1; i >= 0; i--)
 						{
 							if (currentPerm[i] == 1)
 								continue;
-							
-							for(int j = i + 1; j < N; j++)
+
+							for (int j = i + 1; j < N; j++)
 							{
 								currentPerm[j] = 0;
 							}
@@ -374,23 +384,23 @@ namespace CubeAD
 							currentPerm[i] = 1;
 							break;
 						}
-                    }
+					}
 
 					ushort OrientationIndex()
 					{
 						int ret = 0;
-						for(int i = 0; i < N; i++)
+						for (int i = 0; i < N; i++)
 						{
 							ret = (ret << 1) | result[i];
 						}
 						return (ushort)ret;
 					}
-                }
-            }
-        }
+				}
+			}
+		}
 
-        public static void FillNextCornerOrientArray(ushort[,] array)
-        {
+		public static void FillNextCornerOrientArray(ushort[,] array)
+		{
 			int[][] sideCorners = new int[][]
 			{
 				new int[]{0, 1, 2, 3},
@@ -399,69 +409,69 @@ namespace CubeAD
 				new int[]{2, 3, 6, 7},
 				new int[]{0, 2, 4, 6},
 				new int[]{1, 3, 5, 7},
-            };
+			};
 
-            const int N = 8;
-            for (int move = 0; move < 18; move++)
-            {
-                TileCube c = TileCube.GetSolved();
-                CubeMove m = (CubeMove)move;
-                c.MakeMove(m);
+			const int N = 8;
+			for (int move = 0; move < 18; move++)
+			{
+				TileCube c = TileCube.GetSolved();
+				CubeMove m = (CubeMove)move;
+				c.MakeMove(m);
 
-                //inverse because we are working in position space not permuation space
-                int[] movePerm = GetInverse(c.GetCornerPerm());
+				//inverse because we are working in position space not permuation space
+				int[] movePerm = GetInverse(c.GetCornerPerm());
 
-                Console.WriteLine("Generating: " + m);
+				Console.WriteLine("Generating: " + m);
 
-                int[] currentPerm = new int[N];
-                int[] result = new int[N];
+				int[] currentPerm = new int[N];
+				int[] result = new int[N];
 				int side = move / 3;
 
-                for (int i = 0; i < MAX_CORNER_ORIENTATION; i++)
-                {
-                    Transform(currentPerm, movePerm, result);
+				for (int i = 0; i < MAX_CORNER_ORIENTATION; i++)
+				{
+					Transform(currentPerm, movePerm, result);
 
-                    if(move % 3 != 1)
+					if (move % 3 != 1)
 					{
-						foreach(var index in sideCorners[side])
+						foreach (var index in sideCorners[side])
 						{
 							//swaps orientation if its not equal to side / 2
 							result[index] = (2 * result[index] - (side / 2) + 3) % 3;
 						}
-                    }
+					}
 
-                    array[i, move] = OrientationIndex();
+					array[i, move] = OrientationIndex();
 
-                    NextLexico();
+					NextLexico();
 
-                    void NextLexico()
-                    {
-                        for (int i = N - 1; i >= 0; i--)
-                        {
-                            if (currentPerm[i] == 2)
-                                continue;
+					void NextLexico()
+					{
+						for (int i = N - 1; i >= 0; i--)
+						{
+							if (currentPerm[i] == 2)
+								continue;
 
-                            for (int j = i + 1; j < N; j++)
-                            {
-                                currentPerm[j] = 0;
-                            }
+							for (int j = i + 1; j < N; j++)
+							{
+								currentPerm[j] = 0;
+							}
 
-                            currentPerm[i]++;
-                            break;
-                        }
-                    }
+							currentPerm[i]++;
+							break;
+						}
+					}
 
-                    ushort OrientationIndex()
-                    {
-                        int ret = 0;
-                        for (int i = 0; i < N; i++)
-                        {
-                            ret = (ret * 3) + result[i];
-                        }
-                        return (ushort)ret;
-                    }
-                }
-            }
-        }
-    }
+					ushort OrientationIndex()
+					{
+						int ret = 0;
+						for (int i = 0; i < N; i++)
+						{
+							ret = (ret * 3) + result[i];
+						}
+						return (ushort)ret;
+					}
+				}
+			}
+		}
+	}
 }

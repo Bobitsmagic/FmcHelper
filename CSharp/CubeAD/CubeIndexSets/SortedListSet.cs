@@ -6,24 +6,21 @@ using CubeAD.CubeRepresentation;
 
 namespace CubeAD.IndexCubeSets
 {
-    /// <summary>
-    /// An add-only set class for <see cref="IndexCube"/>, optimized for add operations and space efficiency
-    /// </summary>
-    public class SortedListSet
+	public class SortedListSet
 	{
 		public int Count => Data.Count;
 
-		public List<EdgeCornerOrientState> Data;
+		public List<IndexCube> Data;
 
 		//Flag whether this instance can contain duplicates
 		bool IsDirty = false;
 
 		public SortedListSet(int capacity = 0)
 		{
-			Data = new List<EdgeCornerOrientState>(capacity);
+			Data = new List<IndexCube>(capacity);
 		}
 
-		public void Add(EdgeCornerOrientState element)
+		public void Add(IndexCube element)
 		{
 			Data.Add(element);
 			IsDirty = true;
@@ -39,18 +36,18 @@ namespace CubeAD.IndexCubeSets
 				Data.Sort();
 
 				//Copy all unique elements at the first duplicate and count duplicates
-				EdgeCornerOrientState current = Data[0];
+				IndexCube current = Data[0];
 				int deleteCount = 0;
 				for (int i = 1; i < Data.Count; i++)
 				{
-					EdgeCornerOrientState cube = Data[i];
+					IndexCube cube = Data[i];
 					if (cube != current)
 					{
 						current = cube;
 						Data[i - deleteCount] = cube;
 					}
 					else
-					{						
+					{
 						deleteCount++;
 					}
 				}
@@ -70,7 +67,7 @@ namespace CubeAD.IndexCubeSets
 		}
 
 		//For testing purposes
-		public bool Contains(EdgeCornerOrientState cube)
+		public bool Contains(IndexCube cube)
 		{
 #if DEBUG
 			if (IsDirty)
@@ -80,4 +77,5 @@ namespace CubeAD.IndexCubeSets
 			return Data.BinarySearch(cube) >= 0;
 		}
 	}
+
 }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Principal;
+using CubeAD.CubeIndexSets;
 using CubeAD.CubeRepresentation;
 
 namespace CubeAD.IndexCubeSets
@@ -14,26 +16,19 @@ namespace CubeAD.IndexCubeSets
 	{
 		const int BUCKET_COUNT = (int)IndexCube.MAX_EDGE_PERMUTATION;
 		
-		public int DataSizeInBytes => Data.Length * IndexCube.SIZE_IN_BYTES + 4;
+		public int DataSizeInBytes => Data.Length * CornerEdgeOrientState.PADDED_SIZE_IN_BYTES;
 
 		public int Count => Data.Length;
 
-		IndexCube[] Data;
+		CornerEdgeOrientState[] Data;
 
 		//Start-indices of buckets
 		//+1 to store end of last bucket
 		int[] StartIndex = new int[BUCKET_COUNT + 1];
 
-		/// <summary>
-		/// Creates a <see cref="SealedHashset"/> from an array of  <see cref="IndexCube"/>
-		/// </summary>
-		/// <param name="cubes">The array of <see cref="IndexCube"/> (not preserved)</param>
 		public SealedHashset(IndexCube[] cubes)
 		{
-			Data = new IndexCube[cubes.Length];
-			cubes.CopyTo(Data, 0);
-
-			//IndexCube.RadixSortCubeIndices(Data, cubes);
+			Array.Sort(cubes);
 
 			//Count cubes for each bucket
 			for (int i = 0; i < cubes.Length; i++)
@@ -61,16 +56,19 @@ namespace CubeAD.IndexCubeSets
 				StartIndex[i] = StartIndex[i - 1];
 
 			StartIndex[0] = 0;
+
+			Data = new CornerEdgeOrientState[cubes.Length];
+			for(int i = 0; i < cubes.Length; i++)
+			{
+				Data[i] = new CornerEdgeOrientState(cubes[i]);
+			}
 		}
 
-		/// <summary>
-		/// Loads a <see cref="SealedHashset"/> from a memory dump file
-		/// </summary>
-		/// <param name="path">The path to the memory dump file</param>
-		public SealedHashset(string path)
+		public SealedHashset(string dataPath, string indexPath)
 		{
-			byte[] array = File.ReadAllBytes(path);
-			Data = new IndexCube[array.Length / IndexCube.PADDED_SIZE_IN_BYTES];
+			byte[] array = File.ReadAllBytes(dataPath);
+
+			Data = new CornerEdgeOrientState[array.Length / CornerEdgeOrientState.PADDED_SIZE_IN_BYTES];
 
 			//Copy all bytes from array to Data
 			unsafe
@@ -86,28 +84,14 @@ namespace CubeAD.IndexCubeSets
 			
 			Console.WriteLine("Done reading " + Data.Length + " cubes");
 
-			//Count cubes for each bucket
-			for (int i = 0; i < Data.Length; i++)
-				StartIndex[Data[i].EdgePermation]++;
-			//Sum up the first i cubes (prefix sum)
-			for (int i = 1; i < StartIndex.Length; i++)
-				StartIndex[i] += StartIndex[i - 1];
-			//Calculated start-indices
-			for (int i = StartIndex.Length - 1; i >= 1; i--)
-				StartIndex[i] = StartIndex[i - 1];
-
-			StartIndex[0] = 0;
+			Buffer.BlockCopy(File.ReadAllBytes(indexPath), 0, StartIndex, 0, Buffer.ByteLength(StartIndex));
 
 			Console.WriteLine("Finished creating sealed HS");
 		}
 
-		/// <summary>
-		/// Creates a memory dump file of the <see cref="SealedHashset"/>
-		/// </summary>
-		/// <param name="path">The path and the name of the file to create</param>
-		public void SaveToFile(string path)
+		public void SaveToFile(string dataPath, string indexPath)
 		{
-			byte[] array = new byte[Data.Length * IndexCube.PADDED_SIZE_IN_BYTES];
+			byte[] array = new byte[(long)Data.Length * CornerEdgeOrientState.PADDED_SIZE_IN_BYTES];
 
 			//Copy all bytes from Data to array
 			unsafe
@@ -116,12 +100,16 @@ namespace CubeAD.IndexCubeSets
 				{
 					fixed (void* dest = array)
 					{
-						Buffer.MemoryCopy(source, dest, array.Length, array.Length);
+						Buffer.MemoryCopy(source, dest, array.LongLength, array.LongLength);
 					}
 				}
 			}
 
-			File.WriteAllBytes(path, array);
+			File.WriteAllBytes(dataPath, array);
+
+			array = new byte[Buffer.ByteLength(StartIndex)];
+			Buffer.BlockCopy(StartIndex, 0, array, 0, array.Length);
+			File.WriteAllBytes(indexPath, array);
 		}
 
 		public bool Contains(IndexCube index)
@@ -129,10 +117,11 @@ namespace CubeAD.IndexCubeSets
 			//Find start and end of corresbonding bucket
 			int start = StartIndex[index.EdgePermation];
 			int end = StartIndex[index.EdgePermation + 1];
+			CornerEdgeOrientState search = new CornerEdgeOrientState(index);
 
 			for (int i = start; i < end; i++)
 			{
-				if (Data[i] == index)
+				if (Data[i] == search)
 					return true;
 			}
 
@@ -143,18 +132,54 @@ namespace CubeAD.IndexCubeSets
 		{
 			int start = StartIndex[index.EdgePermation];
 			int end = StartIndex[index.EdgePermation + 1];
+			CornerEdgeOrientState search = new CornerEdgeOrientState(index);
 
 			for (int i = start; i < end; i++)
 			{
-				if (Data[i] == index)
+				if (Data[i] == search)
 				{
-					actual = Data[i];
+					actual = index;
+					actual.LastMove = Data[i].LastMove;
 					return true;
 				}
 			}
 
 			actual = new IndexCube();
 			return false;
+		}
+
+		readonly struct CornerEdgeOrientState
+		{
+			public const int PADDED_SIZE_IN_BYTES = 8;
+
+			public readonly ushort EdgeOrientIndex;
+			public readonly ushort CornerPermIndex;
+			public readonly ushort CornerOrientIndex;
+			public readonly CubeMove LastMove;
+
+			public CornerEdgeOrientState(ushort edgeOrientIndex, ushort cornerPermIndex, ushort cornerOrientIndex, CubeMove lastMove)
+			{
+				EdgeOrientIndex = edgeOrientIndex;
+				CornerPermIndex = cornerPermIndex;
+				CornerOrientIndex = cornerOrientIndex;
+				LastMove = lastMove;
+			}
+
+			public CornerEdgeOrientState(IndexCube src) : this(src.EdgeOrientation, src.CornerPermuation, src.CornerOrientation, src.LastMove)
+			{
+
+			}
+
+			public static bool operator ==(CornerEdgeOrientState left, CornerEdgeOrientState right)
+			{
+				return left.EdgeOrientIndex == right.EdgeOrientIndex && 
+					left.CornerPermIndex == right.CornerPermIndex &&
+					left.CornerOrientIndex == right.CornerOrientIndex;
+			}
+			public static bool operator !=(CornerEdgeOrientState left, CornerEdgeOrientState right)
+			{
+				return !(left == right);
+			}
 		}
 	}
 }

@@ -1,10 +1,12 @@
 ﻿using CubeAD.CubeIndexSets;
+using CubeAD.IndexCubeSets;
 using CubeAD.Pieces;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
 
 namespace CubeAD.CubeRepresentation
@@ -69,39 +71,46 @@ namespace CubeAD.CubeRepresentation
 		static int[][] SymmetryCornerPerm = new int[48][];
 		static int[][] SymmetryEdgePerm = new int[48][];
 
-		public static HashSet<PieceCube> GetUniqueSymCubes(int maxDepth)
+		public static SortedBucketsSet GetUniqueSymCubes(int maxDepth)
 		{
-			HashSet<PieceCube> set = new HashSet<PieceCube>() { new PieceCube() };
-			List<PieceCube> currentList = new List<PieceCube>();
-			List<PieceCube> next = new List<PieceCube>();
+			SortedBucketsSet set = new SortedBucketsSet();
+			set.Add(new IndexCube());
 
-			PieceCube lowSym = new PieceCube();
+			int[] edgePerm = new int[12];
+			int[] edgeOrient = new int[12];
+			int[] cornerPerm = new int[8];
+			int[] cornerOrient = new int[8];
 
-			currentList.Add(new PieceCube());
 			for (int d = 0; d < maxDepth; d++)
 			{
-				next.Clear();
-				foreach (var cube in currentList)
+				set.Foreach(x =>
 				{
-					lowSym.CopyValuesFrom(cube);
+					x.InsertEdgePermutation(edgePerm);
+					x.InsertCornerPermutation(cornerPerm);
+					x.InsertEdgeOrientation(edgeOrient);
+					x.InsertCornerOrientation(cornerOrient);
+
+					PieceCube pc = new PieceCube(edgePerm, edgeOrient, cornerPerm, cornerOrient);
+
 					for (int i = 0; i < 18; i++)
 					{
-						lowSym.MakeMove((CubeMove)i);
+						CubeMove cm = (CubeMove)i;
 
-						PieceCube trans = lowSym.FindLowestSymmetry();
+						pc.MakeMove(cm);
 
-						if (set.Add(trans))
-						{
-							next.Add(trans);
-						}
+						PieceCube lowSym = pc.FindLowestSymmetry(out _);
 
-						lowSym.MakeMove(MoveSequenz.ReverseMove((CubeMove)i));
+						set.Add(new IndexCube((uint)lowSym.GetEdgePermIndex(), (ushort)lowSym.GetCornerPermIndex(), (ushort)lowSym.GetEdgeOrientationIndex(), (ushort)lowSym.GetCornerOrientationIndex()));
+
+						pc.MakeMove(MoveSequenz.ReverseMove(cm));
 					}
-				}
+				});
 
 
-				(currentList, next) = (next, currentList);
+				set.RemoveDuplicates();
 			}
+			set.PrintStats();
+
 			Console.WriteLine("Ram usage: " + GC.GetTotalMemory(true).ToString("000 000 000 000"));
 
 			return set;
@@ -109,28 +118,42 @@ namespace CubeAD.CubeRepresentation
 
 		public static SortedBucketsSet GetUniqueSymCubesFast(int maxDepth)
 		{
-			SortedBucketsSet set = new SortedBucketsSet();
+			//Min: 4195 max: 25901 avg: 9837.478149801587
+			//Ram usage: 006 718 347 576
+			//Count: 0 396 647 119
+			//Time: 1 608 430
+
+			SortedBucketsSet set = new ();
 			set.Add(new IndexCube());
 
-			//int[] edgePerm = new int[12];
-			//int[] edgeOrient= new int[12];
-			//int[] cornerPerm = new int[8];
-			//int[] cornerOrient = new int[8];
+			int[] edgePerm = new int[12];
+			int[] edgeOrient = new int[12];
+			int[] cornerPerm = new int[8];
+			int[] cornerOrient = new int[8];
 
 			for (int d = 0; d < maxDepth; d++)
 			{
 				set.Foreach(x =>
 				{
-					PieceCube pc = new PieceCube(x.GetEdgePermutation(), x.GetEdgeOrientation(), x.GetCornerPermuation(), x.GetCornerOrientation());
+					x.InsertEdgePermutation(edgePerm);
+					x.InsertCornerPermutation(cornerPerm);
+					x.InsertEdgeOrientation(edgeOrient);
+					x.InsertCornerOrientation(cornerOrient);
+
+					PieceCube pc = new PieceCube(edgePerm, edgeOrient, cornerPerm, cornerOrient);
+
 					for(int  i = 0; i < 18; i++)
 					{
+						if (i / 3 == (int)x.LastMove / 3)
+							continue;
+
 						CubeMove cm = (CubeMove)i;
 
 						pc.MakeMove(cm);
 
-						PieceCube lowSym = pc.FindLowestSymmetry();
+						PieceCube lowSym = pc.FindLowestSymmetry(out SymmetryElement se);
 
-						set.Add(new IndexCube((uint)lowSym.GetEdgePermIndex(), (ushort)lowSym.GetCornerPermIndex(), (ushort)lowSym.GetEdgeOrientationIndex(), (ushort)lowSym.GetCornerOrientationIndex()));
+						set.Add(new IndexCube((uint)lowSym.GetEdgePermIndex(), (ushort)lowSym.GetCornerPermIndex(), (ushort)lowSym.GetEdgeOrientationIndex(), (ushort)lowSym.GetCornerOrientationIndex(), se.TransformMove(cm)));
 
 						pc.MakeMove(MoveSequenz.ReverseMove(cm));	
 					}
@@ -139,12 +162,65 @@ namespace CubeAD.CubeRepresentation
 
 				set.RemoveDuplicates();
 			}
+			set.PrintStats();
 
             Console.WriteLine("Ram usage: " + GC.GetTotalMemory(true).ToString("000 000 000 000"));
 
-			
+			return set;
+		}
+
+		public static SortedListSet GetUniqueCubes(int maxDepth)
+		{
+		//Min: 13908 max: 91176 avg: 35748.670907738095
+		//Ram usage: 023 641 381 176
+		//Count: 1 441 386 411
+		//Time: 1 133 946
+
+			//SortedBucketsSet set = new();
+			SortedListSet set = new((int)PreCompTables.UniqueCubesMoveCount[maxDepth]);
+
+			long counter = 0;
+			set.Add(new IndexCube());
+
+			PieceCube cube = new PieceCube();
+			BackTrack(0, new MoveBlocker());
+
+			set.RemoveDuplicates();
+			//set.PrintStats();
+
+			Console.WriteLine("Ram usage: " + GC.GetTotalMemory(true).ToString("000 000 000 000"));
 
 			return set;
+
+			void BackTrack(int depth, MoveBlocker mb)
+			{
+				if(depth == maxDepth) return;
+
+				for(int i = 0; i < 18; i++)
+				{
+					CubeMove m = (CubeMove)i;
+					
+					if (mb[m])
+						continue;
+
+					cube.MakeMove(m);
+
+					set.Add(new IndexCube((uint)cube.GetEdgePermIndex(), (ushort)cube.GetCornerPermIndex(), (ushort)cube.GetEdgeOrientationIndex(), (ushort)cube.GetCornerOrientationIndex()));
+					if (++counter > 100_000_000)
+					{
+						counter = 0;
+						int prev = set.Count;
+						set.RemoveDuplicates();
+
+						Console.WriteLine("Removed dups: " + prev + " -> " + set.Count);
+					}
+
+
+					BackTrack(depth + 1, new MoveBlocker(mb, m));
+
+					cube.MakeMove(MoveSequenz.ReverseMove(m));	
+				}
+			}
 		}
 
 		static PieceCube()
@@ -169,12 +245,6 @@ namespace CubeAD.CubeRepresentation
 				ac.MakeMove((CubeMove)move);
 				int[] cornerPerm = ac.GetCornerPerm();
 				int[] edgePerm = ac.GetEdgePerm();
-
-
-				if (m == CubeMove.D2)
-				{
-					Console.WriteLine("kek");
-				}
 
 				MoveCornerPiece[move] = new CornerState[CornerState.MAX_STATE];
 				for (int s = 0; s < CornerState.MAX_STATE; s++)
@@ -369,14 +439,17 @@ namespace CubeAD.CubeRepresentation
 			return new IndexCube(GetEdgePermIndex(), GetCornerPermIndex(), GetEdgeOrientationIndex(), GetCornerOrientationIndex());
 		}
 
-		public PieceCube FindLowestSymmetry()
+		public PieceCube FindLowestSymmetry(out SymmetryElement ret)
 		{
 			PieceCube best = new PieceCube(this);
 			PieceCube buffer = new PieceCube();
 
+			ret = SymmetryElement.Elements[0];
+
 			foreach (var se in SymmetryElement.Elements)
 			{
 				Transform(se, buffer);
+				ret = se;
 
 				if (buffer.CompareTo(best) < 0)
 				{

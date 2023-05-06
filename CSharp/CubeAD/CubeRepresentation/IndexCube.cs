@@ -14,7 +14,7 @@ using static CubeAD.Permutation;
 namespace CubeAD.CubeRepresentation
 {
     //Compressed representation of a cube
-    public struct IndexCube
+    public struct IndexCube : IComparable<IndexCube>
     {
         public const int SIZE_IN_BYTES = 11;
         public const int PADDED_SIZE_IN_BYTES = 12;
@@ -118,7 +118,7 @@ namespace CubeAD.CubeRepresentation
             //{
             //    fixed(void* ptr = &this)
             //    {
-            //        return ptr[index];
+            //        return ((byte*)ptr)[index];
             //    }
             //}
 
@@ -139,8 +139,14 @@ namespace CubeAD.CubeRepresentation
         {
             return GetIndexedPerm(12, (int)EdgePermation);
         }
-        /// <returns>An array representing the orientation of edges</returns>
-        public int[] GetEdgeOrientation()
+		public void InsertEdgePermutation(int[] perm)
+		{
+			GetIndexedPerm(perm, (int)EdgePermation);
+		}
+
+
+		/// <returns>An array representing the orientation of edges</returns>
+		public int[] GetEdgeOrientation()
         {
             int[] buffer = new int[12];
 
@@ -151,11 +157,24 @@ namespace CubeAD.CubeRepresentation
 
             return buffer;
         }
+        public void InsertEdgeOrientation(int[] ret)
+        {
+			for (int i = 0; i < 12; i++)
+			{
+				ret[i] = (EdgeOrientation >> (11 - i)) & 1;
+			}
+		}
+
         /// <returns>An array representing the permutation of corner</returns>
         public int[] GetCornerPermuation()
         {
             return GetIndexedPerm(8, CornerPermuation);
         }
+        public void InsertCornerPermutation(int[] perm)
+        {
+            GetIndexedPerm(perm, CornerPermuation);
+        }
+
         /// <returns>An array representing the orientation of corners</returns>
         public int[] GetCornerOrientation()
         {
@@ -169,6 +188,16 @@ namespace CubeAD.CubeRepresentation
 
             return ret;
         }
+        public void InsertCornerOrientation(int[] ret)
+        {
+            int buffer = CornerOrientation;
+			for (int i = 8 - 1; i >= 0; i--)
+			{
+				ret[i] = buffer % 3;
+				buffer /= 3;
+			}
+		}
+
 
 		public static void RadixSortCubeIndices(List<IndexCube> data, List<IndexCube> CubeBuffer)
 		{
@@ -266,5 +295,19 @@ namespace CubeAD.CubeRepresentation
         {
             return HashCode.Combine(EdgePermation, CornerPermuation, EdgeOrientation, CornerOrientation);
         }
-    }
+
+		public int CompareTo(IndexCube other)
+		{
+	        if(EdgePermation != other.EdgePermation)
+                return EdgePermation.CompareTo(other.EdgePermation);
+
+            if(EdgeOrientation != other.EdgeOrientation)
+                return EdgeOrientation.CompareTo(other.EdgeOrientation);
+
+            if(CornerPermuation != other.CornerPermuation)
+                return CornerPermuation.CompareTo(other.CornerPermuation);
+
+            return CornerOrientation.CompareTo(other.CornerOrientation);
+		}
+	}
 }

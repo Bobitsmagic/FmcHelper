@@ -34,8 +34,8 @@ namespace CubeAD
 			int side = (int)m / 3;
 			Blocked |= (byte)(1 << side);
 
-			if (side % 2 == 0)
-				Blocked |= (byte)(1 << (side + 1));
+			if (side % 2 == 1)
+				Blocked |= (byte)(1 << (side - 1));
 
 			for (int i = 0; i < 6; i++)
 			{
@@ -74,6 +74,18 @@ namespace CubeAD
 					}
 				}
 			}
+		}
+
+		public override string ToString()
+		{
+			string s = "";
+			for(int i = 0; i < 18; i+= 3)
+			{
+				CubeMove m = (CubeMove)i;
+				s += m + ":" + (this[m] ? 1 : 0) + ", ";
+			}
+
+			return s;
 		}
 	}
 }

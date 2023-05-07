@@ -18,19 +18,15 @@ using System.Security.Principal;
 const int COUNT = 396_647_119;
 Console.WriteLine("required size: " + ((long)COUNT * IndexCube.SIZE_IN_BYTES).ToString("000 000 000 000"));
 
+TileCube tc = TileCube.GetSolved();
 
-int fac = 1;
-while (fac * fac < COUNT)
-	fac++;
+for(long i = 0; i < 67108864; i++)
+{
+	tc.MakeMove((CubeMove)((i * 1337) % 18));
+}
 
-Console.WriteLine(int.MaxValue);
-Console.WriteLine(Array.MaxLength);
+Console.WriteLine(tc.SideView());
 
-Stopwatch sw = Stopwatch.StartNew();
-List<int> primes = GetAllPrimes(Array.MaxLength - 1);
-
-Console.WriteLine("Sol: " + FindBiggestWholeFractionLessThanMax(COUNT, IndexCube.PADDED_SIZE_IN_BYTES));
-Console.WriteLine(sw.ElapsedMilliseconds);
 //IndexCube[] array = new IndexCube[396_647_119];
 
 
@@ -77,51 +73,3 @@ Console.ReadLine();
 //159 131
 //2 101 575
 //27 762 103
-
-long FindBiggestWholeFractionLessThanMax(long count, int size)
-{
-	if (count * size <= int.MaxValue)
-	{
-		return count;
-	}
-
-	foreach(int p in primes)
-	{
-		if(count % p == 0)
-		{
-            Console.WriteLine(p);
-			if (count / p * size <= int.MaxValue)
-			{
-				return count / p;
-			}
-        }
-	}
-
-	return -1;
-}
-
-List<int> GetAllPrimes(int max)
-{
-	bool[] primes = new bool[max + 1];
-	Array.Fill(primes, true);
-
-	List<int> ret = new List<int>();
-
-	for (long i = 2; i * i < max + 1; i++)
-	{
-		if (primes[i - 1])
-		{
-			for (long j = i * i; j <= max; j += i)
-			{
-				primes[j - 1] = false;
-			}
-		}
-	}
-
-
-	
-
-	Console.WriteLine($"There are {ret.Count} primes up to {max}");
-
-	return ret;
-}

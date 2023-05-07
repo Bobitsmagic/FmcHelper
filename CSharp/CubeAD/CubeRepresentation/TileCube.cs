@@ -59,11 +59,11 @@ namespace CubeAD.CubeRepresentation
 
 		static int[][] SymmetryArrays = new int[48][];
 
-		CubeColor[] Data = new CubeColor[TILE_COUNT];
 		static int GetTileIndex(int side, int x, int y)
 		{
 			return side * 9 + x + 3 * y;
 		}
+
 		static int[][] MoveArray = new int[18][];
 		static int[][] NonIdMoves = new int[18][];
 
@@ -150,7 +150,7 @@ namespace CubeAD.CubeRepresentation
 							next.Add(trans);
 						}
 
-						lowSym.MakeMove(MoveSequenz.ReverseMove((CubeMove)i));
+						lowSym.MakeMove(MoveSequence.ReverseMove((CubeMove)i));
 					}
 				}
 
@@ -224,7 +224,9 @@ namespace CubeAD.CubeRepresentation
 					}
 				}
 				NonIdMoves[m] = list.ToArray();
-			}
+
+                //Console.WriteLine(list.Count);
+            }
 
 			//Symmetry
 			for (int i = 0; i < 48; i++)
@@ -426,7 +428,7 @@ namespace CubeAD.CubeRepresentation
 			{
 				WritePos(tc, cornerIndex);
 
-				foreach(CubeMove cm in MoveSequenz.CornerPermutation.Moves)
+				foreach(CubeMove cm in MoveSequence.CornerPermutation.Moves)
 				{
 					tc.MakeMove(cm);
 
@@ -477,6 +479,7 @@ namespace CubeAD.CubeRepresentation
 			return buffer.CornerOrientaion(sorted.GetIndex);
 		}
 
+		CubeColor[] Data = new CubeColor[TILE_COUNT];
 		private TileCube()
 		{
 

@@ -89,7 +89,7 @@ namespace CubeTester
 			}
 
 			//Super flip
-			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
+			c.ApplyMoveSequenz(MoveSequence.SuperFlip);
 
 			for (int x = 0; x < 6; x++)
 			{
@@ -106,7 +106,7 @@ namespace CubeTester
 		{
 			StickerCube c = new StickerCube();
 			//Super flip
-			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
+			c.ApplyMoveSequenz(MoveSequence.SuperFlip);
 			for (int x = 0; x < 6; x++)
 			{
 				for (int y = 0; y < 6; y++)
@@ -135,7 +135,7 @@ namespace CubeTester
 			}
 
 			//Super flip has all symmetries
-			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
+			c.ApplyMoveSequenz(MoveSequence.SuperFlip);
 			foreach (SymmetryElement se in SymmetryElement.Elements)
 			{
 				Assert.True(c.HasSymmetry(se));
@@ -163,21 +163,21 @@ namespace CubeTester
 			Assert.AreEqual(SymmetryElement.FullSymmetry, sym);
 
 			//Super flip
-			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
+			c.ApplyMoveSequenz(MoveSequence.SuperFlip);
 			sym = c.GetSymmetrySet();
 			Assert.AreEqual(SymmetryElement.FullSymmetry, sym);
 
 			c.Reset();
 
 			//H perm
-			c.ApplyMoveSequenz(new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
+			c.ApplyMoveSequenz(new MoveSequence("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
 			sym = c.GetSymmetrySet();
 
 			//4 rotations (identity, 90, 180, 270) * 2 reflections (idenity, refelcted)
 			Assert.AreEqual(8, sym.BitCount);
 
 			//H perm of bottom side
-			c.ApplyMoveSequenz(new MoveSequenz("R2 D2 R' D2 R2 D2 R2 D2 R' D2 R2"));
+			c.ApplyMoveSequenz(new MoveSequence("R2 D2 R' D2 R2 D2 R2 D2 R' D2 R2"));
 			sym = c.GetSymmetrySet();
 
 			//4 Y-rotations (identity, 90, 180, 270) * 2 Z-Rotation (0, 180) * 2 reflections (idenity, refelcted)
@@ -186,12 +186,12 @@ namespace CubeTester
 
 			c.Reset();
 			//checkerboard pattern
-			c.ApplyMoveSequenz(new MoveSequenz("U2 D2 R2 L2 F2 B2"));
+			c.ApplyMoveSequenz(new MoveSequence("U2 D2 R2 L2 F2 B2"));
 			sym = c.GetSymmetrySet();
 			Assert.AreEqual(SymmetryElement.FullSymmetry, sym);
 
 			c.Reset();
-			c.ApplyMoveSequenz(new MoveSequenz("R2 L2 U2 R2 L2 D2"));
+			c.ApplyMoveSequenz(new MoveSequence("R2 L2 U2 R2 L2 D2"));
 			sym = c.GetSymmetrySet();
 			Assert.AreEqual(8, sym.BitCount);
 
@@ -206,8 +206,8 @@ namespace CubeTester
 			Random rnd = new Random(0);
 
 			//H perm
-			c1.ApplyMoveSequenz(new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
-			c2.ApplyMoveSequenz(new MoveSequenz("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
+			c1.ApplyMoveSequenz(new MoveSequence("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
+			c2.ApplyMoveSequenz(new MoveSequence("R2 U2 R' U2 R2 U2 R2 U2 R' U2 R2"));
 
 			BitMap64 sym = c1.GetSymmetrySet();
 			SymmetryElement[] elements = new SymmetryElement[sym.BitCount];

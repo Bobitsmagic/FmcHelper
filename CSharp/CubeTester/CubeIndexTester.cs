@@ -17,12 +17,12 @@ namespace CubeTester
 
 			Assert.AreEqual(0, index.EdgePermation);
 
-			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
+			c.ApplyMoveSequenz(MoveSequence.SuperFlip);
 
 			index = new IndexCube(c);
 			Assert.AreEqual(0, index.EdgePermation);
 
-			c.ApplyMoveSequenz(MoveSequenz.CheckerBoard);
+			c.ApplyMoveSequenz(MoveSequence.CheckerBoard);
 			index = new IndexCube(c);
 
 			//index of permutation 5 4 7 6 1 0 3 2 11 10 9 8
@@ -56,12 +56,12 @@ namespace CubeTester
 
 			Assert.AreEqual(0, index.EdgeOrientation);
 
-			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
+			c.ApplyMoveSequenz(MoveSequence.SuperFlip);
 
 			index = new IndexCube(c);
 			Assert.AreEqual(IndexCube.MAX_EDGE_ORIENTATION - 1, index.EdgeOrientation);
 
-			c.ApplyMoveSequenz(MoveSequenz.CheckerBoard);
+			c.ApplyMoveSequenz(MoveSequence.CheckerBoard);
 
 			index = new IndexCube(c);
 			Assert.AreEqual(IndexCube.MAX_EDGE_ORIENTATION - 1, index.EdgeOrientation);
@@ -77,14 +77,14 @@ namespace CubeTester
 
 			//double sune on top
 			//rotates corner 2 3 6 7
-			c.ApplyMoveSequenz(new MoveSequenz("R U R' U R U' R' U R U2 R'"));
+			c.ApplyMoveSequenz(new MoveSequence("R U R' U R U' R' U R U2 R'"));
 			index = new IndexCube(c);
 
 			int val = (Power(3, 7 - 2) + Power(3, 7 - 3) + Power(3, 7 - 6) + Power(3, 7 - 7));
 
 			Assert.AreEqual(val, index.CornerOrientation);
 
-			c.ApplyMoveSequenz(new MoveSequenz("R U R' U R U' R' U R U2 R'"));
+			c.ApplyMoveSequenz(new MoveSequence("R U R' U R U' R' U R U2 R'"));
 			index = new IndexCube(c);
 			Assert.AreEqual(val * 2, index.CornerOrientation);
 
@@ -224,7 +224,7 @@ namespace CubeTester
 			}
 
 			//Super flip
-			c.ApplyMoveSequenz(MoveSequenz.SuperFlip);
+			c.ApplyMoveSequenz(MoveSequence.SuperFlip);
 			foreach (SymmetryElement se in SymmetryElement.Elements)
 			{
 				Assert.True(c.HasSymmetry(se));

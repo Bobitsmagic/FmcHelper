@@ -36,7 +36,7 @@ namespace CubeRenderer
 		StickerCube SC;
 		public CubeMove CurrentMove = CubeMove.None;
 		public float Angle = 0;
-		public MoveSequenz moves = new MoveSequenz("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2");
+		public MoveSequence moves = new MoveSequence("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2");
 		int MoveIndex = 0;
 
 

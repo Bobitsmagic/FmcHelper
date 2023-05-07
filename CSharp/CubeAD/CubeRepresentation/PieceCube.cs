@@ -102,7 +102,7 @@ namespace CubeAD.CubeRepresentation
 
 						set.Add(new IndexCube((uint)lowSym.GetEdgePermIndex(), (ushort)lowSym.GetCornerPermIndex(), (ushort)lowSym.GetEdgeOrientationIndex(), (ushort)lowSym.GetCornerOrientationIndex()));
 
-						pc.MakeMove(MoveSequenz.ReverseMove(cm));
+						pc.MakeMove(MoveSequence.ReverseMove(cm));
 					}
 				});
 
@@ -155,7 +155,7 @@ namespace CubeAD.CubeRepresentation
 
 						set.Add(new IndexCube((uint)lowSym.GetEdgePermIndex(), (ushort)lowSym.GetCornerPermIndex(), (ushort)lowSym.GetEdgeOrientationIndex(), (ushort)lowSym.GetCornerOrientationIndex(), se.TransformMove(cm)));
 
-						pc.MakeMove(MoveSequenz.ReverseMove(cm));	
+						pc.MakeMove(MoveSequence.ReverseMove(cm));	
 					}
 				});
 
@@ -218,7 +218,7 @@ namespace CubeAD.CubeRepresentation
 
 					BackTrack(depth + 1, new MoveBlocker(mb, m));
 
-					cube.MakeMove(MoveSequenz.ReverseMove(m));	
+					cube.MakeMove(MoveSequence.ReverseMove(m));	
 				}
 			}
 		}

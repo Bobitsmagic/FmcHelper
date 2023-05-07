@@ -7,7 +7,7 @@ namespace CubeAD
 	//A set of all ZBLL algorithms
 	public static class ZBLLAlgos
 	{
-		public static List<List<MoveSequenz>> Cases = new List<List<MoveSequenz>>();
+		public static List<List<MoveSequence>> Cases = new List<List<MoveSequence>>();
 		public static void FromFile()
 		{
 			StringReader sr = new StringReader(File.ReadAllText(Directory.GetCurrentDirectory() + @"\casesmap.txt"));
@@ -17,7 +17,7 @@ namespace CubeAD
 
 			int mode = 0;
 			string line;
-			List<MoveSequenz> best = new List<MoveSequenz>();
+			List<MoveSequence> best = new List<MoveSequence>();
 			int shortest = int.MaxValue;
 			while ((line = sr.ReadLine()) != null)
 			{
@@ -44,7 +44,7 @@ namespace CubeAD
 							line = line.Replace("\"", "").Replace("'", "P").Replace(",", "").Trim();
 							//Console.WriteLine(line);
 
-							MoveSequenz ms = new MoveSequenz(line);
+							MoveSequence ms = new MoveSequence(line);
 
 							if (ms.Count == shortest)
 							{

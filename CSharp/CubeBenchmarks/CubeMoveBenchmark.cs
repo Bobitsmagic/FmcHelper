@@ -10,7 +10,7 @@ namespace CubeBenchmarks
     {
         const int COUNT = 1_000;
 
-        static MoveSequenz ms = new MoveSequenz();
+        static MoveSequence ms = new MoveSequence();
 
         TileCube ac = TileCube.GetSolved();
         IndexCube id = new IndexCube();

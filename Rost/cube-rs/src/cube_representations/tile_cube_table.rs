@@ -1,13 +1,11 @@
-use crate::cube_representations::tile_cube;
-
 const TILE_COUNT : i32 = 54;
 const MOVE_COUNT : i32 = 18;
-pub struct Table {
+pub struct TileCubeTable {
     pub move_array: [[i32; TILE_COUNT as usize]; 18],
     pub non_id_moves: [[i32; 20 as usize]; 18]
 }
 
-impl Table{
+impl TileCubeTable{
     pub fn init() -> Self {
         let mut move_array = [[0 as i32; TILE_COUNT as usize]; MOVE_COUNT as usize];
 
@@ -70,6 +68,6 @@ impl Table{
             }
          }
 
-        return Table {move_array, non_id_moves};
+        return TileCubeTable {move_array, non_id_moves};
     }
 }

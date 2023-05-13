@@ -1,6 +1,6 @@
 use crate::move_sequence::MoveSequence;
 
-use super::tile_cube_table::Table;
+use super::tile_cube_table::TileCubeTable;
 
 const TILE_COUNT : i32 = 6 * 9;
 
@@ -32,7 +32,7 @@ impl TileCube {
         return TileCube { data: SOLVED_DATA }
     }
 
-    pub fn make_move(&mut self, cube_move: u8, table: &Table) {
+    pub fn make_move(&mut self, cube_move: u8, table: &TileCubeTable) {
         //let buffer = self.data;
         //let mut buffer = [0 as u8; TILE_COUNT as usize];
         //buffer.copy_from_slice(&self.data);
@@ -49,13 +49,13 @@ impl TileCube {
         //}
     }
 
-    pub fn apply_move_sequence(&mut self, sequence: &MoveSequence, table: &Table){
+    pub fn apply_move_sequence(&mut self, sequence: &MoveSequence, table: &TileCubeTable){
         for m in &sequence.moves {
             self.make_move(*m, table);
         }
     }
 
-    pub fn new_move(src: &TileCube, m: u8, table: &Table) -> Self {
+    pub fn new_move(src: &TileCube, m: u8, table: &TileCubeTable) -> Self {
         let mut ret = (*src).clone();
         ret.make_move(m, table);
 
@@ -75,7 +75,7 @@ impl TileCube {
         //white
         for y in (0..3).rev() {
             print!("\t");
-            for i in 0..3 {
+            for _ in 0..3 {
                 print!("n, ");
             }
 
@@ -83,7 +83,7 @@ impl TileCube {
                 print!("{}, ", TILES[self.data[get_tile_index(3, x, y) as usize] as usize]);
             }
 
-            for i in 0..6 {
+            for _ in 0..6 {
                 print!("n, ");
             }
 
@@ -104,7 +104,7 @@ impl TileCube {
         //yellow
         for y in (0..3).rev() {
             print!("\t");
-            for i in 0..3 {
+            for _ in 0..3 {
                 print!("n, ");
             }
 
@@ -112,7 +112,7 @@ impl TileCube {
                 print!("{}, ", TILES[self.data[get_tile_index(2, x, y) as usize] as usize]);
             }
 
-            for i in 0..6 {
+            for _ in 0..6 {
                 print!("n, ");
             }
 

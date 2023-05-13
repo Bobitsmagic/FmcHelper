@@ -1,10 +1,8 @@
 use std::vec;
-use rand::SeedableRng;
 use rand::rngs::StdRng;
-use rand::{Rng, rngs::ThreadRng};
+use rand::Rng;
 
 use crate::move_blocker::MoveBlocker;
-use crate::ChaCha20Rng;
 
 const NAMES: [&str; 18] = [
     "L ", "L2", "L'", 

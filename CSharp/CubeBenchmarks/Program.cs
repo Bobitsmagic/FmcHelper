@@ -10,7 +10,7 @@ namespace CubeBenchmarks
 		{
             Console.WriteLine(System.Runtime.InteropServices.Marshal.SizeOf(typeof(IndexCube)));
 
-            var summary = BenchmarkRunner.Run<IndexCubeSortBenchmark>();
+            var summary = BenchmarkRunner.Run<CubeMoveBenchmark>();
 
 			//ArrayCube.GetAllCubes(4);
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
 namespace CubeAD
 {
@@ -185,20 +187,62 @@ namespace CubeAD
 			}
 		}
 
-		public static int TransfromToFacNumber(int N, int value)
+		public static int Order(int[] perm)
 		{
-			int ret = 0;
-			int factor = 1;
-			for (int i = 2; i < N; i++)
+			int lcm = 1;
+			for(int i = 0; i < perm.Length; i++)
 			{
-				int dec = value % i;
-				ret += dec * factor;
+				int count = 0;
+				int index = i;
+				do
+				{
+					index = perm[index];
+					count++;
+				} while (index != i);
 
-				value /= i;
-				factor *= 10;
+				lcm *= count / GCD(count, lcm);
 			}
-			return ret;
+
+			return lcm;
+
+			int GCD(int a, int b)
+			{
+				while (a != 0 && b != 0)
+				{
+					if (a > b)
+						a %= b;
+					else
+						b %= a;
+				}
+
+				return a | b;
+			}
 		}
 
+		public static int OrderHash(int[] perm)
+		{
+			List<int> list = new List<int>();
+			for (int i = 0; i < perm.Length; i++)
+			{
+				int count = 0;
+				int index = i;
+				do
+				{
+					index = perm[index];
+					count++;
+				} while (index != i);
+
+				list.Add(count);
+			}
+
+			list.Sort();
+			int hash = 0;
+			for (int i = 0; i < list.Count; i++)
+			{
+				hash = HashCode.Combine(hash, list[i]);
+			}
+
+			return hash;
+		}
 	}
 }

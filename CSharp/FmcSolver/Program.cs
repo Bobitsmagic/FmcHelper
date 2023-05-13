@@ -15,49 +15,74 @@ using System.Management;
 using System.Runtime.ExceptionServices;
 using System.Security.Principal;
 
-const int COUNT = 396_647_119;
-Console.WriteLine("required size: " + ((long)COUNT * IndexCube.SIZE_IN_BYTES).ToString("000 000 000 000"));
+//Console.WriteLine("Order: " + Permutation.Order(new int[] { 1, 2, 0, 4, 3 }));
 
-TileCube tc = TileCube.GetSolved();
 
-for(long i = 0; i < 67108864; i++)
-{
-	tc.MakeMove((CubeMove)((i * 1337) % 18));
+
+//PieceCube[] pc = new PieceCube[48];
+
+//for (int i = 0; i < 48; i++)
+//{
+//	pc[i] = new PieceCube();
+//}
+
+
+PieceCube pc = new PieceCube();
+
+Dictionary<int, int> set = new Dictionary<int, int>();
+
+MoveBlocker mb = new MoveBlocker();
+List<int> list = new List<int>();
+Random rnd = new Random();
+for(long i = 0; i < 1_000_000_00; i++)
+{	
+	list.Clear();
+	for (int j = 0; j < 6; j++)
+	{
+		if (!mb[j])
+			list.Add(j);
+	}
+
+	int index = rnd.Next(list.Count);
+	int side = list[index];
+
+	CubeMove move = (CubeMove)(side * 3 + rnd.Next(3));
+	mb.UpdateBlocked(move);
+	
+	int hash = pc.GetSymHash();
+	if (set.ContainsKey(hash))
+	{
+		set[hash]++;
+	}
+	else
+	{
+		set.Add(hash, 1);
+	}
+	
+	pc.MakeMove(move);
+
+	if (i % 10_000_000 == 0)
+        Console.WriteLine(i);
 }
 
-Console.WriteLine(tc.SideView());
 
-//IndexCube[] array = new IndexCube[396_647_119];
+Console.WriteLine(set.Count);
+
+Console.WriteLine("Keys: ");
+//Console.WriteLine(string.Join("\n", new SortedList<int, int>(set).Keys));
+Console.WriteLine("Values: ");
+Console.WriteLine(string.Join("\n", new SortedList<int, int>(set).Values));
 
 
-//Stopwatch sw = Stopwatch.StartNew();
-//for (int d = 9; d < 10; d++)
+//Console.WriteLine(ms);
+
+//for (int i = 0; i < 48; i++)
 //{
-//    Console.WriteLine("\nWorking: " + d);
+//	pc[i] = new PieceCube();
 
-//    sw.Restart();
-//    var set = PieceCube.GetUniqueSymCubes(d);
+//	pc[i].ApplySequence(ms.TransForm(SymmetryElement.Elements[i]).Moves);
 
-//    Console.WriteLine("Count : " + set.Count.ToString("0 000 000 000"));
-//    Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000"));
-
-//    sw.Restart();
-
-//    Console.WriteLine("Getting array");
-//    var array = set.GetArray();
-//    Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000"));
-
-//    set = null;
-//    GC.Collect();
-//    Console.WriteLine("Creating sealed hashset");
-//    sw.Restart();
-//    SealedHashset sh = new SealedHashset(array);
-//    Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000"));
-
-//    sw.Restart();
-//    sh.SaveToFile("sym_" + d + "_data.bin", "sym_" + d + "_index.bin");
-//    Console.WriteLine("Time: " + sw.ElapsedMilliseconds.ToString("000 000"));
-
+//	Console.WriteLine(pc[i].GetSymHash());
 //}
 
 Console.WriteLine("Done");

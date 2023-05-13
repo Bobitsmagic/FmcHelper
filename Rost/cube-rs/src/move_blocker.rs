@@ -1,5 +1,3 @@
-use std::vec;
-
 #[derive(Clone, Copy)]
 pub struct MoveBlocker {
     blocked: u8

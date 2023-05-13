@@ -223,8 +223,12 @@ namespace CubeAD.CubeRepresentation
 			}
 		}
 
+		static PieceCube SolvedCube;
+
 		static PieceCube()
 		{
+			SolvedCube = new PieceCube();				
+
 			int[] FrontEdges = new int[] { 3, 7, 9, 11 };
 			int[] BackEdges = new int[] { 2, 6, 8, 10 };
 
@@ -369,6 +373,8 @@ namespace CubeAD.CubeRepresentation
 			}
 		}
 
+		public bool IsSolved => this == SolvedCube;
+
 		public PieceCube(IndexCube src) : this(src.GetEdgePermutation(), src.GetEdgeOrientation(), src.GetCornerPermuation(), src.GetCornerOrientation())
 		{
 			
@@ -389,6 +395,15 @@ namespace CubeAD.CubeRepresentation
 			Array.Copy(src.Corners, Corners, 8);
 			Array.Copy(src.Edges, Edges, 12);
 		}
+
+		public PieceCube(PieceCube src, CubeMove m)
+		{
+			Array.Copy(src.Corners, Corners, 8);
+			Array.Copy(src.Edges, Edges, 12);
+
+			MakeMove(m);	
+		}
+
 		public void CopyValuesFrom(PieceCube src)
 		{
 			Array.Copy(src.Corners, Corners, 8);
@@ -539,6 +554,11 @@ namespace CubeAD.CubeRepresentation
 			}
 
 			return (ushort)ret;
+		}
+
+		public int GetSymHash()
+		{
+			return HashCode.Combine(Permutation.OrderHash(GetCornerPerm()), Permutation.OrderHash(GetEdgePerm()));
 		}
 
 		public static bool operator ==(PieceCube left, PieceCube right)

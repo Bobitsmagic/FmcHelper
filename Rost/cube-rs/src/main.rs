@@ -41,7 +41,7 @@ fn main() {
     duration = start.elapsed();
     println!("Time: {:?}", duration);
     
-    let ms = MoveSequence::get_random(14, &mut StdRng::seed_from_u64(1337));
+    let ms = MoveSequence::get_random(15, &mut StdRng::seed_from_u64(1337));
     ms.print();
     let mut cube = PieceCube::get_solved();
     cube.apply_move_sequence(&ms, &piece_table);

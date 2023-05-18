@@ -23,14 +23,14 @@ impl CornerEdgeOrientState {
 pub struct SealedSet {
     data: Vec<CornerEdgeOrientState>,
     moves: Vec<u8>,
-    start_index: Vec<usize>
+    start_index: Vec<u32>
 }
 
 impl SealedSet {
     pub fn new(cubes: &Vec<IndexCube>) -> Self {
         let mut data: Vec<CornerEdgeOrientState> = Vec::with_capacity(cubes.len());
         let mut moves: Vec<u8> = Vec::with_capacity(cubes.len());
-        let mut start_index = vec![0 as usize; BUCKET_COUNT + 1];
+        let mut start_index = vec![0 as u32; BUCKET_COUNT + 1];
 
         for i in 1..cubes.len() {
             if cubes[i].edge_perm < cubes[i - 1].edge_perm {
@@ -71,9 +71,9 @@ impl SealedSet {
         let search = CornerEdgeOrientState::new(cube);
 
         for i in start..end {
-            if self.data[i] == search {
+            if self.data[i as usize] == search {
                 
-                cube.last_move = self.moves[i];
+                cube.last_move = self.moves[i as usize];
 
                 return (true, cube);
             }

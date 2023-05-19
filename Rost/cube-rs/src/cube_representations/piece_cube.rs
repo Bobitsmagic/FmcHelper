@@ -1,4 +1,4 @@
-use crate::{move_sequence::MoveSequence, permuation, cube_move::NONE};
+use crate::{move_sequence::MoveSequence, permutation, cube_move::NONE};
 
 use super::{piece_cube_table::PieceCubeTable, index_cube::IndexCube};
 
@@ -89,14 +89,14 @@ impl PieceCube {
     pub fn from_index_cube(src: IndexCube) -> Self {
         let mut ret = Self::get_solved();
 
-        let edge_perm = permuation::get_indexed_perm(12,src.edge_perm);
+        let edge_perm = permutation::get_indexed_perm(12,src.edge_perm);
 
         for i in 0..12 {
             ret.edges[i] = EdgeState::new_pos_orient(edge_perm[i] as i32, 
                 ((src.edge_orient >> (11 - edge_perm[i])) & 1) as i32);
         }
 
-        let corner_perm = permuation::get_indexed_perm(8, src.corner_perm as u32);
+        let corner_perm = permutation::get_indexed_perm(8, src.corner_perm as u32);
         let mut orientation = [0 as u16; 8];
         let mut corner_orient_index = src.corner_orient;
         for i in (0..8).rev() {
@@ -152,10 +152,10 @@ impl PieceCube {
     }
 
     pub fn get_edge_perm_index(&self) -> u32 {
-        return permuation::get_index(&self.edges.map(|x| x.position() as u8));
+        return permutation::get_index(&self.edges.map(|x| x.position() as u8));
     }
     pub fn get_corner_perm_index(&self) -> u16 {
-        return permuation::get_index(&self.corners.map(|x| x.position() as u8)) as u16;
+        return permutation::get_index(&self.corners.map(|x| x.position() as u8)) as u16;
     }
     pub fn get_edge_orient_index(&self) -> u16 {
         let mut vals = [0 as i32; 12];

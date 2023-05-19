@@ -10,7 +10,7 @@ const AFFECTED_EDGES_CW: [[i32; 4]; 6] = [
     [9, 3, 11, 7]   //Green
 ];
 
-const AFFECTED_CORNERS_CW: [[i32; 4]; 6] = [
+pub const AFFECTED_CORNERS_CW: [[i32; 4]; 6] = [
     [0, 2, 3, 1],   //Orange
     [5, 7, 6, 4],   //Red
     [0, 1, 5, 4],   //Yellow

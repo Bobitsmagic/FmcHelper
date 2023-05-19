@@ -5,10 +5,11 @@ mod move_sequence;
 mod move_blocker;
 mod pieces;
 mod cube_move;
-mod permuation;
+mod permutation;
 mod cube_collections;
 
 use cube_collections::sorted_set::SortedSet;
+use cube_representations::corner_cube_table::{self, CornerCubeTable};
 use cube_representations::index_cube::IndexCube;
 use cube_representations::piece_cube_table::PieceCubeTable;
 use rand::prelude::*;
@@ -20,38 +21,69 @@ use std::time::{Instant, Duration};
 use cube_representations::piece_cube::PieceCube;
 use cube_representations::tile_cube::TileCube;
 use cube_representations::tile_cube_table::TileCubeTable;
+use cube_representations::corner_cube::CornerCube;
 use move_sequence::MoveSequence;
 
+use std::fs::File;
+use std::io::prelude::*;
 
 use crate::cube_collections::sealed_set::SealedSet;
+use crate::cube_representations::corner_cube;
 use crate::move_blocker::MoveBlocker;
 use crate::move_sequence::print_move;
 
-fn main() {
-    let piece_table: PieceCubeTable = PieceCubeTable::init();
+fn main() -> std::io::Result<()> {
     
-    let mut start = Instant::now();
-    let set = create_sorted_set(7, &piece_table);
-    let mut duration = start.elapsed();
-    println!("Count: {}", set.len());
-    println!("Time: {:?}", duration);
 
-    start = Instant::now();
-    let ss = SealedSet::new(&set.data);
-    duration = start.elapsed();
-    println!("Time: {:?}", duration);
-    
-    let ms = MoveSequence::get_random(15, &mut StdRng::seed_from_u64(1337));
-    ms.print();
-    let mut cube = PieceCube::get_solved();
-    cube.apply_move_sequence(&ms, &piece_table);
-    
-    start = Instant::now();
-    
-    look_up(cube, &piece_table, &ss);
+    for i in 0..12 {
+        let start = Instant::now();
+        let set = build_corner_table(i, &CornerCubeTable::init(&PieceCubeTable::init()));
+        let duration = start.elapsed();
+        println!("N: {}, Count: {}, Time: {:?}", i, set.len(), duration);
 
-    duration = start.elapsed();
-    println!("Time: {:?}", duration);   
+        let mut buffer: Vec<u8> = Vec::with_capacity(corner_cube::SIZE_IN_BYTES as usize);
+
+        for cube in set {
+            cube.write_to_buffer(&mut buffer);
+        }
+
+        {
+            let mut file = File::create(i.to_string())?;
+
+            file.write_all(&buffer)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn build_corner_table(max_depth: i32, table: &CornerCubeTable) -> HashSet<CornerCube> {
+    let mut set = HashSet::new();
+    let mut list: Vec<CornerCube> = Vec::new();
+    list.push(CornerCube::get_solved());
+    set.insert(CornerCube::get_solved());
+
+    let mut next_list: Vec<CornerCube> = Vec::new();
+
+    for d in 0..max_depth {
+        for cube in &list {
+            for m in 0..18 {
+                let n = CornerCube::new_move(&cube, m, table); 
+
+                if set.insert(n) {
+                    next_list.push(n);
+                }
+            }
+        }
+
+        list.clear();
+        list.append(&mut next_list);     
+        next_list.clear();
+    }
+
+
+    return set;
+     
 }
 
 fn big_search() {

@@ -10,6 +10,8 @@ mod cube_collections;
 
 use cube_collections::sorted_set::SortedSet;
 use cube_representations::corner_cube_table::{self, CornerCubeTable};
+use cube_representations::edge_perm::EdgePerm;
+use cube_representations::edge_perm_table::EdgePermTable;
 use cube_representations::index_cube::IndexCube;
 use cube_representations::piece_cube_table::PieceCubeTable;
 use rand::prelude::*;
@@ -32,29 +34,17 @@ use crate::cube_representations::corner_cube;
 use crate::move_blocker::MoveBlocker;
 use crate::move_sequence::print_move;
 
-fn main() -> std::io::Result<()> {
-    
+fn main() {
+    //let table = CornerCubeTable::init(&PieceCubeTable::init());
+    let table = EdgePermTable::init();
 
-    for i in 0..12 {
+    for i in 0..13 {
         let start = Instant::now();
-        let set = build_corner_table(i, &CornerCubeTable::init(&PieceCubeTable::init()));
+        let set = build_edge_table(i, &table);
         let duration = start.elapsed();
         println!("N: {}, Count: {}, Time: {:?}", i, set.len(), duration);
-
-        let mut buffer: Vec<u8> = Vec::with_capacity(corner_cube::SIZE_IN_BYTES as usize);
-
-        for cube in set {
-            cube.write_to_buffer(&mut buffer);
-        }
-
-        {
-            let mut file = File::create(i.to_string())?;
-
-            file.write_all(&buffer)?;
-        }
     }
 
-    Ok(())
 }
 
 fn build_corner_table(max_depth: i32, table: &CornerCubeTable) -> HashSet<CornerCube> {
@@ -68,6 +58,10 @@ fn build_corner_table(max_depth: i32, table: &CornerCubeTable) -> HashSet<Corner
     for d in 0..max_depth {
         for cube in &list {
             for m in 0..18 {
+                if m == cube_move::F || m == cube_move::FP || m == cube_move::B || m == cube_move::BP {
+                    continue;
+                } 
+
                 let n = CornerCube::new_move(&cube, m, table); 
 
                 if set.insert(n) {
@@ -85,6 +79,62 @@ fn build_corner_table(max_depth: i32, table: &CornerCubeTable) -> HashSet<Corner
     return set;
      
 }
+
+fn build_edge_table(max_depth: i32, table: &EdgePermTable) -> Vec<u32> {
+    fn remove_duplicates(list: &mut Vec<u32>, start: usize){
+        list[start..] .sort();
+        
+        let mut current = list[start];
+        let mut delete_count = 0;
+        
+        for i in (start + 1)..list.len() {
+            let cube = list[i];
+            
+            if cube != current {
+                current = cube;
+                list[i - delete_count] = cube;
+            }
+            else {
+                delete_count += 1;
+            }
+        }
+        
+        println!("Removed {} from {} elements ({})", delete_count, list.len(), delete_count as f32 / list.len() as f32);
+        list.drain((list.len() - delete_count)..(list.len()));
+    }
+
+    let mut set: Vec<u32> = Vec::new();
+    set.push(0);
+
+    for d in 0..max_depth {
+        let pre_count = set.len();
+
+        for i in 0..pre_count {
+            let cube = EdgePerm::from_index(set[i]);
+
+            for m in 0..18 {
+                if m == cube_move::F || m == cube_move::FP || m == cube_move::B || m == cube_move::BP {
+                    continue;
+                } 
+
+                let n = EdgePerm::new_move(&cube, m, table).get_index(); 
+                
+                set.push(n);
+            }
+
+            const DUP: u32 = 1 << 24;
+            if i as u32 % DUP == DUP - 1 {
+                remove_duplicates(&mut set, pre_count)
+            }
+        }
+        
+
+        remove_duplicates(&mut set, 0);
+    }
+
+    return set;
+}
+
 
 fn big_search() {
     let piece_table: PieceCubeTable = PieceCubeTable::init();

@@ -1,7 +1,7 @@
 use super::piece_cube::CornerState;
 use super::piece_cube::EdgeState;
 
-const AFFECTED_EDGES_CW: [[i32; 4]; 6] = [
+pub const AFFECTED_EDGES_CW: [[i32; 4]; 6] = [
     [0, 2, 1, 3],   //Orange
     [4, 7, 5, 6],   //Red
     [8, 0, 9, 4],   //Yellow

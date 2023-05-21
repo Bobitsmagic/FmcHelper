@@ -1,3 +1,5 @@
+use rand_chacha::rand_core::le;
+
 use crate::move_sequence::MoveSequence;
 
 use super::{index_cube, corner_cube_table::CornerCubeTable};
@@ -19,9 +21,9 @@ impl CornerCube {
         return Self::new(0, 0);
     }
 
-    pub fn read_from_buffer(buffer: Vec<u8>, index: usize) -> Self {
-        let mut array: Vec<u16>;
-        let mut ser: Vec<u8> = vec![0; 4];
+    pub fn read_from_buffer(buffer: &Vec<u8>, index: usize) -> Self {
+        let array: [u16; 2];
+        let mut ser = [0 as u8; 4];
         ser.copy_from_slice(&buffer[index..(index + SIZE_IN_BYTES as usize)]);
         
         unsafe {
@@ -32,14 +34,16 @@ impl CornerCube {
     }
 
     pub fn write_to_buffer(&self, buffer: &mut Vec<u8>) {
-        let array: Vec<u16> = vec![self.perm_index, self.orient_index];
+        let array: [u16; 2] = [self.perm_index, self.orient_index];
 
-        let mut ser: Vec<u8>;
+        let ser: [u8; 4];
         unsafe {
-            ser = std::mem::transmute(array);    
+             ser = std::mem::transmute(array);    
         }
 
-        buffer.append(&mut ser);
+        for val in ser {
+            buffer.push(val);
+        }
     }
 
     pub fn from_index(index: u32) -> Self {

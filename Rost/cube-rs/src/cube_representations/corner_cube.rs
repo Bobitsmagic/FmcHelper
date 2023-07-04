@@ -1,10 +1,9 @@
-use rand_chacha::rand_core::le;
-
 use crate::move_sequence::MoveSequence;
 
 use super::{index_cube, corner_cube_table::CornerCubeTable};
 
 pub const SIZE_IN_BYTES: u32 = 4;
+pub const MAX_INDEX: u32 = index_cube::MAX_CORNER_PERM as u32 * index_cube::MAX_CORNER_ORIENT as u32;
 
 #[derive(PartialEq, Eq, Clone, Copy, Hash)]
 pub struct CornerCube {

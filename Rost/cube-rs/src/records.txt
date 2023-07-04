@@ -1,11 +1,29 @@
-N: 0, Count: 1, Time: 1.2073ms
-N: 1, Count: 15, Time: 13.7µs
-N: 2, Count: 154, Time: 65.1µs
-N: 3, Count: 1522, Time: 361.6µs
-N: 4, Count: 14841, Time: 3.6391ms
-N: 5, Count: 139367, Time: 39.5752ms
-N: 6, Count: 1240076, Time: 397.1404ms
-N: 7, Count: 10294964, Time: 4.5281102s
-N: 8, Count: 74957752, Time: 48.3301464s
-N: 9, Count: 339746592, Time: 455.4269192s
-N: 10, Count: 478851216, Time: 1561.1962046s
+Edges 
+N: 0, Count: 1, Time: 300ns
+N: 1, Count: 19, Time: 3.7µs
+N: 2, Count: 262, Time: 35.2µs
+N: 3, Count: 3502, Time: 410.4µs
+N: 4, Count: 46037, Time: 5.9891ms
+N: 5, Count: 588271, Time: 80.4905ms
+N: 6, Count: 7118162, Time: 1.0810098s
+N: 7, Count: 73596790, Time: 14.2026621s
+N: 8, Count: 384553868, Time: 156.461377s
+N: 9, Count: 478997468, Time: 890.7698814s
+N: 10, Count: 479001600, Time: 1798.1470425s
+
+
+//Edges without F,B, F', B'
+N: 0, Count: 1, Time: 300ns
+N: 1, Count: 15, Time: 3.9µs
+N: 2, Count: 154, Time: 22.5µs
+N: 3, Count: 1522, Time: 217.3µs
+N: 4, Count: 14841, Time: 2.148ms
+N: 5, Count: 139367, Time: 21.2194ms
+N: 6, Count: 1240076, Time: 210.3265ms
+N: 7, Count: 10294964, Time: 1.9723273s
+N: 8, Count: 74957752, Time: 17.5010213s
+N: 9, Count: 339746592, Time: 136.2783135s
+N: 10, Count: 478851216, Time: 677.3398324s
+N: 11, Count: 479001580, Time: 1439.4411179s
+N: 12, Count: 479001600, Time: 2148.8820027s
+

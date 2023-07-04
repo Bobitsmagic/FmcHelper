@@ -1,6 +1,6 @@
 use crate::{move_sequence::MoveSequence, permutation, cube_move::NONE};
 
-use super::{piece_cube_table::PieceCubeTable, index_cube::IndexCube};
+use super::{piece_cube_table::PieceCubeTable, index_cube::{IndexCube, self}};
 
 pub const MAX_STATE : u8 = 24;
 
@@ -149,6 +149,10 @@ impl PieceCube {
             self.get_corner_perm_index(), 
             self.get_corner_orient_index(), 
             NONE);
+    }
+
+    pub fn get_corner_index(&self) -> u32 {
+        return self.get_corner_perm_index() as u32 + (self.get_corner_orient_index() as u32) * index_cube::MAX_CORNER_PERM as u32;
     }
 
     pub fn get_edge_perm_index(&self) -> u32 {

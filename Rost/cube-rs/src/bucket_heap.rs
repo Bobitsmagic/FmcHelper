@@ -1,7 +1,7 @@
-use crate::{cube_representations::piece_cube::PieceCube, move_blocker::MoveBlocker};
+use crate::{cube_representations::piece_cube::PieceCube};
 
 pub struct BucketHeap {
-    data: Vec<Vec<(PieceCube, MoveBlocker, u8)>>,
+    data: Vec<Vec<(PieceCube, u8, u8)>>,
     count: u32,
     inserts: u64
 }
@@ -15,13 +15,9 @@ impl BucketHeap {
         return BucketHeap { data: Vec::new(), count: 0, inserts: 0 }
     }
 
-    pub fn add(&mut self, depth: u8, heuristic: u8, cube: PieceCube, mb: MoveBlocker) {
+    pub fn add(&mut self, depth: u8, heuristic: u8, cube: PieceCube, last_move: u8) {
         if (depth as u32 + heuristic as u32) > 255 {
             println!("{}, {}", depth, heuristic);
-        }
-
-        if depth + heuristic > 17 {
-            return;
         }
 
         let index = (depth + heuristic) as usize;
@@ -34,22 +30,22 @@ impl BucketHeap {
             }
         }
         
-        self.data[index].push((cube, mb, depth));
+        self.data[index].push((cube, last_move, depth));
 
         self.count += 1;
 
         self.inserts += 1;
 
-        if self.inserts % (1 << 24) == 0 {
-            for i in 0..self.data.len() {
-                print!("{:2} -> {:.2}, ", i, self.data[i].len() as f32 / self.count as f32);
-            }
-
-            println!();
-        } 
+        //if self.inserts % (1 << 24) == 0 {
+        //    for i in 0..self.data.len() {
+        //        print!("{:2} -> {:.2}, ", i, self.data[i].len() as f32 / self.count as f32);
+        //    }
+//
+        //    println!();
+        //} 
     }
 
-    pub fn pop(&mut self) -> (PieceCube, MoveBlocker, u8) {
+    pub fn pop(&mut self) -> (PieceCube, u8, u8) {
 
         self.count -= 1;
         for i in 0..self.data.len() {
@@ -61,6 +57,6 @@ impl BucketHeap {
 
         println!("This should never happen");
 
-        return (PieceCube::get_solved(), MoveBlocker::new(), 255);
+        return (PieceCube::get_solved(), 18, 255);
     }
 }

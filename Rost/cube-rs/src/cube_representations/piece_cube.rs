@@ -1,4 +1,4 @@
-use crate::{move_sequence::MoveSequence, permutation, cube_move::NONE};
+use crate::{move_sequence::MoveSequence, permutation, cube_move::{NONE, self}};
 
 use super::{piece_cube_table::PieceCubeTable, index_cube::{IndexCube, self}};
 
@@ -142,13 +142,13 @@ impl PieceCube {
         return ret;
     }
 
-    pub fn get_index_cube(&self) -> IndexCube {
+    pub fn get_index_cube(&self, lm: u8) -> IndexCube {
         return IndexCube::new(
             self.get_edge_perm_index(), 
             self.get_edge_orient_index(), 
             self.get_corner_perm_index(), 
             self.get_corner_orient_index(), 
-            NONE);
+            lm);
     }
 
     pub fn get_corner_index(&self) -> u32 {

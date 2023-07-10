@@ -22,6 +22,10 @@ pub fn print_move(m: u8){
     print!("{} ", NAMES[m as usize]);
 }
 
+pub fn reverse_move(m: u8) -> u8 {
+    return m - m % 3 + (2 * m + 2) % 3
+}
+
 impl MoveSequence {
     pub fn new(moves: Vec<u8>) -> Self {
         return MoveSequence{moves};
@@ -110,6 +114,7 @@ impl MoveSequence {
     }
 
     pub fn print(&self) {
+        print!("[{}]", self.moves.len());
         for m in &self.moves {
             print!("{} ", NAMES[*m as usize]);
         }

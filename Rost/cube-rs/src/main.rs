@@ -39,9 +39,11 @@ use crate::cube_representations::corner_cube;
 use crate::move_blocker::MoveBlocker;
 use crate::move_sequence::print_move;
 
+const MAX_TABLE_DEPTH: u8 = 8;
+
 fn main() {
     let table = PieceCubeTable::init();
-    
+
     //let cc_table = CornerCubeTable::init(&PieceCubeTable::init());
     //build_corner_table(12, &cc_table);
     //println!("Created corner table");
@@ -56,28 +58,51 @@ fn main() {
     
     println!("Loaded tables");
     
-    let set = SealedSet::new(&create_sorted_set(8, &table).data);
+    let set = SealedSet::new(&create_sorted_set(MAX_TABLE_DEPTH as i32, &table).data, MAX_TABLE_DEPTH);
 
     println!("Loaded look up");
 
-    let mut rng = StdRng::seed_from_u64(13);
-
-    for _ in 0..10000 {
+    let mut rng = StdRng::seed_from_u64(4222);
+    
+    let mut start = Instant::now();
+    for _ in 0..3 {
         let mut cube = PieceCube::get_solved();
         
-        let ms = MoveSequence::get_random_eo(30, &mut rng);
+        let ms = MoveSequence::get_random(20, &mut rng);
         ms.print();
         cube.apply_move_sequence(&ms, &table);
         //cube.apply_move_sequence(&MoveSequence::from_string("R2 L2 F2 U2 R2"), &table);
         
-        let mut start = Instant::now();
         //a_star_order(cube, &table, &corner_cost, &edge_cost);
-        a_star_set(cube, &table, &corner_cost, &edge_cost, &set);
-        //a_star(cube, &table, &corner_cost, &edge_cost);
-        let mut duration = start.elapsed();
-
-        println!("{:?}", duration);
+        
+        let list = dfs_eo(cube.clone(), &table);
+        let mut min = 255 as u8;
+        let mut max = 0 as u8;
+        for v in list {
+            cube = PieceCube::get_solved();
+            cube.apply_move_sequence(&ms, &table);
+            cube.apply_move_sequence(&MoveSequence::new(v.clone()), &table);
+    
+            //println!("EO count: {}, length: {}, worked: {}", v.len(), v.len(), cube.get_edge_orient_index() == 0);
+            print!("\nEO: ");
+            MoveSequence::new(v.clone()).print();
+    
+            let val = a_star_set(cube, &table, &corner_cost, &edge_cost, &set, min);
+            //a_star(cube, &table, &corner_cost, &edge_cost);
+            if val < min {
+                min = val;
+            }
+            if val > max {
+                max = val;
+            }
+        }
+        println!("Min {}", min);
+        println!("Max {}", max);
+        println!("#############################################################");
+        
     }
+    let mut duration = start.elapsed();
+    println!("{:?}", duration);
 }
 
 fn load_corner_table(path: String) -> Vec<u8> {
@@ -127,9 +152,9 @@ fn build_corner_table(max_depth: i32, table: &CornerCubeTable) {
     for d in 0..max_depth {
         for cube in &list {
             for m in 0..18 {
-                if m == cube_move::F || m == cube_move::FP || m == cube_move::B || m == cube_move::BP {
-                    continue;
-                } 
+                //if m == cube_move::F || m == cube_move::FP || m == cube_move::B || m == cube_move::BP {
+                //    continue;
+                //} 
                 
                 let n = CornerCube::new_move(&cube, m, table); 
                 
@@ -153,7 +178,7 @@ fn build_corner_table(max_depth: i32, table: &CornerCubeTable) {
         ret[pair.0.get_index() as usize] = pair.1;
     }
 
-    let mut f = File::create("corners_eo.bin").expect("Unable to create file");
+    let mut f = File::create("corners.bin").expect("Unable to create file");
     f.write_all(&ret).expect("Unable to write Data");
     f.flush();     
 }
@@ -171,9 +196,9 @@ fn build_edge_table(max_depth: i32, table: &EdgePermTable) {
             let cube = EdgePerm::from_index(*perm);
 
             for m in 0..18 {
-                if m == cube_move::F || m == cube_move::FP || m == cube_move::B || m == cube_move::BP {
-                    continue;
-                } 
+                //if m == cube_move::F || m == cube_move::FP || m == cube_move::B || m == cube_move::BP {
+                //    continue;
+                //} 
 
                 let n = EdgePerm::new_move(&cube, m, table).get_index(); 
                 
@@ -191,12 +216,12 @@ fn build_edge_table(max_depth: i32, table: &EdgePermTable) {
         println!("Max depth: {} with {}", d, current.len());
     }
 
-    let mut f = File::create("edges_eo.bin").expect("Unable to create file");
+    let mut f = File::create("edges.bin").expect("Unable to create file");
     f.write_all(&ret).expect("Unable to write Data");
     f.flush();
 }
 
-fn a_star(cube: PieceCube, table: &PieceCubeTable, corner_cost: &Vec<u8>, edge_cost: &Vec<u8>) {
+fn a_star(cube: PieceCube, table: &PieceCubeTable, corner_cost: &Vec<u8>, edge_cost: &Vec<u8>){
     fn get_cost(pc: &PieceCube, corner_cost: &Vec<u8>, edge_cost: &Vec<u8>) -> u8 {
 
         let c1 = corner_cost[pc.get_corner_index() as usize];
@@ -210,163 +235,162 @@ fn a_star(cube: PieceCube, table: &PieceCubeTable, corner_cost: &Vec<u8>, edge_c
             println!("edge not found: {}", pc.get_edge_perm_index());
         }
 
-        let dif = (c1 as i32 - c2 as i32).abs(); 
-        if dif > 9 {
-            println!("Dif corner: {} edge {}", c1, c2);
-        }
-
         return cmp::max(c1, c2);
         //return c2;
     }
 
+    fn find_move_sequence_map(pc: &PieceCube, target: &PieceCube, map: &HashMap<PieceCube, (u8, u8)>, table: &PieceCubeTable) -> MoveSequence {
+        let mut moves: Vec<u8> = Vec::new();
+        let mut next = pc.clone();
+
+        while next != *target {
+            if !map.contains_key(&next) {
+                print!("Alarm");
+            }
+            let (old_move, old_depth) = map.get(&next).unwrap();
+            moves.push(*old_move);
+            
+            let rev = move_sequence::reverse_move(*old_move);
+            next.make_move(rev,  table);
+        }
+        moves.reverse();
+
+        return MoveSequence::new(moves);
+    }
+
+    let mut visited: HashMap<PieceCube, (u8, u8)> = HashMap::new();
     let mut heap = BucketHeap::new();
-    heap.add(0, get_cost(&cube, corner_cost, edge_cost), cube, MoveBlocker::new());
+
+    visited.insert(cube.clone(), (cube_move::NONE, 0));
+    heap.add(0, get_cost(&cube, corner_cost, edge_cost), cube.clone(), cube_move::NONE);
+
 
     while heap.len() > 0 {
         let pair = heap.pop();
-        let cube = &pair.0;
-        let mb = pair.1;
+        let prev_cube = &pair.0;
+        let lm = pair.1;
         let depth = pair.2;
 
-        for m in 0..18 {
-            if mb.move_blocked(m) {
-                continue;
-            }
+        for m in move_blocker::POSSIBLE_MOVES[(lm / 3) as usize] {
+            let next = PieceCube::new_move(prev_cube, *m, table);
 
-            if m == cube_move::F || m == cube_move::FP || m == cube_move::B || m == cube_move::BP {
-                continue;
-            }
-
-            let next = PieceCube::new_move(cube, m, table);
-            
-            if next.is_solved() {
-                println!("Found solution at cost: {} ", depth + 1);
-
-                return;
-            }
-
-            let cost = get_cost(&next, corner_cost, edge_cost);
-
-            heap.add(depth + 1,  cost,  next, mb);
-        }
-    }
-}
-
-fn a_star_order(cube: PieceCube, table: &PieceCubeTable, corner_cost: &Vec<u8>, edge_cost: &Vec<u8>) {
-    fn get_cost(pc: &PieceCube, corner_cost: &Vec<u8>, edge_cost: &Vec<u8>) -> (u8, u8) {
-
-        let c1 = corner_cost[pc.get_corner_index() as usize];
-        let c2 = edge_cost[pc.get_edge_perm_index() as usize];
-
-        if c1 == 255 {
-            println!("corner not found: {} ", pc.get_corner_index());
-        }
-
-        if c2 == 255 {
-            println!("edge not found: {}", pc.get_edge_perm_index());
-        }
-
-        let dif = (c1 as i32 - c2 as i32).abs(); 
-        if dif > 9 {
-            println!("Dif corner: {} edge {}", c1, c2);
-        }
-
-        return (cmp::max(c1, c2), dif as u8);
-        //return c2;
-    }
-
-    let mut heap = SortedHeap::new();
-    let pair = get_cost(&cube, corner_cost, edge_cost);
-    heap.add(0, pair.0, pair.1 , cube, MoveBlocker::new());
-
-    while heap.len() > 0 {
-        let pair = heap.pop();
-        let cube = &pair.0;
-        let mb = pair.1;
-        let depth = pair.2;
-
-        for m in 0..18 {
-            if mb.move_blocked(m) {
-                continue;
-            }
-
-            if m == cube_move::F || m == cube_move::FP || m == cube_move::B || m == cube_move::BP {
-                continue;
-            }
-
-            let next = PieceCube::new_move(cube, m, table);
-            
-            if next.is_solved() {
-                println!("Found solution at cost: {} ", depth + 1);
-
-                return;
-            }
-
-            let cost = get_cost(&next, corner_cost, edge_cost);
-
-            heap.add(depth + 1,  cost.0, cost.1,  next, mb);
-        }
-    }
-}
-
-
-fn a_star_set(cube: PieceCube, table: &PieceCubeTable, corner_cost: &Vec<u8>, edge_cost: &Vec<u8>, set: &SealedSet){
-    fn get_cost(pc: &PieceCube, corner_cost: &Vec<u8>, edge_cost: &Vec<u8>) -> u8 {
-
-        let c1 = corner_cost[pc.get_corner_index() as usize];
-        let c2 = edge_cost[pc.get_edge_perm_index() as usize];
-
-        if c1 == 255 {
-            println!("corner not found: {} ", pc.get_corner_index());
-        }
-
-        if c2 == 255 {
-            println!("edge not found: {}", pc.get_edge_perm_index());
-        }
-
-        let dif = (c1 as i32 - c2 as i32).abs(); 
-        if dif > 9 {
-            println!("Dif corner: {} edge {}", c1, c2);
-        }
-
-        return cmp::max(c1, c2);
-        //return c2;
-    }
-
-    let mut heap = BucketHeap::new();
-    heap.add(0, get_cost(&cube, corner_cost, edge_cost), cube, MoveBlocker::new());
-
-    while heap.len() > 0 {
-        let pair = heap.pop();
-        let cube = &pair.0;
-        let mb = pair.1;
-        let depth = pair.2;
-
-        for m in 0..18 {
-            if mb.move_blocked(m) {
-                continue;
-            }
-
-            if m == cube_move::F || m == cube_move::FP || m == cube_move::B || m == cube_move::BP {
-                continue;
-            }
-
-            let next = PieceCube::new_move(cube, m, table);
-
-            let cost = get_cost(&next, corner_cost, edge_cost);
-            
-            if cost <= 8 {
-                if set.try_get_value(next.get_index_cube()).0 {
-                    println!("Found solution in table at cost: {} ", depth + 1 + cost);
-
-                    return;
+            if visited.contains_key(&next) {
+                let (old_move, old_depth) = visited.get(&next).unwrap();
+                if m / 3 == old_move / 3 {
+                    if depth >= *old_depth {
+                        //println!("Duplicate! md: {}, {} old md: {}, {}", m, depth, old_move, old_depth);
+                        continue;
+                    } 
                 }
             }
+            else {
+                visited.insert(next.clone(), (*m, depth));
+            }
 
+            let cost = get_cost(&next, corner_cost, edge_cost);
+            
+            
+            if next.is_solved() {
+                println!("A-Star: {} ", depth + 1 + cost);
+                let ms = find_move_sequence_map(&next, &cube, &visited, table);
+                ms.print();
 
-            heap.add(depth + 1,  cost,  next, mb);
+                return;
+            }
+            
+            
+            heap.add(depth + 1,  cost,  next, *m);
         }
     }
+}
+
+fn a_star_set(cube: PieceCube, table: &PieceCubeTable, corner_cost: &Vec<u8>, edge_cost: &Vec<u8>, set: &SealedSet, min: u8) -> u8 {
+    fn get_cost(pc: &PieceCube, corner_cost: &Vec<u8>, edge_cost: &Vec<u8>) -> u8 {
+
+        let c1 = corner_cost[pc.get_corner_index() as usize];
+        let c2 = edge_cost[pc.get_edge_perm_index() as usize];
+
+        if c1 == 255 {
+            println!("corner not found: {} ", pc.get_corner_index());
+        }
+
+        if c2 == 255 {
+            println!("edge not found: {}", pc.get_edge_perm_index());
+        }
+
+        return cmp::max(c1, c2);
+        //return c2;
+    }
+
+    fn find_move_sequence_map(pc: &PieceCube, target: &PieceCube, map: &HashMap<PieceCube, (u8, u8)>, table: &PieceCubeTable) -> MoveSequence {
+        let mut moves: Vec<u8> = Vec::new();
+        let mut next = pc.clone();
+
+        while next != *target {
+            if !map.contains_key(&next) {
+                print!("Alarm");
+            }
+            let (old_move, old_depth) = map.get(&next).unwrap();
+            moves.push(*old_move);
+            
+            let rev = move_sequence::reverse_move(*old_move);
+            next.make_move(rev,  table);
+        }
+        moves.reverse();
+
+        return MoveSequence::new(moves);
+    }
+
+    let mut visited: HashMap<PieceCube, (u8, u8)> = HashMap::new();
+    let mut heap = BucketHeap::new();
+
+    visited.insert(cube.clone(), (cube_move::NONE, 0));
+    heap.add(0, get_cost(&cube, corner_cost, edge_cost), cube.clone(), cube_move::NONE);
+
+
+    while heap.len() > 0 {
+        let pair = heap.pop();
+        let prev_cube = &pair.0;
+        let lm = pair.1;
+        let depth = pair.2;
+
+        for m in move_blocker::POSSIBLE_MOVES[(lm / 3) as usize] {
+            let next = PieceCube::new_move(prev_cube, *m, table);
+
+            if visited.contains_key(&next) {
+                let (old_move, old_depth) = visited.get(&next).unwrap();
+                if m / 3 == old_move / 3 {
+                    if depth >= *old_depth {
+                        //println!("Duplicate! md: {}, {} old md: {}, {}", m, depth, old_move, old_depth);
+                        continue;
+                    } 
+                }
+            }
+            else {
+                visited.insert(next.clone(), (*m, depth));
+            }
+
+            let cost = get_cost(&next, corner_cost, edge_cost);
+            
+            if cost <= set.max_depth {
+                if set.try_get_value(next.get_index_cube(cube_move::NONE)).0 {
+                    println!("Found solution in table at depth: {} with expected cost: {}", depth + 1, cost);
+                    let ms = find_move_sequence_map(&next, &cube, &visited, table);
+                    ms.print();
+                    
+                    a_star(next.clone(), table, corner_cost, edge_cost);
+                    
+                    return depth + 1 + set.max_depth;
+                }
+            }
+            
+            if depth + 2 + cmp::max(set.max_depth, cost) < min {
+                heap.add(depth + 1,  cost,  next, *m);
+            }
+        }
+    }
+
+    return 255;
 }
 
 fn big_search() {
@@ -379,7 +403,7 @@ fn big_search() {
     println!("Time: {:?}", duration);
 
     start = Instant::now();
-    let ss = SealedSet::new(&set.data);
+    let ss = SealedSet::new(&set.data, 7);
     duration = start.elapsed();
     println!("Time: {:?}", duration);
     
@@ -471,6 +495,41 @@ fn dfs_piece(cube: PieceCube, table: &PieceCubeTable) {
     println!("No sol :(")
  }
 
+fn dfs_eo(cube: PieceCube, table: &PieceCubeTable) -> Vec<Vec<u8>> {
+    let mut ret: Vec<Vec<u8>> = Vec::new();
+    let mut stack: Vec<u8> = Vec::new();
+     
+    for max_depth in 0..12 {
+        fn backtrack(cube: &PieceCube, mb: MoveBlocker, depth: i32, max_depth: i32, table: &PieceCubeTable, stack: &mut Vec<u8>, ret: &mut Vec<Vec<u8>>) {
+            if depth == max_depth {
+                if cube.get_edge_orient_index() == 0 {
+                    ret.push(stack.clone());
+                }
+
+                return;
+            }
+
+            for m in 0..18 {
+                if mb.move_blocked(m) {
+                    continue;
+                }
+                stack.push(m);
+                backtrack(&PieceCube::new_move(&cube, m, table), MoveBlocker::new_move(mb, m), depth + 1, max_depth, table, stack, ret);
+                stack.pop();
+            }
+        }
+
+        backtrack(&cube, MoveBlocker::new(),  0, max_depth, table, &mut stack, &mut ret);
+        
+        if ret.len() > 0 {
+            return ret;
+        }
+    }
+
+    return ret;
+ }
+
+
 fn create_hashset(max_depth: i32, table: &PieceCubeTable) -> HashSet<PieceCube> {
     let mut set = HashSet::new();
 
@@ -505,7 +564,7 @@ fn create_hashset_index_cube(max_depth: i32, table: &PieceCubeTable) -> HashSet<
     let mut set = HashSet::new();
 
     fn backtrack(cube: &PieceCube, mb: MoveBlocker, depth: i32, set: &mut HashSet<IndexCube>, max_depth: i32, table: &PieceCubeTable) {
-        set.insert(cube.get_index_cube());
+        set.insert(cube.get_index_cube(cube_move::NONE));
         
         if depth == max_depth {
             return;
@@ -534,32 +593,29 @@ fn create_hashset_index_cube(max_depth: i32, table: &PieceCubeTable) -> HashSet<
 fn create_sorted_set(max_depth: i32, table: &PieceCubeTable) -> SortedSet {
     let mut set = SortedSet::new(0);
 
-    fn backtrack(cube: &PieceCube, mb: MoveBlocker, depth: i32, set: &mut SortedSet, max_depth: i32, table: &PieceCubeTable) {
-        set.insert(cube.get_index_cube());
+    fn backtrack(cube: &PieceCube, lm: u8, depth: i32, set: &mut SortedSet, max_depth: i32, table: &PieceCubeTable) {
+        set.insert(cube.get_index_cube(lm));
         
         if depth == max_depth {
             return;
         }
 
-        for m in 0..18 {
-            if mb.move_blocked(m) {
-                continue;
-            }
+        for m in move_blocker::POSSIBLE_MOVES_EO[(lm / 3) as usize] { 
 
-            if m == cube_move::F || m == cube_move::FP || m == cube_move::B || m == cube_move::BP {
-                continue;
-            } 
-
-            backtrack(&PieceCube::new_move(&cube, m, table), 
-                MoveBlocker::new_move(mb, m),
+            backtrack(&PieceCube::new_move(&cube, *m, table), 
+                *m,
                 depth + 1, 
                 set, 
                 max_depth, 
                 table);
+
+            if depth == 0 {
+                println!("Finished depth: {}", *m);
+            }
         }
     }
 
-    backtrack(&PieceCube::get_solved(), MoveBlocker::new(),  0, &mut set, max_depth, table);
+    backtrack(&PieceCube::get_solved(), cube_move::NONE, 0, &mut set, max_depth, table);
 
     set.remove_duplicates();
 
@@ -573,7 +629,7 @@ fn look_up(cube: PieceCube, table: &PieceCubeTable, set: &SealedSet){
     for max_depth in 0..9 {
         fn backtrack(cube: &PieceCube, mb: MoveBlocker, depth: i32, max_depth: i32, table: &PieceCubeTable, set: &SealedSet) -> bool {
             if depth == max_depth {
-                return set.try_get_value(cube.get_index_cube()).0;
+                return set.try_get_value(cube.get_index_cube(cube_move::NONE)).0;
             }
 
             for m in 0..18 {

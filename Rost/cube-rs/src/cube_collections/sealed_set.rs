@@ -1,6 +1,6 @@
 
 
-use crate::cube_representations::index_cube::{self, IndexCube};
+use crate::{cube_representations::{index_cube::{self, IndexCube}, piece_cube::PieceCube, piece_cube_table::PieceCubeTable}, move_sequence::{MoveSequence, self}, cube_move::{NONE, self}};
 
 const BUCKET_COUNT: usize = index_cube::MAX_EDGE_PERM as usize;
 
@@ -21,13 +21,14 @@ impl CornerEdgeOrientState {
 }
 
 pub struct SealedSet {
+    pub max_depth: u8,
     data: Vec<CornerEdgeOrientState>,
     moves: Vec<u8>,
     start_index: Vec<u32>
 }
 
 impl SealedSet {
-    pub fn new(cubes: &Vec<IndexCube>) -> Self {
+    pub fn new(cubes: &Vec<IndexCube>, max_depth: u8) -> Self {
         let mut data: Vec<CornerEdgeOrientState> = Vec::with_capacity(cubes.len());
         let mut moves: Vec<u8> = Vec::with_capacity(cubes.len());
         let mut start_index = vec![0 as u32; BUCKET_COUNT + 1];
@@ -61,7 +62,13 @@ impl SealedSet {
             moves.push(cubes[i].last_move);
         }
 
-        return SealedSet { data, moves, start_index }
+        for m in &moves {
+            if *m >= 18 {
+                println!("This should not happen {}", m);
+            }
+        }
+
+        return SealedSet { data, moves, start_index, max_depth }
     }
 
     pub fn try_get_value(&self, mut cube: IndexCube) -> (bool, IndexCube) {
@@ -80,5 +87,25 @@ impl SealedSet {
         }
 
         return (false, IndexCube::get_solved());
+    }
+
+
+    pub fn find_move_sequence(&self, pc: &PieceCube, table: &PieceCubeTable) -> MoveSequence {
+        let mut moves: Vec<u8> = Vec::new();
+        let mut next = pc.clone();
+
+        while !next.is_solved() {
+            let pair = self.try_get_value(next.get_index_cube(cube_move::NONE));
+
+            if !pair.0 {
+                print!("Alarm");
+            }
+
+            let lm = move_sequence::reverse_move(pair.1.last_move);
+            moves.push(lm);
+            next.make_move(lm,  table);
+        }
+
+        return MoveSequence::new(moves);
     }
 }
